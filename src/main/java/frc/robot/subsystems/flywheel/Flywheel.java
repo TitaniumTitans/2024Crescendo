@@ -53,6 +53,11 @@ public class Flywheel extends SubsystemBase {
     Logger.processInputs("Flywheel", inputs);
   }
 
+  /** Run open loop at the specified voltage. */
+  public void runVolts(double volts) {
+    io.setVoltage(volts);
+  }
+
   /** Run closed loop at the specified velocity. */
   public void runVelocity(double velocityRPM) {
     var velocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(velocityRPM);
@@ -73,12 +78,7 @@ public class Flywheel extends SubsystemBase {
     return Units.radiansPerSecondToRotationsPerMinute(inputs.velocityRadPerSec);
   }
 
-  /** Runs forwards at the commanded voltage. */
-  public void runCharacterizationVolts(double volts) {
-    io.setVoltage(volts);
-  }
-
-  /** Returns the average drive velocity in radians/sec. */
+  /** Returns the current velocity in radians per second. */
   public double getCharacterizationVelocity() {
     return inputs.velocityRadPerSec;
   }

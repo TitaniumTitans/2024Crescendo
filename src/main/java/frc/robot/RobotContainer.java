@@ -103,16 +103,15 @@ public class RobotContainer {
         break;
     }
 
-    // Set up named commands for PathPlanner
+    // Set up auto routines
     NamedCommands.registerCommand(
         "Run Flywheel",
         Commands.startEnd(
-            () -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel));
-
-    // Set up auto routines
+                () -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel)
+            .withTimeout(5.0));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-    // Set up FF characterization routines
+    // Set up feedforward characterization
     autoChooser.addOption(
         "Drive FF Characterization",
         new FeedForwardCharacterization(
@@ -120,7 +119,7 @@ public class RobotContainer {
     autoChooser.addOption(
         "Flywheel FF Characterization",
         new FeedForwardCharacterization(
-            flywheel, flywheel::runCharacterizationVolts, flywheel::getCharacterizationVelocity));
+            flywheel, flywheel::runVolts, flywheel::getCharacterizationVelocity));
 
     // Configure the button bindings
     configureButtonBindings();

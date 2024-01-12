@@ -13,21 +13,25 @@
 
 package frc.robot.subsystems.flywheel;
 
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkPIDController.ArbFFUnits;
 import edu.wpi.first.math.util.Units;
 
+/**
+ * NOTE: To use the Spark Flex / NEO Vortex, replace all instances of "CANSparkMax" with
+ * "CANSparkFlex".
+ */
 public class FlywheelIOSparkMax implements FlywheelIO {
   private static final double GEAR_RATIO = 1.5;
 
   private final CANSparkMax leader = new CANSparkMax(0, MotorType.kBrushless);
   private final CANSparkMax follower = new CANSparkMax(1, MotorType.kBrushless);
   private final RelativeEncoder encoder = leader.getEncoder();
-  private final SparkMaxPIDController pid = leader.getPIDController();
+  private final SparkPIDController pid = leader.getPIDController();
 
   public FlywheelIOSparkMax() {
     leader.restoreFactoryDefaults();
