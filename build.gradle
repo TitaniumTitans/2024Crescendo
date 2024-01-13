@@ -2,7 +2,6 @@ plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2024.1.1"
     id "com.peterabeles.gversion" version "1.10"
-    id "com.diffplug.spotless" version "6.12.0"
 }
 
 java {
@@ -140,44 +139,4 @@ gversion {
     indent       = "  "
 }
 
-// Spotless formatting
-project.compileJava.dependsOn(spotlessApply)
-spotless {
-    java {
-        target fileTree(".") {
-            include "**/*.java"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        toggleOffOn()
-        googleJavaFormat()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-    groovyGradle {
-        target fileTree(".") {
-            include "**/*.gradle"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        greclipse()
-        indentWithSpaces(4)
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
-    json {
-        target fileTree(".") {
-            include "**/*.json"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        gson().indentWithSpaces(2)
-    }
-    format "misc", {
-        target fileTree(".") {
-            include "**/*.md", "**/.gitignore"
-            exclude "**/build/**", "**/build-*/**"
-        }
-        trimTrailingWhitespace()
-        indentWithSpaces(2)
-        endWithNewline()
-    }
-}
+
