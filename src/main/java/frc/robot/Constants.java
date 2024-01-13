@@ -12,9 +12,7 @@
 // GNU General Public License for more details.
 
 package frc.robot;
-import com.gos.lib.rev.swerve.RevSwerveModuleConstants;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Units.*;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
 /**
@@ -26,7 +24,7 @@ import frc.robot.subsystems.drive.module.ModuleConstants;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -46,44 +44,44 @@ public final class Constants {
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
-            new int[]{0, 1, 2},
+            new int[]{0, 1, 2}, // drive, turn, encoder
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
-            0,
-            true,
+            Units.rotationsToDegrees(0.455322), // offset
+            true, // inversion
             ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
-            0,
-            new int[]{3, 4, 5},
+            1,
+            new int[]{3, 4, 5}, // drive, turn, encoder
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
-            0,
+            Units.rotationsToDegrees(0.233398),
             true,
             ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
-            0,
-            new int[]{6, 7, 8},
+            2,
+            new int[]{6, 7, 8}, // drive, turn, encoder
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
-            0,
+            Units.rotationsToDegrees(-0.017090),
             false,
             ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
-            0,
-            new int[]{9, 10, 11},
+            3,
+            new int[]{9, 10, 11}, // drive, turn, encoder
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
             new double[]{0.0, 0.0, 0.0},
-            0,
+            Units.rotationsToDegrees(-0.265137),
             false,
             ModuleConstants.GearRatios.L3
     );

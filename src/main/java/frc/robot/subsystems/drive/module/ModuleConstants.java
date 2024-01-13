@@ -56,11 +56,11 @@ public class ModuleConstants {
                            double[] driveFF,
                            double[] driveFB,
                            double[] turnFB,
-                           int offsetDegs,
+                           double offsetDegs,
                            boolean inverted,
                            GearRatios driveRatio) {
 
-        double defaultTurnRatio = (50.0 / 14.0) * (60.0 / 10.0);
+        double defaultTurnRatio = (150.0 / 7.0);
         double defaultWheelRadiusMeters = Units.inchesToMeters(2.0);
 
         MODULE_INDEX = id;
@@ -81,8 +81,8 @@ public class ModuleConstants {
         TURN_KI = turnFB[1];
         TURN_KD = turnFB[2];
 
-        DRIVE_MOTOR_INVERTED = inverted;
-        TURN_MOTOR_INVERTED = !inverted;
+        DRIVE_MOTOR_INVERTED = false;
+        TURN_MOTOR_INVERTED = inverted;
         ENCODER_INVERTED = false;
 
         ENCODER_OFFSET = Rotation2d.fromDegrees(offsetDegs);
@@ -100,7 +100,7 @@ public class ModuleConstants {
                             double[] driveFB,
                             double[] turnFB,
                             boolean[] inversions,
-                            int offsetDegs,
+                            double offsetDegs,
                             GearRatios driveRatio,
                             double turningRatio,
                             double wheelRadiusMeter) {

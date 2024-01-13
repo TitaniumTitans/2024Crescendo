@@ -63,7 +63,7 @@ public class DriveCommands {
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec(),
-                  drive.getRotation()));
+                  new Rotation2d())); //drive.getRotation()));
         },
         drive);
   }

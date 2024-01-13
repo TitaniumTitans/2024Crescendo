@@ -46,6 +46,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final TalonFX m_driveTalon;
   private final TalonFX m_turnTalon;
   private final CANcoder m_cancoder;
+  private final ModuleConstants m_moduleConstants;
 
   private final StatusSignal<Double> m_drivePosition;
   private final Queue<Double> m_drivePositionQueue;
@@ -71,6 +72,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID);
     m_cancoder = new CANcoder(moduleConstants.ENCODER_ID);
 
+    m_moduleConstants = moduleConstants;
+
     absoluteEncoderOffset = moduleConstants.ENCODER_OFFSET;
 
     // run configs on drive motor
@@ -95,8 +98,11 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // run factory default on cancoder
     var encoderConfig = new CANcoderConfiguration();
-    encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+    encoderConfig.MagnetSensor.SensorDirection =
+            moduleConstants.ENCODER_INVERTED ? SensorDirectionValue.Clockwise_Positive
+              : SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+    m_cancoder.getConfigurator().apply(encoderConfig);
 
     // Fancy multi-threaded odometry update stuff
     // setup drive values
@@ -156,7 +162,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble())
             .minus(absoluteEncoderOffset);
     inputs.turnPosition =
-        Rotation2d.fromRotations(m_turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
+        Rotation2d.fromRotations((m_turnPosition.getValueAsDouble() / TURN_GEAR_RATIO));
     inputs.turnVelocityRadPerSec =
         Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
     inputs.turnAppliedVolts = m_turnAppliedVolts.getValueAsDouble();
@@ -195,8 +201,15 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void setTurnBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
+    config.Inverted =
+            m_moduleConstants.TURN_MOTOR_INVERTED ? InvertedValue.Clockwise_Positive
+                    : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     m_turnTalon.getConfigurator().apply(config);
   }
-  
+
+  @Override
+  public ModuleConstants getModuleConstants() {
+    return m_moduleConstants;
+  }
 }

@@ -25,6 +25,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon1;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
@@ -56,7 +57,7 @@ public class RobotContainer {
       case REAL:
         // Real robot, instantiate hardware IO implementations
          drive = new Drive(
-         new GyroIOPigeon2(true),
+         new GyroIOPigeon1(12, true),
          new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
          new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
          new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),

@@ -51,7 +51,7 @@ public interface ModuleIO {
   public default void setTurnBrakeMode(boolean enable) {}
 
   // Used to pass moduleConstants
-  public default ModuleConstants getModuleConstants() {return null;}
+  public default ModuleConstants getModuleConstants() {throw new RuntimeException("getModuleConstants() not implemented");}
 
   // Used to pass the onboard PID controller to the GoS wrapper
   public default PidProperty getTurnFBController() {return null;}
