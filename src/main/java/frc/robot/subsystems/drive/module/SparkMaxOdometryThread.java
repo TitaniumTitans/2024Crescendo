@@ -11,9 +11,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.module;
 
 import edu.wpi.first.wpilibj.Notifier;
+import frc.robot.subsystems.drive.Drive;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;

@@ -11,8 +11,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.module;
 
+import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -48,4 +49,11 @@ public interface ModuleIO {
 
   /** Enable or disable brake mode on the turn motor. */
   public default void setTurnBrakeMode(boolean enable) {}
+
+  // Used to pass the onboard PID controller to the GoS wrapper
+  public default PidProperty getTurnFBController() {return null;}
+
+  public default PidProperty getDriveFBController() {return null;}
+
+  public default PidProperty getDriveFFController() {return null;}
 }
