@@ -7,7 +7,8 @@ public class ModuleConstants {
 
     public enum GearRatios {
         L1((14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0)),
-        L2(6.75),
+        L2((14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)),
+        L3((14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0))
         ;
 
         GearRatios(double ratio) {
@@ -82,7 +83,7 @@ public class ModuleConstants {
 
         DRIVE_MOTOR_INVERTED = inverted;
         TURN_MOTOR_INVERTED = !inverted;
-        ENCODER_INVERTED = inverted;
+        ENCODER_INVERTED = false;
 
         ENCODER_OFFSET = Rotation2d.fromDegrees(offsetDegs);
 
@@ -123,7 +124,7 @@ public class ModuleConstants {
 
         DRIVE_MOTOR_INVERTED = inversions[0];
         TURN_MOTOR_INVERTED = inversions[1];
-        ENCODER_INVERTED = inversions[2];
+        ENCODER_INVERTED = false;
 
         ENCODER_OFFSET = Rotation2d.fromDegrees(offsetDegs);
 

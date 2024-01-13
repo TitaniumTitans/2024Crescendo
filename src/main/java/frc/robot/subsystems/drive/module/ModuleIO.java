@@ -50,6 +50,9 @@ public interface ModuleIO {
   /** Enable or disable brake mode on the turn motor. */
   public default void setTurnBrakeMode(boolean enable) {}
 
+  // Used to pass moduleConstants
+  public default ModuleConstants getModuleConstants() {return null;}
+
   // Used to pass the onboard PID controller to the GoS wrapper
   public default PidProperty getTurnFBController() {return null;}
 

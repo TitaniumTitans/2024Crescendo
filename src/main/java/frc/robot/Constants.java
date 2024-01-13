@@ -13,6 +13,9 @@
 
 package frc.robot;
 import com.gos.lib.rev.swerve.RevSwerveModuleConstants;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Units.*;
+import frc.robot.subsystems.drive.module.ModuleConstants;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -34,5 +37,55 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static class DriveConstants {
+
+    // module constants
+    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+
+    public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
+            0,
+            new int[]{0, 1, 2},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            0,
+            true,
+            ModuleConstants.GearRatios.L3
+    );
+
+    public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
+            0,
+            new int[]{3, 4, 5},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            0,
+            true,
+            ModuleConstants.GearRatios.L3
+    );
+
+    public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
+            0,
+            new int[]{6, 7, 8},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            0,
+            false,
+            ModuleConstants.GearRatios.L3
+    );
+
+    public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
+            0,
+            new int[]{9, 10, 11},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            0,
+            false,
+            ModuleConstants.GearRatios.L3
+    );
   }
 }
