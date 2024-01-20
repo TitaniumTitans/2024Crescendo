@@ -13,6 +13,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -86,7 +87,7 @@ public class FeedForwardCharacterization extends Command {
     }
 
     public void print() {
-      if (velocityData.size() == 0 || voltageData.size() == 0) {
+      if (velocityData.isEmpty() || voltageData.isEmpty()) {
         return;
       }
 
@@ -96,11 +97,11 @@ public class FeedForwardCharacterization extends Command {
               voltageData.stream().mapToDouble(Double::doubleValue).toArray(),
               1);
 
-      System.out.println("FF Characterization Results:");
-      System.out.println("\tCount=" + Integer.toString(velocityData.size()) + "");
-      System.out.println(String.format("\tR2=%.5f", regression.R2()));
-      System.out.println(String.format("\tkS=%.5f", regression.beta(0)));
-      System.out.println(String.format("\tkV=%.5f", regression.beta(1)));
+      DriverStation.reportWarning("FF Characterization Results:", false);
+      DriverStation.reportWarning("\tCount=" + Integer.toString(velocityData.size()) + "", false);
+      DriverStation.reportWarning(String.format("\tR2=%.5f", regression.R2()), false);
+      DriverStation.reportWarning(String.format("\tkS=%.5f", regression.beta(0)), false);
+      DriverStation.reportWarning(String.format("\tkV=%.5f", regression.beta(1)), false);
     }
   }
 }

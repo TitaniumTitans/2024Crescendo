@@ -33,6 +33,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.util.LocalADStarAK;
+
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -51,7 +53,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
 
-  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
 
@@ -81,16 +83,13 @@ public class DriveSubsystem extends SubsystemBase {
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
-        (activePath) -> {
-          Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
+        (List<Pose2d> activePath) -> Logger.recordOutput(
+            "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
     PathPlannerLogging.setLogTargetPoseCallback(
-        (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+        (Pose2d targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
   }
 
+  @Override
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
@@ -111,8 +110,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-      Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-      Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+      Logger.recordOutput("SwerveStates/Setpoints");
+      Logger.recordOutput("SwerveStates/SetpointsOptimized");
     }
 
     // Update odometry
@@ -203,7 +202,7 @@ public class DriveSubsystem extends SubsystemBase {
     return driveVelocityAverage / 4.0;
   }
 
-  /** Returns the module states (turn angles and drive velocities) for all of the modules. */
+  /** Returns the module states (turn angles and drive velocities) for all the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];

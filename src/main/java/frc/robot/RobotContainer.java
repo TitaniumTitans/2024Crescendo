@@ -57,7 +57,7 @@ public class RobotContainer {
       case REAL -> {
           // Real robot, instantiate hardware IO implementations
           m_driveSubsystem = new DriveSubsystem(
-            new GyroIOPigeon1(12, true),
+            new GyroIOPigeon1(12),
               new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
