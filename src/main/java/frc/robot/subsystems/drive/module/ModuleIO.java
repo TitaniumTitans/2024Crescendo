@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.drive.module;
 
-import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
