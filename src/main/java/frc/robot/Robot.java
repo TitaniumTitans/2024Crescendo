@@ -44,15 +44,16 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    String gitDirty = "GitDirty";
     switch (BuildConstants.DIRTY) {
       case 0:
-        Logger.recordMetadata("GitDirty", "All changes committed");
+        Logger.recordMetadata(gitDirty, "All changes committed");
         break;
       case 1:
-        Logger.recordMetadata("GitDirty", "Uncomitted changes");
+        Logger.recordMetadata(gitDirty, "Uncomitted changes");
         break;
       default:
-        Logger.recordMetadata("GitDirty", "Unknown");
+        Logger.recordMetadata(gitDirty, "Unknown");
         break;
     }
 
