@@ -5,6 +5,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class ShooterIOSim implements ShooterIO{
+    private static final double LOOP_PERIOD_SECS = 0.02;
     private final FlywheelSim m_simTL = new FlywheelSim(
             DCMotor.getNeoVortex(1), 1, 1);
     private final FlywheelSim m_simTR = new FlywheelSim(
@@ -22,7 +23,13 @@ public class ShooterIOSim implements ShooterIO{
     private double bRAppliedVolts = 0.0;
     private double kickerAppliedVolts = 0.0;
 
+    @Override
     public void updateInputs(ShooterIOInputs inputs) {
+        m_simTL.update(LOOP_PERIOD_SECS);
+        m_simTR.update(LOOP_PERIOD_SECS);
+        m_simBL.update(LOOP_PERIOD_SECS);
+        m_simBR.update(LOOP_PERIOD_SECS);
+
         inputs.tLAngularVelocity = m_simTL.getAngularVelocityRadPerSec();
         inputs.tRAngularVelocity = m_simTR.getAngularVelocityRadPerSec();
         inputs.bLAngularVelocity = m_simBL.getAngularVelocityRadPerSec();
@@ -35,6 +42,7 @@ public class ShooterIOSim implements ShooterIO{
         inputs.bRAppliedInputs = bRAppliedVolts;
         inputs.kickerAppliedInputs = kickerAppliedVolts;
     }
+
     @Override
     public void setMotorVoltageTL(double voltage) {
         tLAppliedVolts = MathUtil.clamp(voltage, -12.0, 12.0);

@@ -19,7 +19,7 @@ public interface ShooterIO {
         public double kickerAppliedInputs = 0.0;
     }
 
-    public default void updateInputs(){}
+    public default void updateInputs(ShooterIOInputs inputs){}
     default void setMotorVoltageTL(double voltage) {}
     default void setMotorVoltageTR(double voltage) {}
     default void setMotorVoltageBL(double voltage) {}
