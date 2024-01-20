@@ -52,11 +52,4 @@ public interface ModuleIO {
 
   // Used to pass moduleConstants
   public default ModuleConstants getModuleConstants() {throw new RuntimeException("getModuleConstants() not implemented");}
-
-  // Used to pass the onboard PID controller to the GoS wrapper
-  public default PidProperty getTurnFBController() {return null;}
-
-  public default PidProperty getDriveFBController() {return null;}
-
-  public default PidProperty getDriveFFController() {return null;}
 }

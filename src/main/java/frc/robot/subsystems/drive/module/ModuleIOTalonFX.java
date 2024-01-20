@@ -25,7 +25,6 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import java.util.Queue;
@@ -86,6 +85,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
 
+    // setup pid gains for drive motor
+    
+
     // run configs on turning motor
     var turnConfig = new TalonFXConfiguration();
     turnConfig.CurrentLimits.StatorCurrentLimit = 30.0;
@@ -106,6 +108,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // Fancy multi-threaded odometry update stuff
     // setup drive values
+    m_driveTalon.setPosition(0.0);
     m_drivePosition = m_driveTalon.getPosition();
     m_drivePositionQueue =
         PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
@@ -114,6 +117,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_driveCurrent = m_driveTalon.getStatorCurrent();
 
     // setup turn values
+    m_turnTalon.setPosition(0.0);
     m_turnAbsolutePosition = m_cancoder.getAbsolutePosition();
     m_turnPosition = m_turnTalon.getPosition();
     m_turnPositionQueue =
@@ -193,7 +197,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void setDriveBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
-    config.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.Inverted =
+            m_moduleConstants.DRIVE_MOTOR_INVERTED ? InvertedValue.Clockwise_Positive
+                    : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     m_driveTalon.getConfigurator().apply(config);
   }

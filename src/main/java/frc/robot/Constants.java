@@ -42,13 +42,17 @@ public final class Constants {
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
+    public static final double[] DRIVE_FB_GAINS = new double[]{0.05, 0.0, 0.0};
+    public static final double[] TURN_FB_GAINS = new double[]{7.0, 0.0, 0.0};
+
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
             new int[]{0, 1, 2}, // drive, turn, encoder
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            Units.rotationsToDegrees(0.455322), // offset
+            DRIVE_FF_GAINS,
+            DRIVE_FB_GAINS,
+            TURN_FB_GAINS,
+            Units.rotationsToDegrees(0.457764), // offset
             true, // inversion
             ModuleConstants.GearRatios.L3
     );
@@ -56,10 +60,10 @@ public final class Constants {
     public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
             1,
             new int[]{3, 4, 5}, // drive, turn, encoder
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            Units.rotationsToDegrees(0.233398),
+            DRIVE_FF_GAINS,
+            DRIVE_FB_GAINS,
+            TURN_FB_GAINS,
+            Units.rotationsToDegrees(0.201172),
             true,
             ModuleConstants.GearRatios.L3
     );
@@ -67,10 +71,10 @@ public final class Constants {
     public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
             2,
             new int[]{6, 7, 8}, // drive, turn, encoder
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            Units.rotationsToDegrees(-0.017090),
+            DRIVE_FF_GAINS,
+            DRIVE_FB_GAINS,
+            TURN_FB_GAINS,
+            Units.rotationsToDegrees(-0.017578),
             false,
             ModuleConstants.GearRatios.L3
     );
@@ -78,10 +82,10 @@ public final class Constants {
     public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
             3,
             new int[]{9, 10, 11}, // drive, turn, encoder
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            new double[]{0.0, 0.0, 0.0},
-            Units.rotationsToDegrees(-0.265137),
+            DRIVE_FF_GAINS,
+            DRIVE_FB_GAINS,
+            TURN_FB_GAINS,
+            Units.rotationsToDegrees(-0.263916),
             false,
             ModuleConstants.GearRatios.L3
     );

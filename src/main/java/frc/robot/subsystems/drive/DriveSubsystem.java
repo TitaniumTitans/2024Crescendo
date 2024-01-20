@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends SubsystemBase {
+public class DriveSubsystem extends SubsystemBase {
   private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
@@ -55,7 +55,7 @@ public class Drive extends SubsystemBase {
   private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
 
-  public Drive(
+  public DriveSubsystem(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
@@ -121,6 +121,7 @@ public class Drive extends SubsystemBase {
     for (int i = 0; i < 4; i++) {
       deltaCount = Math.min(deltaCount, modules[i].getPositionDeltas().length);
     }
+    Logger.recordOutput("Odometry/Delta Count", deltaCount);
     for (int deltaIndex = 0; deltaIndex < deltaCount; deltaIndex++) {
       // Read wheel deltas from each module
       SwerveModulePosition[] wheelDeltas = new SwerveModulePosition[4];
@@ -139,6 +140,7 @@ public class Drive extends SubsystemBase {
         twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
         lastGyroRotation = gyroRotation;
       }
+      Logger.recordOutput("Odometry/Twist", twist);
       // Apply the twist (change since last sample) to the current pose
       pose = pose.exp(twist);
     }

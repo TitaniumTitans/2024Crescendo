@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -45,6 +46,8 @@ public class Module {
     this.m_io = io;
     this.m_moduleConstants = m_io.getModuleConstants();
     this.m_index = m_moduleConstants.MODULE_INDEX;
+    // delay to initialize all hardware
+    Timer.delay(0.5);
 
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
@@ -86,8 +89,6 @@ public class Module {
     if (m_turnRelativeOffset == null && m_inputs.turnAbsolutePosition.getRadians() != 0.0) {
       m_turnRelativeOffset = m_inputs.turnAbsolutePosition.minus(m_inputs.turnPosition);
     }
-
-    Logger.recordOutput("TurnRelativeOffsetMod" + m_index, m_turnRelativeOffset);
 
     // Run closed loop turn control
     if (m_angleSetpoint != null) {
@@ -170,11 +171,6 @@ public class Module {
     if (m_turnRelativeOffset == null) {
       return new Rotation2d();
     } else {
-      if (m_moduleConstants.TURN_MOTOR_INVERTED) {
-        Logger.recordOutput("getAngle() Mod Inverted" + m_index, m_inputs.turnPosition.minus(m_turnRelativeOffset));
-        return Rotation2d.fromDegrees(360).plus(m_inputs.turnPosition.minus(m_turnRelativeOffset));
-      }
-      Logger.recordOutput("getAngle() Mod" + m_index, m_inputs.turnPosition.plus(m_turnRelativeOffset));
       return m_inputs.turnPosition.plus(m_turnRelativeOffset);
     }
   }

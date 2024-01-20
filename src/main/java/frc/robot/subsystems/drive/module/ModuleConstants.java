@@ -81,7 +81,7 @@ public class ModuleConstants {
         TURN_KI = turnFB[1];
         TURN_KD = turnFB[2];
 
-        DRIVE_MOTOR_INVERTED = false;
+        DRIVE_MOTOR_INVERTED = !inverted;
         TURN_MOTOR_INVERTED = inverted;
         ENCODER_INVERTED = false;
 
