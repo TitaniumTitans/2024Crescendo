@@ -99,7 +99,7 @@ public class FeedForwardCharacterization extends Command {
 
       DriverStation.reportWarning("FF Characterization Results:", false);
       DriverStation.reportWarning("\tCount=" + Integer.toString(velocityData.size()) + "", false);
-      DriverStation.reportWarning(String.format("\tR2=%.5f", regression.R2()), false);
+      DriverStation.reportWarning(String.format("\tR2=%.5f", regression.r2()), false);
       DriverStation.reportWarning(String.format("\tkS=%.5f", regression.beta(0)), false);
       DriverStation.reportWarning(String.format("\tkV=%.5f", regression.beta(1)), false);
     }
