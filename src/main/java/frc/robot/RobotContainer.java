@@ -74,10 +74,10 @@ public class RobotContainer {
                 new DriveSubsystem(
                   new GyroIO() {
                   },
-                  new ModuleIOSim(),
-                  new ModuleIOSim(),
-                  new ModuleIOSim(),
-                  new ModuleIOSim());
+                  new ModuleIOSim(Constants.DriveConstants.FL_MOD_CONSTANTS),
+                  new ModuleIOSim(Constants.DriveConstants.FR_MOD_CONSTANTS),
+                  new ModuleIOSim(Constants.DriveConstants.BL_MOD_CONSTANTS),
+                  new ModuleIOSim(Constants.DriveConstants.BR_MOD_CONSTANTS));
               m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
           }
           default -> {

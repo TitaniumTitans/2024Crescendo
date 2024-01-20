@@ -5,7 +5,10 @@ import edu.wpi.first.math.util.Units;
 
 public class ModuleConstants {
 
+    public static final double DEFAULT_WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+
     public enum GearRatios {
+        TURN(150.0 / 7.0),
         L1((14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0)),
         L2((14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)),
         L3((14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0))
@@ -60,8 +63,7 @@ public class ModuleConstants {
                            boolean inverted,
                            GearRatios driveRatio) {
 
-        double defaultTurnRatio = (150.0 / 7.0);
-        double defaultWheelRadiusMeters = Units.inchesToMeters(2.0);
+        double defaultTurnRatio = GearRatios.TURN.ratio;
 
         MODULE_INDEX = id;
 
@@ -90,7 +92,7 @@ public class ModuleConstants {
         DRIVE_GEAR_RATIO = driveRatio.ratio;
         TURNING_GEAR_RATIO = defaultTurnRatio;
 
-        WHEEL_RADIUS_METERS = defaultWheelRadiusMeters;
+        WHEEL_RADIUS_METERS = DEFAULT_WHEEL_RADIUS_METERS;
         WHEEL_CURCUMFERENCE_METERS = WHEEL_RADIUS_METERS * Math.PI * 2;
     }
 
