@@ -50,5 +50,7 @@ public interface ModuleIO {
   public default void setTurnBrakeMode(boolean enable) {}
 
   // Used to pass moduleConstants
-  public default ModuleConstants getModuleConstants() {throw new RuntimeException("getModuleConstants() not implemented");}
+  public default ModuleConstants getModuleConstants() {
+    throw new RuntimeException("getModuleConstants() not implemented");
+  }
 }
