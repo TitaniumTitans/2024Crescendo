@@ -88,7 +88,9 @@ public class PhoenixOdometryThread extends Thread {
           // of Pro licensing. No reasoning for this behavior
           // is provided by the documentation.
           Thread.sleep((long) (1000.0 / Module.ODOMETRY_FREQUENCY));
-          if (signals.length > 0) BaseStatusSignal.refreshAll(signals);
+          if (signals.length > 0) {
+            BaseStatusSignal.refreshAll(signals);
+          }
         }
       } catch (InterruptedException e) {
         e.printStackTrace();
