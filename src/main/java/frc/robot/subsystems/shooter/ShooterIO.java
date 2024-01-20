@@ -5,8 +5,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
 
     @AutoLog
-    public class ShooterIOInputs {
-
+    class ShooterIOInputs {
     }
     default void setMotorVoltageTL(double voltage) {}
     default void setMotorVoltageTR(double voltage) {}
