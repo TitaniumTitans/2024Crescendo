@@ -18,10 +18,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -51,22 +49,22 @@ public class Module {
 
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
-      switch (Constants.currentMode) {
-          case REAL, REPLAY -> {
-              m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
-              m_driveFeedback = new PIDController(0.05, 0.0, 0.0);
-              m_turnFeedback = new PIDController(7.0, 0.0, 0.0);
-          }
-          case SIM -> {
-              m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-              m_driveFeedback = new PIDController(0.1, 0.0, 0.0);
-              m_turnFeedback = new PIDController(10.0, 0.0, 0.0);
-          }
-          default -> {
-              m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
-              m_driveFeedback = new PIDController(0.0, 0.0, 0.0);
-              m_turnFeedback = new PIDController(0.0, 0.0, 0.0);
-          }
+    switch (Constants.currentMode) {
+        case REAL, REPLAY -> {
+          m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
+          m_driveFeedback = new PIDController(0.05, 0.0, 0.0);
+          m_turnFeedback = new PIDController(7.0, 0.0, 0.0);
+        }
+        case SIM -> {
+          m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
+          m_driveFeedback = new PIDController(0.1, 0.0, 0.0);
+          m_turnFeedback = new PIDController(10.0, 0.0, 0.0);
+        }
+        default -> {
+          m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
+          m_driveFeedback = new PIDController(0.0, 0.0, 0.0);
+          m_turnFeedback = new PIDController(0.0, 0.0, 0.0);
+        }
       }
 
     m_turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
