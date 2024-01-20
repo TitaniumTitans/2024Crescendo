@@ -45,7 +45,7 @@ public class Module {
   public Module(ModuleIO io) {
     this.m_io = io;
     this.m_moduleConstants = m_io.getModuleConstants();
-    this.m_index = m_moduleConstants.MODULE_INDEX;
+    this.m_index = m_moduleConstants.MODULE_INDEX();
     // delay to initialize all hardware
     Timer.delay(0.5);
 
