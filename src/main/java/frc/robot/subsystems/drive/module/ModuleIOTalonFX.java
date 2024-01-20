@@ -25,6 +25,8 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.gos.lib.phoenix6.properties.pid.Phoenix6TalonPidPropertyBuilder;
+import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import java.util.Queue;
@@ -45,6 +47,10 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final TalonFX m_driveTalon;
   private final TalonFX m_turnTalon;
   private final CANcoder m_cancoder;
+
+  private final PidProperty m_drivePid;
+  private final PidProperty m_turnPid;
+
   private final ModuleConstants m_moduleConstants;
 
   private final StatusSignal<Double> m_drivePosition;
@@ -86,7 +92,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     setDriveBrakeMode(true);
 
     // setup pid gains for drive motor
-    
+    m_drivePid = new Phoenix6TalonPidPropertyBuilder(
+            "Drive/Module" + m_moduleConstants.MODULE_INDEX + "/Drive Pid Property",
+            false,
+            m_driveTalon,
+            0
+    ).addP(m_moduleConstants.DRIVE_KP).build();
 
     // run configs on turning motor
     var turnConfig = new TalonFXConfiguration();
@@ -97,6 +108,16 @@ public class ModuleIOTalonFX implements ModuleIO {
                     : InvertedValue.CounterClockwise_Positive;
     m_turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
+
+    m_turnPid = new Phoenix6TalonPidPropertyBuilder(
+            "Drive/Module" + m_moduleConstants.MODULE_INDEX + "/Turn Pid Property",
+                    false,
+                    m_turnTalon,
+                    0)
+            .addP(m_moduleConstants.TURN_KP)
+            .addI(m_moduleConstants.TURN_KI)
+            .addD(m_moduleConstants.TURN_KD)
+            .build();
 
     // run factory default on cancoder
     var encoderConfig = new CANcoderConfiguration();
