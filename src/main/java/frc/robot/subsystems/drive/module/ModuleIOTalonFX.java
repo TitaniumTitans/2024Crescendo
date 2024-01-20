@@ -67,20 +67,20 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final Rotation2d absoluteEncoderOffset;
 
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
-    m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID);
-    m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID);
-    m_cancoder = new CANcoder(moduleConstants.ENCODER_ID);
+    m_driveTalon = new TalonFX(moduleConstants.kDriveMotorId);
+    m_turnTalon = new TalonFX(moduleConstants.kTurnMotorId);
+    m_cancoder = new CANcoder(moduleConstants.kEncoderId);
 
     m_moduleConstants = moduleConstants;
 
-    absoluteEncoderOffset = moduleConstants.ENCODER_OFFSET;
+    absoluteEncoderOffset = moduleConstants.kEncoderOffset;
 
     // run configs on drive motor
     var driveConfig = new TalonFXConfiguration();
     driveConfig.CurrentLimits.StatorCurrentLimit = 40.0;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     driveConfig.MotorOutput.Inverted =
-            moduleConstants.DRIVE_MOTOR_INVERTED ? InvertedValue.Clockwise_Positive
+            moduleConstants.kDriveMotorInverted ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     m_driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -93,7 +93,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.CurrentLimits.StatorCurrentLimit = 30.0;
     turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     turnConfig.MotorOutput.Inverted =
-            moduleConstants.TURN_MOTOR_INVERTED ? InvertedValue.Clockwise_Positive
+            moduleConstants.kTurnMotorInverted ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     m_turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
@@ -101,7 +101,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     // run factory default on cancoder
     var encoderConfig = new CANcoderConfiguration();
     encoderConfig.MagnetSensor.SensorDirection =
-            moduleConstants.ENCODER_INVERTED ? SensorDirectionValue.Clockwise_Positive
+            moduleConstants.kEncoderInverted ? SensorDirectionValue.Clockwise_Positive
               : SensorDirectionValue.CounterClockwise_Positive;
     encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
     m_cancoder.getConfigurator().apply(encoderConfig);
@@ -198,7 +198,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   public void setDriveBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
     config.Inverted =
-            m_moduleConstants.DRIVE_MOTOR_INVERTED ? InvertedValue.Clockwise_Positive
+            m_moduleConstants.kDriveMotorInverted ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     m_driveTalon.getConfigurator().apply(config);
@@ -208,7 +208,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   public void setTurnBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
     config.Inverted =
-            m_moduleConstants.TURN_MOTOR_INVERTED ? InvertedValue.Clockwise_Positive
+            m_moduleConstants.kTurnMotorInverted ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     m_turnTalon.getConfigurator().apply(config);

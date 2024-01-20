@@ -18,38 +18,49 @@ public class ModuleConstants {
         public final double ratio;
     }
     // Physical constants
-    public final double DRIVE_GEAR_RATIO;
-    public final double TURNING_GEAR_RATIO;
+    public final double kDriveGearRatio;
+    public final double kTurningGearRatio;
 
-    public final double WHEEL_RADIUS_METERS;
-    public final double WHEEL_CURCUMFERENCE_METERS;
+    public final double kWheelRadiusMeters;
+    public final double kWheelCurcumferenceMeters;
 
-    public final boolean TURN_MOTOR_INVERTED;
-    public final boolean DRIVE_MOTOR_INVERTED;
-    public final boolean ENCODER_INVERTED;
+    public final boolean kTurnMotorInverted;
+    public final boolean kDriveMotorInverted;
+    public final boolean kEncoderInverted;
 
-    public final Rotation2d ENCODER_OFFSET;
+    public final Rotation2d kEncoderOffset;
 
-    public final int MODULE_INDEX;
+    public final int kModuleIndex;
 
     // can ID's
-    public final int DRIVE_MOTOR_ID;
-    public final int TURN_MOTOR_ID;
-    public final int ENCODER_ID;
+    public final int kDriveMotorId;
+    public final int kTurnMotorId;
+    public final int kEncoderId;
 
     // Drive loop gains
-    public final double DRIVE_KV;
-    public final double DRIVE_KS;
-    public final double DRIVE_KA;
+    public final double kDriveKv;
+    public final double kDriveKs;
+    public final double kDriveKa;
 
-    public final double DRIVE_KP;
-    public final double DRIVE_KI;
-    public final double DRIVE_KD;
+    public final double kDriveKp;
+    public final double kDriveKi;
+    public final double kDriveKd;
 
     // Turning loop gains
-    public final double TURN_KP;
-    public final double TURN_KI;
-    public final double TURN_KD;
+    public final double kTurnKp;
+    public final double kTurnKi;
+    public final double kTurnKd;
+
+    public static final ModuleConstants BLANK_CONSTANTS = new ModuleConstants(
+            0,
+            new int[]{0, 0, 0},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            new double[]{0.0, 0.0, 0.0},
+            0.0,
+            false,
+            GearRatios.L1
+    );
 
     public ModuleConstants(int id,
                            int[] ids,
@@ -63,35 +74,35 @@ public class ModuleConstants {
         double defaultTurnRatio = (150.0 / 7.0);
         double defaultWheelRadiusMeters = Units.inchesToMeters(2.0);
 
-        MODULE_INDEX = id;
+        kModuleIndex = id;
 
-        DRIVE_MOTOR_ID = ids[0];
-        TURN_MOTOR_ID = ids[1];
-        ENCODER_ID = ids[2];
+        kDriveMotorId = ids[0];
+        kTurnMotorId = ids[1];
+        kEncoderId = ids[2];
 
-        DRIVE_KV = driveFF[0];
-        DRIVE_KS = driveFF[1];
-        DRIVE_KA = driveFF[2];
+        kDriveKv = driveFF[0];
+        kDriveKs = driveFF[1];
+        kDriveKa = driveFF[2];
 
-        DRIVE_KP = driveFB[0];
-        DRIVE_KI = driveFB[1];
-        DRIVE_KD = driveFB[2];
+        kDriveKp = driveFB[0];
+        kDriveKi = driveFB[1];
+        kDriveKd = driveFB[2];
 
-        TURN_KP = turnFB[0];
-        TURN_KI = turnFB[1];
-        TURN_KD = turnFB[2];
+        kTurnKp = turnFB[0];
+        kTurnKi = turnFB[1];
+        kTurnKd = turnFB[2];
 
-        DRIVE_MOTOR_INVERTED = !inverted;
-        TURN_MOTOR_INVERTED = inverted;
-        ENCODER_INVERTED = false;
+        kDriveMotorInverted = !inverted;
+        kTurnMotorInverted = inverted;
+        kEncoderInverted = false;
 
-        ENCODER_OFFSET = Rotation2d.fromDegrees(offsetDegs);
+        kEncoderOffset = Rotation2d.fromDegrees(offsetDegs);
 
-        DRIVE_GEAR_RATIO = driveRatio.ratio;
-        TURNING_GEAR_RATIO = defaultTurnRatio;
+        kDriveGearRatio = driveRatio.ratio;
+        kTurningGearRatio = defaultTurnRatio;
 
-        WHEEL_RADIUS_METERS = defaultWheelRadiusMeters;
-        WHEEL_CURCUMFERENCE_METERS = WHEEL_RADIUS_METERS * Math.PI * 2;
+        kWheelRadiusMeters = defaultWheelRadiusMeters;
+        kWheelCurcumferenceMeters = kWheelRadiusMeters * Math.PI * 2;
     }
 
     public ModuleConstants (int id,
@@ -104,34 +115,34 @@ public class ModuleConstants {
                             GearRatios driveRatio,
                             double turningRatio,
                             double wheelRadiusMeter) {
-        MODULE_INDEX = id;
+        kModuleIndex = id;
 
-        DRIVE_MOTOR_ID = ids[0];
-        TURN_MOTOR_ID = ids[1];
-        ENCODER_ID = ids[2];
+        kDriveMotorId = ids[0];
+        kTurnMotorId = ids[1];
+        kEncoderId = ids[2];
 
-        DRIVE_KV = driveFF[0];
-        DRIVE_KS = driveFF[1];
-        DRIVE_KA = driveFF[2];
+        kDriveKv = driveFF[0];
+        kDriveKs = driveFF[1];
+        kDriveKa = driveFF[2];
 
-        DRIVE_KP = driveFB[0];
-        DRIVE_KI = driveFB[1];
-        DRIVE_KD = driveFB[2];
+        kDriveKp = driveFB[0];
+        kDriveKi = driveFB[1];
+        kDriveKd = driveFB[2];
 
-        TURN_KP = turnFB[0];
-        TURN_KI = turnFB[1];
-        TURN_KD = turnFB[2];
+        kTurnKp = turnFB[0];
+        kTurnKi = turnFB[1];
+        kTurnKd = turnFB[2];
 
-        DRIVE_MOTOR_INVERTED = inversions[0];
-        TURN_MOTOR_INVERTED = inversions[1];
-        ENCODER_INVERTED = false;
+        kDriveMotorInverted = inversions[0];
+        kTurnMotorInverted = inversions[1];
+        kEncoderInverted = false;
 
-        ENCODER_OFFSET = Rotation2d.fromDegrees(offsetDegs);
+        kEncoderOffset = Rotation2d.fromDegrees(offsetDegs);
 
-        DRIVE_GEAR_RATIO = driveRatio.ratio;
-        TURNING_GEAR_RATIO = turningRatio;
+        kDriveGearRatio = driveRatio.ratio;
+        kTurningGearRatio = turningRatio;
 
-        WHEEL_RADIUS_METERS = wheelRadiusMeter;
-        WHEEL_CURCUMFERENCE_METERS = WHEEL_RADIUS_METERS * Math.PI * 2;
+        kWheelRadiusMeters = wheelRadiusMeter;
+        kWheelCurcumferenceMeters = kWheelRadiusMeters * Math.PI * 2;
     }
 }

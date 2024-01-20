@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.drive.module;
 
-import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -51,5 +50,7 @@ public interface ModuleIO {
   public default void setTurnBrakeMode(boolean enable) {}
 
   // Used to pass moduleConstants
-  public default ModuleConstants getModuleConstants() {throw new RuntimeException("getModuleConstants() not implemented");}
+  public default ModuleConstants getModuleConstants() {
+        return ModuleConstants.BLANK_CONSTANTS;
+  }
 }

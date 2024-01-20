@@ -18,10 +18,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -45,7 +43,7 @@ public class Module {
   public Module(ModuleIO io) {
     this.m_io = io;
     this.m_moduleConstants = m_io.getModuleConstants();
-    this.m_index = m_moduleConstants.MODULE_INDEX;
+    this.m_index = m_moduleConstants.kModuleIndex;
     // delay to initialize all hardware
     Timer.delay(0.5);
 
