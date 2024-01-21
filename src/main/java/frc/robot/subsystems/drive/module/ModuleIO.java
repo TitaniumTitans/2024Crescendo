@@ -138,7 +138,7 @@ public interface ModuleIO {
   default void setTurnBrakeMode(boolean enable) {}
 
   // Used to pass moduleConstants
-  public default ModuleConstants getModuleConstants() {
-        return ModuleConstants.BLANK_CONSTANTS;
+  default ModuleConstants getModuleConstants() {
+    return ModuleConstants.BLANK_CONSTANTS;
   }
 }
