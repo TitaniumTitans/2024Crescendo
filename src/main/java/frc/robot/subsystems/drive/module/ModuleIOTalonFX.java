@@ -69,7 +69,21 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
     m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID());
     m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID());
-    CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID());
+    /*
+    * this is technically the proper way of using any class that
+    * implements the "Closeable" or "AutoClosable", typically things
+    * like files or network ports, but also robot hardware */
+    try (CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID())) {
+      // run factory default on cancoder
+      var encoderConfig = new CANcoderConfiguration();
+      encoderConfig.MagnetSensor.SensorDirection =
+              moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
+                      : SensorDirectionValue.CounterClockwise_Positive;
+      encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+      cancoder.getConfigurator().apply(encoderConfig);
+
+      m_turnAbsolutePosition = cancoder.getAbsolutePosition();
+    }
 
     m_moduleConstants = moduleConstants;
 
@@ -103,35 +117,27 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     m_turnPid = new Phoenix6TalonPidPropertyBuilder(
             "Drive/Module" + m_moduleConstants.MODULE_INDEX() + "/Turn Pid Property",
-                    false,
-                    m_turnTalon,
-                    0)
+            false,
+            m_turnTalon,
+            0)
             .addP(m_moduleConstants.TURN_KP())
             .addI(m_moduleConstants.TURN_KI())
             .addD(m_moduleConstants.TURN_KD())
             .build();
 
-    // run factory default on cancoder
-    var encoderConfig = new CANcoderConfiguration();
-    encoderConfig.MagnetSensor.SensorDirection =
-            moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
-              : SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
-    cancoder.getConfigurator().apply(encoderConfig);
+      // Fancy multithreaded odometry update stuff
+      // setup drive values
+      m_driveTalon.setPosition(0.0);
+      m_drivePosition = m_driveTalon.getPosition();
+      m_drivePositionQueue =
+              PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
+      m_driveVelocity = m_driveTalon.getVelocity();
+      m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
+      m_driveCurrent = m_driveTalon.getStatorCurrent();
 
-    // Fancy multithreaded odometry update stuff
-    // setup drive values
-    m_driveTalon.setPosition(0.0);
-    m_drivePosition = m_driveTalon.getPosition();
-    m_drivePositionQueue =
-        PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
-    m_driveVelocity = m_driveTalon.getVelocity();
-    m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
-    m_driveCurrent = m_driveTalon.getStatorCurrent();
+      // setup turn values
+      m_turnTalon.setPosition(0.0);
 
-    // setup turn values
-    m_turnTalon.setPosition(0.0);
-    m_turnAbsolutePosition = cancoder.getAbsolutePosition();
     m_turnPosition = m_turnTalon.getPosition();
     m_turnPositionQueue =
         PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
