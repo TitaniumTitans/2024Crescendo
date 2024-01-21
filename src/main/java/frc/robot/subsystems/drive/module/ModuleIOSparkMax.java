@@ -50,7 +50,7 @@ public class ModuleIOSparkMax implements ModuleIO {
   private final Queue<Double> drivePositionQueue;
   private final Queue<Double> turnPositionQueue;
 
-  private final boolean isTurnMotorInverted = true;
+  private static final boolean TURN_MOTOR_INVERTED = true;
   private final Rotation2d absoluteEncoderOffset;
 
   public ModuleIOSparkMax(int index) {
@@ -80,7 +80,7 @@ public class ModuleIOSparkMax implements ModuleIO {
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
         break;
       default:
-        throw new RuntimeException("Invalid module index");
+        throw new UnsupportedOperationException("Invalid module index");
     }
 
     driveSparkMax.restoreFactoryDefaults();
@@ -92,7 +92,7 @@ public class ModuleIOSparkMax implements ModuleIO {
     driveEncoder = driveSparkMax.getEncoder();
     turnRelativeEncoder = turnSparkMax.getEncoder();
 
-    turnSparkMax.setInverted(isTurnMotorInverted);
+    turnSparkMax.setInverted(TURN_MOTOR_INVERTED);
     driveSparkMax.setSmartCurrentLimit(40);
     turnSparkMax.setSmartCurrentLimit(30);
     driveSparkMax.enableVoltageCompensation(12.0);
@@ -124,33 +124,27 @@ public class ModuleIOSparkMax implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(driveEncoder.getPosition()) / DRIVE_GEAR_RATIO;
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsPerMinuteToRadiansPerSecond(driveEncoder.getVelocity()) / DRIVE_GEAR_RATIO;
-    inputs.driveAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
-    inputs.driveCurrentAmps = new double[] {driveSparkMax.getOutputCurrent()};
+    inputs.setDrivePositionRad(Units.rotationsToRadians(driveEncoder.getPosition()) / DRIVE_GEAR_RATIO);
+    inputs.setDriveVelocityRadPerSec(
+            Units.rotationsPerMinuteToRadiansPerSecond(driveEncoder.getVelocity()) / DRIVE_GEAR_RATIO);
+    inputs.setDriveAppliedVolts(driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage());
+    inputs.setDriveCurrentAmps(new double[] {driveSparkMax.getOutputCurrent()});
 
-    inputs.turnAbsolutePosition =
-        new Rotation2d(
-                turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V() * 2.0 * Math.PI)
-            .minus(absoluteEncoderOffset);
-    inputs.turnPosition =
-        Rotation2d.fromRotations(turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO);
-    inputs.turnVelocityRadPerSec =
-        Units.rotationsPerMinuteToRadiansPerSecond(turnRelativeEncoder.getVelocity())
-            / TURN_GEAR_RATIO;
-    inputs.turnAppliedVolts = turnSparkMax.getAppliedOutput() * turnSparkMax.getBusVoltage();
-    inputs.turnCurrentAmps = new double[] {turnSparkMax.getOutputCurrent()};
+    inputs.setTurnAbsolutePosition(new Rotation2d(
+            turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V() * 2.0 * Math.PI)
+        .minus(absoluteEncoderOffset));
+    inputs.setTurnPosition(Rotation2d.fromRotations(turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO));
+    inputs.setTurnVelocityRadPerSec(Units.rotationsPerMinuteToRadiansPerSecond(turnRelativeEncoder.getVelocity())
+        / TURN_GEAR_RATIO);
+    inputs.setTurnAppliedVolts(turnSparkMax.getAppliedOutput() * turnSparkMax.getBusVoltage());
+    inputs.setTurnCurrentAmps(new double[] {turnSparkMax.getOutputCurrent()});
 
-    inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
-            .toArray();
-    inputs.odometryTurnPositions =
-        turnPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
-            .toArray(Rotation2d[]::new);
+    inputs.setOdometryDrivePositionsRad(drivePositionQueue.stream()
+        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+        .toArray());
+    inputs.setOdometryTurnPositions(turnPositionQueue.stream()
+        .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
+        .toArray(Rotation2d[]::new));
     drivePositionQueue.clear();
     turnPositionQueue.clear();
   }

@@ -94,37 +94,5 @@
     "properties": {
       "persistent": true
     }
-  },
-  {
-    "name": "/Preferences/Drive/Module3/Drive Pid Property.mm.kp",
-    "type": "double",
-    "value": 0.05,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Drive/Module3/Turn Pid Property.mm.kp",
-    "type": "double",
-    "value": 7.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Drive/Module3/Turn Pid Property.mm.ki",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Drive/Module3/Turn Pid Property.mm.kd",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
   }
 ]

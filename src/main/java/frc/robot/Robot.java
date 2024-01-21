@@ -44,15 +44,16 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    String gitDirty = "GitDirty";
     switch (BuildConstants.DIRTY) {
       case 0:
-        Logger.recordMetadata("GitDirty", "All changes committed");
+        Logger.recordMetadata(gitDirty, "All changes committed");
         break;
       case 1:
-        Logger.recordMetadata("GitDirty", "Uncomitted changes");
+        Logger.recordMetadata(gitDirty, "Uncomitted changes");
         break;
       default:
-        Logger.recordMetadata("GitDirty", "Unknown");
+        Logger.recordMetadata(gitDirty, "Unknown");
         break;
     }
 
@@ -102,11 +103,15 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -121,7 +126,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -137,7 +144,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 
   /** This function is called once when test mode is enabled. */
   @Override
@@ -148,13 +157,19 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    // Function is empty simply to overwrite the default, which throws an error
+  }
 }
