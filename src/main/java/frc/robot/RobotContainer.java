@@ -141,13 +141,15 @@ public class RobotContainer {
                             m_driveSubsystem)
                 .ignoringDisable(true));
 
-    controller.a().whileTrue(m_shooter.setShooterPower(0.6, 0.6))
-            .whileFalse(m_shooter.setShooterPower(0.0, 0.0));
+    controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.6, 0.6))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.b().whileTrue(m_shooter.setIntakePowerFactory(0.75))
+            .whileFalse(m_shooter.setIntakePowerFactory(0.0));
 
     controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25))
             .whileFalse(m_climber.setClimberPowerFactory(0.0));
-      controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25))
-              .whileFalse(m_climber.setClimberPowerFactory(0.0));
+    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25))
+            .whileFalse(m_climber.setClimberPowerFactory(0.0));
   }
 
   /**

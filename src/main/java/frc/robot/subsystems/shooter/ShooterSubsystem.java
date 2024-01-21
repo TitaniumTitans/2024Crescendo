@@ -30,11 +30,22 @@ public class ShooterSubsystem extends SubsystemBase {
     m_io.setKickerVoltage(power * 12.0);
   }
 
-  public Command setShooterPower(double left, double right) {
+  public void setIntakePower(double power) {
+    m_io.setIntakeVoltage(power * 12.0);
+  }
+
+  public Command setShooterPowerFactory(double left, double right) {
     return run(() -> {
       setShooterPowerLeft(left == 0.0 ? 0.0 : SmartDashboard.getNumber("Left wheel", 0.6));
       setShooterPowerRight(right == 0.0 ? 0.0 : SmartDashboard.getNumber("Right wheel", 0.6));
       setKickerPower(left == 0.0 ? 0.0 : 1.0);
+    });
+  }
+
+  public Command setIntakePowerFactory(double power) {
+    return run(() -> {
+      setIntakePower(power);
+      setKickerPower(power == 0.0 ? 0.0 : 0.75);
     });
   }
 }
