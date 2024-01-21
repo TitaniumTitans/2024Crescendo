@@ -17,6 +17,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.ParentDevice;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 import java.util.ArrayList;
@@ -93,7 +94,7 @@ public class PhoenixOdometryThread extends Thread {
           }
         }
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        DriverStation.reportError(e.toString(), true);
       } finally {
         signalsLock.unlock();
       }

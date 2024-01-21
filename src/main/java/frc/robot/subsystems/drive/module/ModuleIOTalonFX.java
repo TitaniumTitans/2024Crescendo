@@ -168,15 +168,19 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_turnAppliedVolts,
             m_turnCurrent);
 
-    inputs.setDrivePositionRad(Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO());
-    inputs.setDriveVelocityRadPerSec(Units.rotationsToRadians(m_driveVelocity.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO());
+    inputs.setDrivePositionRad(
+            Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO());
+    inputs.setDriveVelocityRadPerSec(
+            Units.rotationsToRadians(m_driveVelocity.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO());
     inputs.setDriveAppliedVolts(m_driveAppliedVolts.getValueAsDouble());
     inputs.setDriveCurrentAmps(new double[] {m_driveCurrent.getValueAsDouble()});
 
     inputs.setTurnAbsolutePosition(Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble())
         .minus(m_moduleConstants.ENCODER_OFFSET()));
-    inputs.setTurnPosition(Rotation2d.fromRotations((m_turnPosition.getValueAsDouble() / m_moduleConstants.TURNING_GEAR_RATIO())));
-    inputs.setTurnVelocityRadPerSec(Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()) / m_moduleConstants.TURNING_GEAR_RATIO());
+    inputs.setTurnPosition(Rotation2d.fromRotations((
+            m_turnPosition.getValueAsDouble() / m_moduleConstants.TURNING_GEAR_RATIO())));
+    inputs.setTurnVelocityRadPerSec(
+            Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()) / m_moduleConstants.TURNING_GEAR_RATIO());
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
 

@@ -125,7 +125,8 @@ public class ModuleIOSparkMax implements ModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     inputs.setDrivePositionRad(Units.rotationsToRadians(driveEncoder.getPosition()) / DRIVE_GEAR_RATIO);
-    inputs.setDriveVelocityRadPerSec(Units.rotationsPerMinuteToRadiansPerSecond(driveEncoder.getVelocity()) / DRIVE_GEAR_RATIO);
+    inputs.setDriveVelocityRadPerSec(
+            Units.rotationsPerMinuteToRadiansPerSecond(driveEncoder.getVelocity()) / DRIVE_GEAR_RATIO);
     inputs.setDriveAppliedVolts(driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage());
     inputs.setDriveCurrentAmps(new double[] {driveSparkMax.getOutputCurrent()});
 
