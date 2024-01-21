@@ -125,18 +125,18 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addD(m_moduleConstants.TURN_KD())
             .build();
 
-      // Fancy multithreaded odometry update stuff
-      // setup drive values
-      m_driveTalon.setPosition(0.0);
-      m_drivePosition = m_driveTalon.getPosition();
-      m_drivePositionQueue =
-              PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
-      m_driveVelocity = m_driveTalon.getVelocity();
-      m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
-      m_driveCurrent = m_driveTalon.getStatorCurrent();
+    // Fancy multithreaded odometry update stuff
+    // setup drive values
+    m_driveTalon.setPosition(0.0);
+    m_drivePosition = m_driveTalon.getPosition();
+    m_drivePositionQueue =
+            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
+    m_driveVelocity = m_driveTalon.getVelocity();
+    m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
+    m_driveCurrent = m_driveTalon.getStatorCurrent();
 
-      // setup turn values
-      m_turnTalon.setPosition(0.0);
+    // setup turn values
+    m_turnTalon.setPosition(0.0);
 
     m_turnPosition = m_turnTalon.getPosition();
     m_turnPositionQueue =
