@@ -22,15 +22,14 @@ public class GyroIOPigeon1 implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected = m_pigeon.getState() == PigeonIMU.PigeonState.Ready;
-    inputs.yawPosition = Rotation2d.fromDegrees(m_pigeon.getYaw());
-    inputs.yawVelocityRadPerSec = (m_pigeon.getYaw() - prevYaw) / Units.millisecondsToSeconds(20);
+    inputs.setConnected(m_pigeon.getState() == PigeonIMU.PigeonState.Ready);
+    inputs.setYawPosition(Rotation2d.fromDegrees(m_pigeon.getYaw()));
+    inputs.setYawVelocityRadPerSec((m_pigeon.getYaw() - prevYaw) / Units.millisecondsToSeconds(20));
     prevYaw = m_pigeon.getYaw();
 
-    inputs.odometryYawPositions =
-        yawPositionQueue.stream()
-                      .map(Rotation2d::fromDegrees)
-                      .toArray(Rotation2d[]::new);
+    inputs.setOdometryYawPositions(yawPositionQueue.stream()
+                  .map(Rotation2d::fromDegrees)
+                  .toArray(Rotation2d[]::new));
     yawPositionQueue.clear();
   }
 }

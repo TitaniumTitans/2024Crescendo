@@ -19,10 +19,42 @@ import org.littletonrobotics.junction.AutoLog;
 public interface GyroIO {
   @AutoLog
   class GyroIOInputs {
-    public boolean connected = false;
-    public Rotation2d yawPosition = new Rotation2d();
-    public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
-    public double yawVelocityRadPerSec = 0.0;
+    protected boolean connected = false;
+    protected Rotation2d yawPosition = new Rotation2d();
+    protected Rotation2d[] odometryYawPositions = new Rotation2d[] {};
+    protected double yawVelocityRadPerSec = 0.0;
+
+    public boolean isConnected() {
+      return connected;
+    }
+
+    public void setConnected(boolean connected) {
+      this.connected = connected;
+    }
+
+    public Rotation2d getYawPosition() {
+      return yawPosition;
+    }
+
+    public void setYawPosition(Rotation2d yawPosition) {
+      this.yawPosition = yawPosition;
+    }
+
+    public Rotation2d[] getOdometryYawPositions() {
+      return odometryYawPositions;
+    }
+
+    public void setOdometryYawPositions(Rotation2d[] odometryYawPositions) {
+      this.odometryYawPositions = odometryYawPositions;
+    }
+
+    public double getYawVelocityRadPerSec() {
+      return yawVelocityRadPerSec;
+    }
+
+    public void setYawVelocityRadPerSec(double yawVelocityRadPerSec) {
+      this.yawVelocityRadPerSec = yawVelocityRadPerSec;
+    }
   }
 
   default void updateInputs(GyroIOInputs inputs) {}

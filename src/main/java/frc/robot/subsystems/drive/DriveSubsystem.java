@@ -116,7 +116,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Update odometry
     int deltaCount =
-        gyroInputs.connected ? gyroInputs.odometryYawPositions.length : Integer.MAX_VALUE;
+        gyroInputs.isConnected() ? gyroInputs.getOdometryYawPositions().length : Integer.MAX_VALUE;
     for (int i = 0; i < 4; i++) {
       deltaCount = Math.min(deltaCount, modules[i].getPositionDeltas().length);
     }
@@ -132,10 +132,10 @@ public class DriveSubsystem extends SubsystemBase {
       // sample in x, y, and theta based only on the modules, without
       // the gyro. The gyro is always disconnected in simulation.
       var twist = kinematics.toTwist2d(wheelDeltas);
-      if (gyroInputs.connected) {
+      if (gyroInputs.isConnected()) {
         // If the gyro is connected, replace the theta component of the twist
         // with the change in angle since the last sample.
-        Rotation2d gyroRotation = gyroInputs.odometryYawPositions[deltaIndex];
+        Rotation2d gyroRotation = gyroInputs.getOdometryYawPositions()[deltaIndex];
         twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
         lastGyroRotation = gyroRotation;
       }

@@ -51,14 +51,13 @@ public class GyroIOPigeon2 implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
-    inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-    inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+    inputs.setConnected(BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK));
+    inputs.setYawPosition(Rotation2d.fromDegrees(yaw.getValueAsDouble()));
+    inputs.setYawVelocityRadPerSec(Units.degreesToRadians(yawVelocity.getValueAsDouble()));
 
-    inputs.odometryYawPositions =
-        yawPositionQueue.stream()
-            .map(Rotation2d::fromDegrees)
-            .toArray(Rotation2d[]::new);
+    inputs.setOdometryYawPositions(yawPositionQueue.stream()
+        .map(Rotation2d::fromDegrees)
+        .toArray(Rotation2d[]::new));
     yawPositionQueue.clear();
   }
 }
