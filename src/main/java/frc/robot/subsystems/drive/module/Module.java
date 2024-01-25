@@ -65,7 +65,7 @@ public class Module {
           m_driveFeedback = new PIDController(0.0, 0.0, 0.0);
           m_turnFeedback = new PIDController(0.0, 0.0, 0.0);
         }
-    }
+      }
 
     m_turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
     setBrakeMode(true);
@@ -84,8 +84,8 @@ public class Module {
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (m_turnRelativeOffset == null && m_inputs.turnAbsolutePosition.getRadians() != 0.0) {
-      m_turnRelativeOffset = m_inputs.turnAbsolutePosition.minus(m_inputs.turnPosition);
+    if (m_turnRelativeOffset == null && m_inputs.getTurnAbsolutePosition().getRadians() != 0.0) {
+      m_turnRelativeOffset = m_inputs.getTurnAbsolutePosition().minus(m_inputs.getTurnPosition());
     }
 
     // Run closed loop turn control
@@ -107,18 +107,18 @@ public class Module {
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
         m_io.setDriveVelocityMPS(
             m_driveFeedforward.calculate(velocityRadPerSec)
-                + m_driveFeedback.calculate(m_inputs.driveVelocityRadPerSec, velocityRadPerSec));
+                + m_driveFeedback.calculate(m_inputs.getDriveVelocityRadPerSec(), velocityRadPerSec));
       }
     }
 
     // Calculate position deltas for odometry
     int deltaCount =
-        Math.min(m_inputs.odometryDrivePositionsRad.length, m_inputs.odometryTurnPositions.length);
+        Math.min(m_inputs.getOdometryDrivePositionsRad().length, m_inputs.getOdometryTurnPositions().length);
     m_positionDeltas = new SwerveModulePosition[deltaCount];
     for (int i = 0; i < deltaCount; i++) {
-      double positionMeters = m_inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
+      double positionMeters = m_inputs.getOdometryDrivePositionsRad()[i] * WHEEL_RADIUS;
       Rotation2d angle =
-          m_inputs.odometryTurnPositions[i].plus(
+          m_inputs.getOdometryTurnPositions()[i].plus(
               m_turnRelativeOffset != null ? m_turnRelativeOffset : new Rotation2d());
       m_positionDeltas[i] = new SwerveModulePosition(positionMeters - m_lastPositionMeters, angle);
       m_lastPositionMeters = positionMeters;
@@ -169,18 +169,18 @@ public class Module {
     if (m_turnRelativeOffset == null) {
       return new Rotation2d();
     } else {
-      return m_inputs.turnPosition.plus(m_turnRelativeOffset);
+      return m_inputs.getTurnPosition().plus(m_turnRelativeOffset);
     }
   }
 
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
-    return m_inputs.drivePositionRad * WHEEL_RADIUS;
+    return m_inputs.getDrivePositionRad() * WHEEL_RADIUS;
   }
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return m_inputs.driveVelocityRadPerSec * WHEEL_RADIUS;
+    return m_inputs.getDriveVelocityRadPerSec() * WHEEL_RADIUS;
   }
 
   /** Returns the module position (turn angle and drive position). */
@@ -200,6 +200,6 @@ public class Module {
 
   /** Returns the drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
-    return m_inputs.driveVelocityRadPerSec;
+    return m_inputs.getDriveVelocityRadPerSec();
   }
 }

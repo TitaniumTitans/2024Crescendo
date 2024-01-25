@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -55,35 +56,41 @@ public class RobotContainer {
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL -> {
-        // Real robot, instantiate hardware IO implementations
-        m_driveSubsystem = new DriveSubsystem(
-            new GyroIOPigeon1(12, true),
-            new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+          // Real robot, instantiate hardware IO implementations
+          m_driveSubsystem = new DriveSubsystem(
+            new GyroIOPigeon1(12),
+              new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
+              new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
+              new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
+              new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        }
+    case SIM -> {
+      // Sim robot, instantiate physics sim IO implementations
+        m_driveSubsystem =
+          new DriveSubsystem(
+            new GyroIO() {
+            },
+            new ModuleIOSim(DriveConstants.FL_MOD_CONSTANTS),
+            new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
+            new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
       }
-      case SIM -> {
-        // Sim robot, instantiate physics sim IO implementations
+    default -> {
+      // Replayed robot, disable IO implementations
         m_driveSubsystem =
-        new DriveSubsystem(
-          new GyroIO() {},
-          new ModuleIOSim(Constants.DriveConstants.FL_MOD_CONSTANTS),
-          new ModuleIOSim(Constants.DriveConstants.FR_MOD_CONSTANTS),
-          new ModuleIOSim(Constants.DriveConstants.BL_MOD_CONSTANTS),
-          new ModuleIOSim(Constants.DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-      }
-      default -> {
-        // Replayed robot, disable IO implementations
-        m_driveSubsystem =
-        new DriveSubsystem(
-          new GyroIO() {},
-          new ModuleIO() {},
-          new ModuleIO() {},
-          new ModuleIO() {},
-          new ModuleIO() {});
+                new DriveSubsystem(
+                        new GyroIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        },
+                        new ModuleIO() {
+                        });
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
       }
     }

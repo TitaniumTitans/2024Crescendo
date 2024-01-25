@@ -85,15 +85,14 @@ public class ModuleIOSim implements ModuleIO {
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = new double[] {Math.abs(m_driveSim.getCurrentDrawAmps())};
 
-    inputs.turnAbsolutePosition =
-        new Rotation2d(m_turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
-    inputs.turnPosition = new Rotation2d(m_turnSim.getAngularPositionRad());
-    inputs.turnVelocityRadPerSec = m_turnSim.getAngularVelocityRadPerSec();
-    inputs.turnAppliedVolts = turnAppliedVolts;
-    inputs.turnCurrentAmps = new double[] {Math.abs(m_turnSim.getCurrentDrawAmps())};
+    inputs.setTurnAbsolutePosition(new Rotation2d(m_turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition));
+    inputs.setTurnPosition(new Rotation2d(m_turnSim.getAngularPositionRad()));
+    inputs.setTurnVelocityRadPerSec(m_turnSim.getAngularVelocityRadPerSec());
+    inputs.setTurnAppliedVolts(turnAppliedVolts);
+    inputs.setTurnCurrentAmps(new double[] {Math.abs(m_turnSim.getCurrentDrawAmps())});
 
-    inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
-    inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
+    inputs.setOdometryDrivePositionsRad(new double[] {inputs.getDrivePositionRad()});
+    inputs.setOdometryTurnPositions(new Rotation2d[] {inputs.getTurnPosition()});
   }
 
   @Override
