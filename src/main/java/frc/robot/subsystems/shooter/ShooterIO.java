@@ -21,12 +21,6 @@ public interface ShooterIO {
 
     public default void updateInputs(ShooterIOInputs inputs){}
 
-    default void setMotorVoltageTL(double voltage) {}
-    default void setMotorVoltageTR(double voltage) {}
-    default void setMotorVoltageBL(double voltage) {}
-    default void setMotorVoltageBR(double voltage) {}
-
-
     default void setVelocityTL(double rpm) {}
     default void setVelocityTR(double rpm) {}
     default void setVelocityBL(double rpm) {}
