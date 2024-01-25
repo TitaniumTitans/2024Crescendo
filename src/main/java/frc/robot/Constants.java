@@ -27,7 +27,7 @@ public final class Constants {
   private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -98,5 +98,25 @@ public final class Constants {
             false,
             ModuleConstants.GearRatios.L3
     );
+  }
+
+  public static class ShooterConstants {
+    private ShooterConstants() {}
+
+    public static final int TL_SHOOTER_ID = 13;
+    public static final int TR_SHOOTER_ID = 14;
+    public static final int BL_SHOOTER_ID = 15;
+    public static final int BR_SHOOTER_ID = 16;
+    public static final int KICKER_ID = 17;
+    public static final int INTAKE_LEFT_ID = 20;
+    public static final int INTAKE_RIGHT_ID = 21;
+
+    public static final double SHOOTER_KP = 0.05;
+    public static final double SHOOTER_KI = 0.0;
+    public static final double SHOOTER_KD = 0.0;
+
+    public static final double SHOOTER_KV = 0.0;
+    public static final double SHOOTER_KS = 0.0;
+    public static final double SHOOTER_KA = 0.0;
   }
 }
