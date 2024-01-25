@@ -37,7 +37,6 @@ import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOPrototype;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -56,7 +55,6 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final LoggedDashboardNumber intakeSpeed = new LoggedDashboardNumber("Intake Speed", 0.25);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -143,9 +141,9 @@ public class RobotContainer {
                             m_driveSubsystem)
                 .ignoringDisable(true));
 
-    controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.625, 0.6))
+    controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.6, 0.6))
             .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.b().whileTrue(m_shooter.setIntakePowerFactory(intakeSpeed.get()))
+    controller.b().whileTrue(m_shooter.setIntakePowerFactory(0.75))
             .whileFalse(m_shooter.setIntakePowerFactory(0.0));
 
     controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25))

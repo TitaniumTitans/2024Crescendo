@@ -17,13 +17,13 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void setShooterPowerLeft(double power) {
-    m_io.setVelocityTL((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
-    m_io.setVelocityBL(power * 12.0);
+    m_io.setMotorVoltageTL((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
+    m_io.setMotorVoltageBL(power * 12.0);
   }
 
   public void setShooterPowerRight(double power) {
-    m_io.setVelocityTR((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
-    m_io.setVelocityBR(power * 12.0);
+    m_io.setMotorVoltageTR((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
+    m_io.setMotorVoltageBR(power * 12.0);
   }
 
   public void setKickerPower(double power) {
