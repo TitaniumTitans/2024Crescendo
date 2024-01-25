@@ -18,6 +18,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -25,10 +27,11 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.gos.lib.phoenix6.properties.pid.Phoenix6TalonPidPropertyBuilder;
-import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
+import lib.properties.phoenix6.PidPropertyPublic;
+
 import java.util.Queue;
 
 /**
@@ -47,8 +50,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final TalonFX m_driveTalon;
   private final TalonFX m_turnTalon;
 
-  private final PidProperty m_drivePid;
-  private final PidProperty m_turnPid;
+  private final PidPropertyPublic m_drivePid;
+  private final PidPropertyPublic m_turnPid;
 
   private final ModuleConstants m_moduleConstants;
 
@@ -79,16 +82,20 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
+    driveConfig.Feedback.RotorToSensorRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
     m_driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
 
     // setup pid gains for drive motor
-    m_drivePid = new Phoenix6TalonPidPropertyBuilder(
+    m_drivePid = new Phoenix6PidPropertyBuilder(
             "Drive/Module" + m_moduleConstants.MODULE_INDEX() + "/Drive Pid Property",
-            false,
-            m_driveTalon,
-            0
-    ).addP(m_moduleConstants.DRIVE_KP()).build();
+            false, m_driveTalon, 0)
+            .addP(m_moduleConstants.DRIVE_KP())
+            .addI(m_moduleConstants.DRIVE_KI())
+            .addD(m_moduleConstants.DRIVE_KD())
+            .addKV(m_moduleConstants.DRIVE_KV())
+            .addKS(m_moduleConstants.DRIVE_KS())
+            .build();
 
     // run configs on turning motor
     var turnConfig = new TalonFXConfiguration();
@@ -97,10 +104,13 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotorOutput.Inverted =
             moduleConstants.TURN_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
+    turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+    turnConfig.Feedback.RotorToSensorRatio = m_moduleConstants.TURNING_GEAR_RATIO();
     m_turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
-    m_turnPid = new Phoenix6TalonPidPropertyBuilder(
+    // setup pid gains for turn motor
+    m_turnPid = new Phoenix6PidPropertyBuilder(
             "Drive/Module" + m_moduleConstants.MODULE_INDEX() + "/Turn Pid Property",
                     false,
                     m_turnTalon,
@@ -167,6 +177,9 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_turnAppliedVolts,
             m_turnCurrent);
 
+    m_drivePid.updateIfChanged();
+    m_turnPid.updateIfChanged();
+
     inputs.drivePositionRad =
         Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
     inputs.driveVelocityRadPerSec =
@@ -197,13 +210,17 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void setDriveVoltage(double volts) {
-    m_driveTalon.setControl(new VoltageOut(volts));
+  public void setDriveVelocityMPS(double mps) {
+    double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
+    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0);
+    m_driveTalon.setControl(velRequest);
   }
 
   @Override
-  public void setTurnVoltage(double volts) {
-    m_turnTalon.setControl(new VoltageOut(volts));
+  public void setTurnPositionDegs(double degrees) {
+    double rots = degrees / 360;
+    PositionVoltage posRequest = new PositionVoltage(rots).withSlot(0);
+    m_turnTalon.setControl(posRequest);
   }
 
   @Override

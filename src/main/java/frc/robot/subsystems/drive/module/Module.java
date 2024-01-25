@@ -90,7 +90,7 @@ public class Module {
 
     // Run closed loop turn control
     if (m_angleSetpoint != null) {
-      m_io.setTurnVoltage(
+      m_io.setTurnPositionDegs(
           m_turnFeedback.calculate(getAngle().getRadians(), m_angleSetpoint.getRadians()));
 
       // Run closed loop drive control
@@ -105,7 +105,7 @@ public class Module {
 
         // Run drive controller
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        m_io.setDriveVoltage(
+        m_io.setDriveVelocityMPS(
             m_driveFeedforward.calculate(velocityRadPerSec)
                 + m_driveFeedback.calculate(m_inputs.driveVelocityRadPerSec, velocityRadPerSec));
       }
@@ -144,14 +144,14 @@ public class Module {
     m_angleSetpoint = new Rotation2d();
 
     // Open loop drive control
-    m_io.setDriveVoltage(volts);
+    m_io.setDriveVelocityMPS(volts);
     m_speedSetpoint = null;
   }
 
   /** Disables all outputs to motors. */
   public void stop() {
-    m_io.setTurnVoltage(0.0);
-    m_io.setDriveVoltage(0.0);
+    m_io.setTurnPositionDegs(0.0);
+    m_io.setDriveVelocityMPS(0.0);
 
     // Disable closed loop control for turn and drive
     m_angleSetpoint = null;

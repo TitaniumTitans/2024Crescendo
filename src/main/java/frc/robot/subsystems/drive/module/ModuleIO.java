@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.drive.module;
 
-import com.gos.lib.properties.pid.PidProperty;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -36,20 +35,22 @@ public interface ModuleIO {
   }
 
   /** Updates the set of loggable inputs. */
-  public default void updateInputs(ModuleIOInputs inputs) {}
+  default void updateInputs(ModuleIOInputs inputs) {}
 
   /** Run the drive motor at the specified voltage. */
-  public default void setDriveVoltage(double volts) {}
+  default void setDriveVelocityMPS(double mps) {}
 
   /** Run the turn motor at the specified voltage. */
-  public default void setTurnVoltage(double volts) {}
+  default void setTurnPositionDegs(double degrees) {}
 
   /** Enable or disable brake mode on the drive motor. */
-  public default void setDriveBrakeMode(boolean enable) {}
+  default void setDriveBrakeMode(boolean enable) {}
 
   /** Enable or disable brake mode on the turn motor. */
-  public default void setTurnBrakeMode(boolean enable) {}
+  default void setTurnBrakeMode(boolean enable) {}
 
   // Used to pass moduleConstants
-  public default ModuleConstants getModuleConstants() {throw new RuntimeException("getModuleConstants() not implemented");}
+  default ModuleConstants getModuleConstants() {
+    throw new RuntimeException("getModuleConstants() not implemented");
+  }
 }
