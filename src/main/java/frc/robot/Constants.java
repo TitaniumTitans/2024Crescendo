@@ -24,9 +24,12 @@ import frc.robot.subsystems.drive.module.ModuleConstants;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  private Constants() {
+    throw new IllegalStateException("Constants class should not be constructed");
+  }
   public static final Mode currentMode = Mode.REAL;
 
-  public static enum Mode {
+  public enum Mode {
     /** Running on a real robot. */
     REAL,
 
@@ -38,13 +41,19 @@ public final class Constants {
   }
 
   public static class DriveConstants {
+    private DriveConstants() {
+      throw new IllegalStateException("Constants class should not be constructed");
+    }
 
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
-    public static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
-    public static final double[] DRIVE_FB_GAINS = new double[]{0.05, 0.0, 0.0};
-    public static final double[] TURN_FB_GAINS = new double[]{7.0, 0.0, 0.0};
+    // kV, kS, kA in order
+    protected static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
+    // kP, kI, kD in order
+    protected static final double[] DRIVE_FB_GAINS = new double[]{0.05, 0.0, 0.0};
+    // kP, kI, kD in order
+    protected static final double[] TURN_FB_GAINS = new double[]{7.0, 0.0, 0.0};
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
