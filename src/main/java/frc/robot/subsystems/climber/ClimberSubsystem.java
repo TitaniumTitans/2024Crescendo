@@ -11,8 +11,8 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public void setClimberPower(double power) {
-        m_io.setLeftVoltage(power * 12.0);
-        m_io.setRightVoltage(power * 12.0);
+        m_io.setRightPosition(power * 12.0);
+        m_io.setLeftPosition(power * 12.0);
     }
 
     public Command setClimberPowerFactory(double power) {

@@ -2,6 +2,6 @@ package frc.robot.subsystems.climber;
 
 public interface ClimberIO {
 
-    default void setLeftVoltage(double voltage) {}
-    default void setRightVoltage(double voltage) {}
+    default void setRightPosition(double degrees) {}
+    default void setLeftPosition(double degrees) {}
 }
