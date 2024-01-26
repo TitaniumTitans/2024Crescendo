@@ -21,6 +21,15 @@ public class VisionSubsystem extends SubsystemBase {
      private PhotonPoseEstimator m_photonPoseEstimator;
      private DriverStation.Alliance m_alliance;
      private AprilTagFieldLayout m_aprilTagFieldLayout;
+
+     public class photonVisionInputs {
+        public boolean camConnected = false;
+        public double camLatency = 0.0;
+        public boolean tagsFound = false;
+        public int[] tagIds = new int[] {};
+        public int nearestTagId = 0;
+        public Pose2d nearestTagPose = new Pose2d();
+    }
     public VisionSubsystem(String camName, Transform3d camPose) {
         m_camera = new PhotonCamera(camName);
         robotToCam = camPose;
