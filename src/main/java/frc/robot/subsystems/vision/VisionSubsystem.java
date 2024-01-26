@@ -3,19 +3,23 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
      private final PhotonCamera m_camera;
      private final Transform3d robotToCam;
      private PhotonPoseEstimator m_photonPoseEstimator;
-     private final DriverStation.Alliance m_alliance;
+     private DriverStation.Alliance m_alliance;
      private AprilTagFieldLayout m_aprilTagFieldLayout;
     public VisionSubsystem(String camName, Transform3d camPose) {
         m_camera = new PhotonCamera(camName);
@@ -40,7 +44,18 @@ public class VisionSubsystem extends SubsystemBase {
         } catch (IOException e){
             throw new IllegalStateException(e);
         }
-
+    }
+    public Optional<EstimatedRobotPose> getPose(Pose2d prevEstimatedRobotPose){
+        m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+        if(m_alliance != DriverStation.getAlliance().get());
+        m_alliance = DriverStation.getAlliance().get();
+        if(m_alliance == DriverStation.Alliance.Blue){
+            m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
+        } else {
+            m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
+        }
+        PhotonPipelineResult camResult = m_camera.getLatestResult();
+        return m_photonPoseEstimator.update(camResult);
     }
 }
 
