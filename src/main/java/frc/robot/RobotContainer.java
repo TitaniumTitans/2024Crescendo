@@ -24,6 +24,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOPrototype;
+import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
@@ -34,6 +37,7 @@ import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOPrototype;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -45,12 +49,16 @@ public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
+  private final ArmSubsystem m_armSubsystem;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final LoggedDashboardNumber wristPower;
+  private final LoggedDashboardNumber armPower;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -64,6 +72,7 @@ public class RobotContainer {
               new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -76,6 +85,7 @@ public class RobotContainer {
             new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
     default -> {
       // Replayed robot, disable IO implementations
@@ -92,11 +102,16 @@ public class RobotContainer {
                         new ModuleIO() {
                         });
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
     }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+
+    armPower = new LoggedDashboardNumber("Arm Power", 0.0);
+    wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
 
     // Set up feedforward characterization
     autoChooser.addOption(
@@ -133,9 +148,15 @@ public class RobotContainer {
                             new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
                             m_driveSubsystem)
                 .ignoringDisable(true));
+    controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory())
+            .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+    controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory())
+            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory())
+            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory())
+            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
-    controller.a().whileTrue(m_shooter.setShooterPower(0.6, 0.6))
-            .whileFalse(m_shooter.setShooterPower(0.0, 0.0));
   }
 
   /**

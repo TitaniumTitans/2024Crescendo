@@ -99,4 +99,8 @@ public final class Constants {
             ModuleConstants.GearRatios.L3
     );
   }
+
+  private static class ArmConstants {
+    private ArmConstants(){}
+  }
 }
