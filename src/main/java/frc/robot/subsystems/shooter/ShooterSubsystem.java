@@ -39,6 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
       setShooterPowerLeft(left == 0.0 ? 0.0 : SmartDashboard.getNumber("Left wheel", 0.6));
       setShooterPowerRight(right == 0.0 ? 0.0 : SmartDashboard.getNumber("Right wheel", 0.6));
       setKickerPower(left == 0.0 ? 0.0 : 1.0);
+      setIntakePower(left == 0.0 ? 0.0 : 0.35);
     });
   }
 

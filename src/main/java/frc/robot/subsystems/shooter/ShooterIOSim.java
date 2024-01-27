@@ -23,25 +23,25 @@ public class ShooterIOSim implements ShooterIO{
     private double bRAppliedVolts = 0.0;
     private double kickerAppliedVolts = 0.0;
 
-    @Override
-    public void updateInputs(ShooterIOInputs inputs) {
-        m_simTL.update(LOOP_PERIOD_SECS);
-        m_simTR.update(LOOP_PERIOD_SECS);
-        m_simBL.update(LOOP_PERIOD_SECS);
-        m_simBR.update(LOOP_PERIOD_SECS);
-
-        inputs.tLAngularVelocity = m_simTL.getAngularVelocityRadPerSec();
-        inputs.tRAngularVelocity = m_simTR.getAngularVelocityRadPerSec();
-        inputs.bLAngularVelocity = m_simBL.getAngularVelocityRadPerSec();
-        inputs.bRAngularVelocity = m_simBR.getAngularVelocityRadPerSec();
-        inputs.kickerAngularVelocity = m_simKicker.getAngularVelocityRadPerSec();
-
-        inputs.tLAppliedInputs = tLAppliedVolts;
-        inputs.tRAppliedInputs = tRAppliedVolts;
-        inputs.bLAppliedInputs = bLAppliedVolts;
-        inputs.bRAppliedInputs = bRAppliedVolts;
-        inputs.kickerAppliedInputs = kickerAppliedVolts;
-    }
+//    @Override
+//    public void updateInputs(ShooterIOInputs inputs) {
+//        m_simTL.update(LOOP_PERIOD_SECS);
+//        m_simTR.update(LOOP_PERIOD_SECS);
+//        m_simBL.update(LOOP_PERIOD_SECS);
+//        m_simBR.update(LOOP_PERIOD_SECS);
+//
+//        inputs.tLAngularVelocity = m_simTL.getAngularVelocityRadPerSec();
+//        inputs.tRAngularVelocity = m_simTR.getAngularVelocityRadPerSec();
+//        inputs.bLAngularVelocity = m_simBL.getAngularVelocityRadPerSec();
+//        inputs.bRAngularVelocity = m_simBR.getAngularVelocityRadPerSec();
+//        inputs.kickerAngularVelocity = m_simKicker.getAngularVelocityRadPerSec();
+//
+//        inputs.tLAppliedInputs = tLAppliedVolts;
+//        inputs.tRAppliedInputs = tRAppliedVolts;
+//        inputs.bLAppliedInputs = bLAppliedVolts;
+//        inputs.bRAppliedInputs = bRAppliedVolts;
+//        inputs.kickerAppliedInputs = kickerAppliedVolts;
+//    }
 
     @Override
     public void setMotorVoltageTL(double voltage) {

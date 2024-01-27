@@ -33,9 +33,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon1;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
-import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOPrototype;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.shooter.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -67,8 +65,19 @@ public class RobotContainer {
               new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
-          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+          m_shooter = new ShooterSubsystem(new ShooterIntakeIOPrototype());
           m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+        }
+        case PROTO_SHOOTER -> {
+          m_driveSubsystem = new DriveSubsystem(
+                  new GyroIO() {
+                  },
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
+          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+          m_climber = new ClimberSubsystem(new ClimberIO() {});
         }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -80,7 +89,7 @@ public class RobotContainer {
             new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_shooter = new ShooterSubsystem(new ShooterIOSim());
         m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
     default -> {
@@ -143,8 +152,6 @@ public class RobotContainer {
 
     controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.6, 0.6))
             .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.b().whileTrue(m_shooter.setIntakePowerFactory(0.75))
-            .whileFalse(m_shooter.setIntakePowerFactory(0.0));
 
     controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25))
             .whileFalse(m_climber.setClimberPowerFactory(0.0));

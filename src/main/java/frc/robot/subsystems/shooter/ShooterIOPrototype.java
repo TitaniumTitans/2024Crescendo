@@ -10,43 +10,38 @@ public class ShooterIOPrototype implements ShooterIO {
   private final CANSparkMax m_bottomLeftMotor;
   private final CANSparkMax m_bottomRightMotor;
   private final CANSparkMax m_kickekMotor;
-  private final CANSparkMax m_intakeLeft;
-  private final CANSparkMax m_intakeRight;
   public ShooterIOPrototype() {
     m_topLeftMotor = new CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless);
     m_topRightMotor = new CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless);
     m_bottomLeftMotor = new CANSparkMax(15, CANSparkLowLevel.MotorType.kBrushless);
     m_bottomRightMotor = new CANSparkMax(16, CANSparkLowLevel.MotorType.kBrushless);
     m_kickekMotor = new CANSparkMax(17, CANSparkLowLevel.MotorType.kBrushless);
-    m_intakeLeft = new CANSparkMax(20, CANSparkLowLevel.MotorType.kBrushless);
-    m_intakeRight = new CANSparkMax(21, CANSparkLowLevel.MotorType.kBrushless);
 
     m_topLeftMotor.setInverted(false);
-    m_bottomLeftMotor.setInverted(true);
+    m_bottomLeftMotor.setInverted(false);
+    m_bottomRightMotor.setInverted(true);
 
-    m_intakeRight.setInverted(true);
-    m_intakeLeft.setInverted(false);
+
 
     m_topLeftMotor.burnFlash();
     m_topRightMotor.burnFlash();
-    m_intakeLeft.burnFlash();
-    m_intakeRight.burnFlash();
+    m_bottomRightMotor.burnFlash();
   }
 
-    @Override
-    public void updateInputs(ShooterIOInputs inputs) {
-        inputs.tLAngularVelocity = m_topLeftMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.tRAngularVelocity = m_topRightMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.bLAngularVelocity = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.bRAngularVelocity = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.kickerAngularVelocity = m_kickerMotor.getEncoder().getVelocity() * Math.PI;
-
-        inputs.tLAppliedInputs = m_topLeftMotor.getAppliedOutput();
-        inputs.tRAppliedInputs = m_topRightMotor.getAppliedOutput();
-        inputs.bLAppliedInputs = m_bottomLeftMotor.getAppliedOutput();
-        inputs.bRAppliedInputs = m_bottomRightMotor.getAppliedOutput();
-        inputs.kickerAppliedInputs = m_kickerMotor.getAppliedOutput();
-    }
+//    @Override
+//    public void updateInputs(ShooterIOInputs inputs) {
+//        inputs.tLAngularVelocity = m_topLeftMotor.getEncoder().getVelocity() * Math.PI;
+//        inputs.tRAngularVelocity = m_topRightMotor.getEncoder().getVelocity() * Math.PI;
+//        inputs.bLAngularVelocity = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI;
+//        inputs.bRAngularVelocity = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI;
+//        inputs.kickerAngularVelocity = m_kickerMotor.getEncoder().getVelocity() * Math.PI;
+//
+//        inputs.tLAppliedInputs = m_topLeftMotor.getAppliedOutput();
+//        inputs.tRAppliedInputs = m_topRightMotor.getAppliedOutput();
+//        inputs.bLAppliedInputs = m_bottomLeftMotor.getAppliedOutput();
+//        inputs.bRAppliedInputs = m_bottomRightMotor.getAppliedOutput();
+//        inputs.kickerAppliedInputs = m_kickerMotor.getAppliedOutput();
+//    }
 
   @Override
   public void setMotorVoltageTL(double voltage) {
@@ -73,9 +68,4 @@ public class ShooterIOPrototype implements ShooterIO {
     m_kickekMotor.setVoltage(voltage);
   }
 
-  @Override
-  public void setIntakeVoltage(double voltage) {
-    m_intakeLeft.setVoltage(voltage);
-    m_intakeRight.setVoltage(voltage);
-  }
 }
