@@ -120,8 +120,8 @@ public class RobotContainer {
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
                 m_driveSubsystem,
-            () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
+            () -> -controller.getLeftY(),
             () -> -controller.getRightX()));
     controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
     controller

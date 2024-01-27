@@ -83,7 +83,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
-    driveConfig.Feedback.RotorToSensorRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
+    driveConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
     m_driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
 
@@ -106,7 +106,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             moduleConstants.TURN_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    turnConfig.Feedback.RotorToSensorRatio = m_moduleConstants.TURNING_GEAR_RATIO();
+    turnConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.TURNING_GEAR_RATIO();
     m_turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
@@ -191,7 +191,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.setTurnAbsolutePosition(Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble())
         .minus(m_moduleConstants.ENCODER_OFFSET()));
     inputs.setTurnPosition(Rotation2d.fromRotations((
-            m_turnPosition.getValueAsDouble() / m_moduleConstants.TURNING_GEAR_RATIO())));
+            m_turnPosition.getValueAsDouble())));
     inputs.setTurnVelocityRadPerSec(
             Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()) / m_moduleConstants.TURNING_GEAR_RATIO());
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
