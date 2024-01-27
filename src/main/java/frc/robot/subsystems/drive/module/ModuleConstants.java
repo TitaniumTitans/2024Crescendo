@@ -19,6 +19,14 @@ public record ModuleConstants(
     double TURN_KP, double TURN_KI, double TURN_KD) {
   public static final double DEFAULT_WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
+  public ModuleConstants() {
+    this (0, new int[] {0, 0, 0},
+            new double[] {0.0, 0.0, 0.0},
+            new double[] {0.0, 0.0, 0.0},
+            new double[] {0.0, 0.0, 0.0},
+    0.0, false, GearRatios.L3);
+  }
+
   public enum GearRatios {
     TURN(150.0 / 7.0),
     L1((14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0)),

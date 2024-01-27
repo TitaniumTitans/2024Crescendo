@@ -74,6 +74,17 @@ public class RobotContainer {
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         }
+    case PROTO_ARM -> {
+          m_driveSubsystem = new DriveSubsystem(
+                  new GyroIO() {
+                  },
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
+          m_shooter = new ShooterSubsystem(new ShooterIO() {});
+          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+    }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
@@ -148,13 +159,15 @@ public class RobotContainer {
                             new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
                             m_driveSubsystem)
                 .ignoringDisable(true));
-    controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory())
+
+    controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
-    controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory())
+    controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
+            .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+
+    controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory())
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory())
+    controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory(-wristPower.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
   }

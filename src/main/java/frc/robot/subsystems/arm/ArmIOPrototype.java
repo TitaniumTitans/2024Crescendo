@@ -17,15 +17,7 @@ public class ArmIOPrototype implements ArmIO {
     }
 
     @Override
-    public void setShoulderAngle(double degrees){
-    }
-
-    @Override
     public void setWristVoltage(double voltage){
         m_wrist.setVoltage(voltage);
-    }
-
-    @Override
-    public void setWristAngle(double degrees){
     }
 }

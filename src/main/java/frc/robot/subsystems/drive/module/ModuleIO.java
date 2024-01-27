@@ -139,6 +139,6 @@ public interface ModuleIO {
 
   // Used to pass moduleConstants
   default ModuleConstants getModuleConstants() {
-    throw new UnsupportedOperationException("getModuleConstants() not implemented");
+    return new ModuleConstants();
   }
 }
