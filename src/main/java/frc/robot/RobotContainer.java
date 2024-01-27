@@ -153,10 +153,10 @@ public class RobotContainer {
     controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.6, 0.6))
             .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
 
-    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25))
-            .whileFalse(m_climber.setClimberPowerFactory(0.0));
-    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25))
-            .whileFalse(m_climber.setClimberPowerFactory(0.0));
+//    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25))
+//            .whileFalse(m_climber.setClimberPowerFactory(0.0));
+//    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25))
+//            .whileFalse(m_climber.setClimberPowerFactory(0.0));
   }
 
   /**
