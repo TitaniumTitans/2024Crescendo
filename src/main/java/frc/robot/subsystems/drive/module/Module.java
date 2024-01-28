@@ -90,7 +90,7 @@ public class Module {
 
     // Run closed loop turn control
     if (m_angleSetpoint != null) {
-      m_io.setTurnPositionDegs(m_angleSetpoint.minus(m_turnRelativeOffset).getRotations());
+      m_io.setTurnPositionRots(m_angleSetpoint.minus(m_turnRelativeOffset).getRotations());
 
       // Run closed loop drive control
       // Only allowed if closed loop turn control is running
@@ -149,7 +149,7 @@ public class Module {
 
   /** Disables all outputs to motors. */
   public void stop() {
-    m_io.setTurnPositionDegs(0.0);
+    m_io.setTurnPositionRots(0.0);
     m_io.setDriveVelocityMPS(0.0);
 
     // Disable closed loop control for turn and drive
