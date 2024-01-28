@@ -4,7 +4,18 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {
     @AutoLog
-    class ShooterIOInputs {}
+    class ArmIOInputs {
+        public double shoulderPositionRads = 0.0;
+        public double wristPositionRads = 0.0;
+        public double shoulerVelocityRadsPerSecond = 0.0;
+        public double wristVelocityRadsPerSecond = 0.0;
+        public double shoulderAppliedOutput = 0.0;
+        public double wristAppliedOutput = 0.0;
+        public double shoulderDesiredSetpoint = 0.0;
+        public double wristDesiredSetpoint = 0.0;
+        public double shoulderCurrentDraw = 0.0;
+        public double wristCurrentDraw = 0.0;
+    }
 
     default void setShoulderVoltage(double voltage) {}
 
