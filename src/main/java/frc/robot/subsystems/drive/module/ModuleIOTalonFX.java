@@ -20,7 +20,6 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
@@ -32,6 +31,7 @@ import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import org.littletonrobotics.junction.Logger;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 
 import java.util.Queue;
 
@@ -70,6 +70,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
 
+
+  PositionVoltage m_posRequest;
+
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
     m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID());
     m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID());
@@ -107,7 +110,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             moduleConstants.TURN_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    turnConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.TURNING_GEAR_RATIO();
+    turnConfig.Feedback.SensorToMechanismRatio = -m_moduleConstants.TURNING_GEAR_RATIO();
     m_turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
@@ -121,6 +124,8 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addI(m_moduleConstants.TURN_KI())
             .addD(m_moduleConstants.TURN_KD())
             .build();
+
+    m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
 
     // run factory default on cancoder
     var encoderConfig = new CANcoderConfiguration();
@@ -208,25 +213,24 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnPositionQueue.clear();
 
     Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
-            "Closed Loop Output", m_turnTalon.getClosedLoopOutput().getValueAsDouble());
+            "/Closed Loop Output", m_turnTalon.getClosedLoopOutput().refresh().getValueAsDouble());
     Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
-            "Closed Loop Error", m_turnTalon.getClosedLoopError().getValueAsDouble());
+            "/Closed Loop Error", m_turnTalon.getClosedLoopError().refresh().getValueAsDouble());
     Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
-            "Closed Loop Reference", m_turnTalon.getClosedLoopReference().getValueAsDouble());
+            "/Closed Loop Reference", m_turnTalon.getClosedLoopReference().refresh().getValueAsDouble());
   }
 
   @Override
   public void setDriveVelocityMPS(double mps) {
     double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
     VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0);
-    m_driveTalon.setControl(velRequest);
+    m_driveTalon.setControl(velRequest.withVelocity(rps));
   }
 
   @Override
   public void setTurnPositionDegs(double degrees) {
-    double rots = degrees / 360;
-    PositionVoltage posRequest = new PositionVoltage(rots).withSlot(0);
-    m_turnTalon.setControl(posRequest);
+//    double rots = degrees / 360;
+    m_turnTalon.setControl(m_posRequest.withPosition(degrees));
   }
 
   @Override
