@@ -126,7 +126,7 @@ public class RobotContainer {
     armPower = new LoggedDashboardNumber("Arm Power", 0.0);
     armPosition = new LoggedDashboardNumber("Arm Position", 0.0);
     wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
-    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0)
+    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0);
 
     // Set up feedforward characterization
     autoChooser.addOption(
@@ -153,16 +153,16 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        m_driveSubsystem.setPose(
-                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-                            m_driveSubsystem)
-                .ignoringDisable(true));
+//    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
+//    controller
+//        .b()
+//        .onTrue(
+//            Commands.runOnce(
+//                    () ->
+//                        m_driveSubsystem.setPose(
+//                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+//                            m_driveSubsystem)
+//                .ignoringDisable(true));
 
     controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
@@ -175,8 +175,8 @@ public class RobotContainer {
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
     controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory(-wristPower.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-      controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
-              .whileFalse(m_armSubsystem.setWristPositionFactory(0.0));
+    controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
+            .whileFalse(m_armSubsystem.setWristPositionFactory(0.0));
 
   }
 

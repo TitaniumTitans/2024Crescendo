@@ -16,7 +16,9 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setWristPower(double power) {m_io.setWristVoltage(power * 12.0);}
 
-    public void setWristPosition(double degrees) {m_io.setWristAngle(degrees);}
+    public void setWristPosition(double degrees) {
+        m_io.setWristAngle(degrees);
+    }
 
     public Command setShoulderPowerFactory(double power) {
         return runOnce(() -> setShoulderPower(power));
