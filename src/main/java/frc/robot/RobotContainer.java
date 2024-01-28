@@ -58,7 +58,9 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   private final LoggedDashboardNumber wristPower;
+  private final LoggedDashboardNumber wristPosition;
   private final LoggedDashboardNumber armPower;
+  private final LoggedDashboardNumber armPosition;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -83,7 +85,7 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {});
           m_shooter = new ShooterSubsystem(new ShooterIO() {});
-          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
     }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -122,7 +124,9 @@ public class RobotContainer {
 
 
     armPower = new LoggedDashboardNumber("Arm Power", 0.0);
+    armPosition = new LoggedDashboardNumber("Arm Position", 0.0);
     wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
+    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0)
 
     // Set up feedforward characterization
     autoChooser.addOption(
@@ -164,11 +168,15 @@ public class RobotContainer {
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
     controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+    controller.b().whileTrue(m_armSubsystem.setShoulderPositionFactory(armPosition.get()))
+            .whileFalse(m_armSubsystem.setShoulderPositionFactory(0.0));
 
     controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
     controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory(-wristPower.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+      controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
+              .whileFalse(m_armSubsystem.setWristPositionFactory(0.0));
 
   }
 
