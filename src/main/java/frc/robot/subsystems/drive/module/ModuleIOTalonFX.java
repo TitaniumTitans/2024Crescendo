@@ -28,10 +28,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import org.littletonrobotics.junction.Logger;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 
 import java.util.Queue;
 
@@ -52,8 +52,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final TalonFX m_driveTalon;
   private final TalonFX m_turnTalon;
 
-  private final PidPropertyPublic m_drivePid;
-  private final PidPropertyPublic m_turnPid;
+  private final Phoenix6PidPropertyBuilder m_drivePid;
+  private final Phoenix6PidPropertyBuilder m_turnPid;
 
   private final ModuleConstants m_moduleConstants;
 
@@ -69,6 +69,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> m_turnVelocity;
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
+  private final StatusSignal<Double> m_turnClosedLoopOutput;
+  private final StatusSignal<Double> m_turnClosedLoopError;
+  private final StatusSignal<Double> m_turnClosedLoopReference;
 
 
   PositionVoltage m_posRequest;
@@ -99,8 +102,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addI(m_moduleConstants.DRIVE_KI())
             .addD(m_moduleConstants.DRIVE_KD())
             .addKV(m_moduleConstants.DRIVE_KV())
-            .addKS(m_moduleConstants.DRIVE_KS())
-            .build();
+            .addKS(m_moduleConstants.DRIVE_KS());
 
     // run configs on turning motor
     var turnConfig = new TalonFXConfiguration();
@@ -110,7 +112,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             moduleConstants.TURN_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-    turnConfig.Feedback.SensorToMechanismRatio = -m_moduleConstants.TURNING_GEAR_RATIO();
+    turnConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.TURNING_GEAR_RATIO();
     m_turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
@@ -122,8 +124,7 @@ public class ModuleIOTalonFX implements ModuleIO {
                     0)
             .addP(m_moduleConstants.TURN_KP())
             .addI(m_moduleConstants.TURN_KI())
-            .addD(m_moduleConstants.TURN_KD())
-            .build();
+            .addD(m_moduleConstants.TURN_KD());
 
     m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
 
@@ -155,6 +156,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnAppliedVolts = m_turnTalon.getMotorVoltage();
     m_turnCurrent = m_turnTalon.getStatorCurrent();
 
+    m_turnClosedLoopOutput = m_turnTalon.getClosedLoopOutput();
+    m_turnClosedLoopError = m_turnTalon.getClosedLoopError();
+    m_turnClosedLoopReference = m_turnTalon.getClosedLoopReference();
+
     // setup refresh rates on all inputs
     BaseStatusSignal.setUpdateFrequencyForAll(
         Module.ODOMETRY_FREQUENCY, m_drivePosition, m_turnPosition);
@@ -166,7 +171,10 @@ public class ModuleIOTalonFX implements ModuleIO {
         m_turnAbsolutePosition,
         m_turnVelocity,
         m_turnAppliedVolts,
-        m_turnCurrent);
+        m_turnCurrent,
+        m_turnClosedLoopOutput,
+        m_turnClosedLoopError,
+        m_turnClosedLoopReference);
     m_driveTalon.optimizeBusUtilization();
     m_turnTalon.optimizeBusUtilization();
   }
@@ -182,7 +190,10 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_turnPosition,
             m_turnVelocity,
             m_turnAppliedVolts,
-            m_turnCurrent);
+            m_turnCurrent,
+            m_turnClosedLoopOutput,
+            m_turnClosedLoopError,
+            m_turnClosedLoopReference);
 
     m_drivePid.updateIfChanged();
     m_turnPid.updateIfChanged();
@@ -212,12 +223,15 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_drivePositionQueue.clear();
     m_turnPositionQueue.clear();
 
-    Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Closed Loop Output", m_turnTalon.getClosedLoopOutput().refresh().getValueAsDouble());
-    Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Closed Loop Error", m_turnTalon.getClosedLoopError().refresh().getValueAsDouble());
-    Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Closed Loop Reference", m_turnTalon.getClosedLoopReference().refresh().getValueAsDouble());
+    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
+            "/Closed Loop Output", m_turnClosedLoopOutput.getValueAsDouble());
+    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
+            "/Closed Loop Error", m_turnClosedLoopError.getValueAsDouble());
+    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
+            "/Closed Loop Reference", m_turnClosedLoopReference.getValueAsDouble());
+
+    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
+            "/Recorded kP", m_turnPid.getSlotConfigs().kP);
   }
 
   @Override

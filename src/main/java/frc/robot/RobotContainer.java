@@ -59,10 +59,10 @@ public class RobotContainer {
           // Real robot, instantiate hardware IO implementations
           m_driveSubsystem = new DriveSubsystem(
             new GyroIOPigeon1(12),
-              new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
-              new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-              new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-              new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+            new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         }
     case SIM -> {
