@@ -54,7 +54,7 @@ public final class Constants {
     // kP, kI, kD in order
     protected static final double[] DRIVE_FB_GAINS = new double[]{0.05, 0.0, 0.0};
     // kP, kI, kD in order
-    protected static final double[] TURN_FB_GAINS = new double[]{7.0, 0.0, 0.0};
+    protected static final double[] TURN_FB_GAINS = new double[]{0.1, 0.0, 0.0};
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
@@ -62,7 +62,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.457764), // offset
+            Units.rotationsToDegrees(-0.017578), // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3
     );
@@ -84,8 +84,8 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.017578),
-            false,
+            Units.rotationsToDegrees(0.457764),
+            true,
             ModuleConstants.GearRatios.L3
     );
 
@@ -96,7 +96,7 @@ public final class Constants {
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
             Units.rotationsToDegrees(-0.263916),
-            false,
+            true,
             ModuleConstants.GearRatios.L3
     );
   }

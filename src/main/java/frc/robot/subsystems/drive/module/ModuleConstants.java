@@ -55,7 +55,7 @@ public record ModuleConstants(
             DEFAULT_WHEEL_RADIUS_METERS * 2 * Math.PI,
             inverted,
             !inverted,
-            !inverted,
+            false,
             Rotation2d.fromDegrees(offsetDegs),
             id,
             ids[0], ids[1], ids[2],
