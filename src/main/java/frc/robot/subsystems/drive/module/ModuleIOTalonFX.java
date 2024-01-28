@@ -31,6 +31,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Queue;
 
@@ -205,6 +206,13 @@ public class ModuleIOTalonFX implements ModuleIO {
         .toArray(Rotation2d[]::new));
     m_drivePositionQueue.clear();
     m_turnPositionQueue.clear();
+
+    Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
+            "Closed Loop Output", m_turnTalon.getClosedLoopOutput().getValueAsDouble());
+    Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
+            "Closed Loop Error", m_turnTalon.getClosedLoopError().getValueAsDouble());
+    Logger.recordOutput("Module " + m_moduleConstants.MODULE_INDEX() +
+            "Closed Loop Reference", m_turnTalon.getClosedLoopReference().getValueAsDouble());
   }
 
   @Override
