@@ -41,10 +41,16 @@ class CVCapture(Capture):
 
     m_video = None
 
-    def get_frame(self) -> Tuple[bool, cv.Mat]:
+    def get_frame(self, config: ConfigStore) -> Tuple[bool, cv.Mat]:
         if self.m_video is None:
-            print("Creating camera with device id {}.".format(0))
+            print("Creating camera with device id {}.".format(config.remote_config.camera_id))
             self.m_video = cv.VideoCapture(0)
+            self.m_video.set(cv.CAP_PROP_FRAME_WIDTH, config.remote_config.camera_resolution_width)
+            self.m_video.set(cv.CAP_PROP_FRAME_HEIGHT, config.remote_config.camera_resolution_height)
+            self.m_video.set(cv.CAP_PROP_AUTO_EXPOSURE, config.remote_config.camera_auto_exposure)
+            self.m_video.set(cv.CAP_PROP_EXPOSURE, config.remote_config.camera_exposure)
+            self.m_video.set(cv.CAP_PROP_GAIN, config.remote_config.camera_gain)
+            print("Created camera with device id {}.".format(config.remote_config.camera_id))
 
         retval, image = self.m_video.read()
 
