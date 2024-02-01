@@ -18,14 +18,16 @@ public class ShooterIOPrototype implements ShooterIO {
     m_kickekMotor = new CANSparkMax(17, CANSparkLowLevel.MotorType.kBrushless);
 
     m_topLeftMotor.setInverted(false);
-    m_bottomLeftMotor.setInverted(false);
+    m_topRightMotor.setInverted(true);
+    m_bottomLeftMotor.setInverted(true);
     m_bottomRightMotor.setInverted(true);
-
-
+    m_kickekMotor.setInverted(true);
 
     m_topLeftMotor.burnFlash();
     m_topRightMotor.burnFlash();
+    m_topRightMotor.burnFlash();
     m_bottomRightMotor.burnFlash();
+    m_kickekMotor.burnFlash();
   }
 
 //    @Override

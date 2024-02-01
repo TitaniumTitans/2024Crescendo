@@ -35,6 +35,7 @@ import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -53,6 +54,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final LoggedDashboardNumber leftPower;
+  private final LoggedDashboardNumber rightPower;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -114,6 +118,9 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
+    leftPower = new LoggedDashboardNumber("Left Power", 0.6);
+    rightPower = new LoggedDashboardNumber("Right Power", 0.6);
+
     // Set up feedforward characterization
     autoChooser.addOption(
         "Drive FF Characterization",
@@ -150,9 +157,9 @@ public class RobotContainer {
                             m_driveSubsystem)
                 .ignoringDisable(true));
 
-    controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.6, 0.6))
+    controller.a().whileTrue(m_shooter.setShooterPowerFactory(leftPower.get(), rightPower.get()))
             .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.b().whileTrue(m_shooter.runFullShooter(0.6, 0.6))
+    controller.b().whileTrue(m_shooter.runFullShooter(leftPower.get(), rightPower.get()))
             .whileFalse(m_shooter.runFullShooter(0.0, 0.0));
   }
 

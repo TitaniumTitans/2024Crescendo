@@ -54,7 +54,7 @@ public class ShooterSubsystem extends SubsystemBase {
     return runOnce(() -> {
       setShooterPowerLeft(left);
       setShooterPowerRight(right);
-      setKickerPower(left == 0.0 ? 0.0 : 0.75);
+      setKickerPower(left == 0.0 ? 0.0 : 1.0);
     });
   }
 }
