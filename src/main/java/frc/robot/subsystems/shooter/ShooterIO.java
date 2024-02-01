@@ -5,6 +5,13 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
   @AutoLog
   class ShooterIOInputs {
+    public double topLeftVelocity = 0.0;
+    public double topRightVelocity = 0.0;
+    public double bottomLeftVelocity = 0.0;
+    public double bottomRightVelocity = 0.0;
+    public double appliedOutput = 0.0;
+    public double currentDraw = 0.0;
+    public double temperature = 0.0;
 
   }
 
