@@ -1,0 +1,68 @@
+Metadata-Version: 2.1
+Name: pyfrc
+Version: 2024.0.1
+Summary: Development tools library for python interpreter used for the FIRST Robotics Competition
+Home-page: https://github.com/robotpy/pyfrc
+Author: Dustin Spicuzza
+Author-email: robotpy@googlegroups.com
+License: BSD-3-Clause
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Testing
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pytest >=3.9
+Requires-Dist: pytest-reraise
+Requires-Dist: pint >=0.11.0
+Requires-Dist: wpilib <2025,>=2024.1.0
+Requires-Dist: robotpy-cli ~=2024.0
+
+pyfrc - RobotPy simulation and testing support
+==============================================
+
+pyfrc provides simulation and testing support for RobotPy projects.
+
+This library contains a few primary parts:
+
+* Integration with the pytest testing tool to allow you to easily write unit
+  tests for your robot code.
+* Various support for robot simulation
+  
+Documentation
+=============
+
+* RobotPy documentation: https://robotpy.readthedocs.io
+* Installation: https://robotpy.readthedocs.io/en/stable/install/pyfrc.html
+
+Contributing new changes
+========================
+
+pyfrc is intended to be a project that all members of the FIRST community can
+quickly and easily contribute to. If you find a bug, or have an idea that you
+think others can use:
+
+1. [Fork this git repository](https://github.com/robotpy/robotpy/fork) to your github account
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push -u origin my-new-feature`)
+5. Create new Pull Request on github
+
+
+Authors
+=======
+
+Dustin Spicuzza (dustin@virtualroadside.com)
+
+Contributors:
+
+* Sam Rosenblum
+* James Ward
+* Christian Balcom
+* Others
+
+pyfrc is originally derived from (and supercedes) fake_wpilib, which was
+developed with contributions from Sam Rosenblum and Team 2423. 

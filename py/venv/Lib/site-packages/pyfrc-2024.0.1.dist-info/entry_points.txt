@@ -1,0 +1,7 @@
+[robotpy]
+add-tests = pyfrc.mains.cli_add_tests:PyFrcAddTests
+coverage = pyfrc.mains.cli_coverage:PyFrcCoverage
+create-physics = pyfrc.mains.cli_create_physics:PyFrcCreatePhysics
+profiler = pyfrc.mains.cli_profiler:PyFrcProfiler
+sim = pyfrc.mains.cli_sim:PyFrcSim
+test = pyfrc.mains.cli_test:PyFrcTest

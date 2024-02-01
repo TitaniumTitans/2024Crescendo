@@ -1,0 +1,3 @@
+[robotpybuild]
+wpinet = wpinet.pkgcfg
+

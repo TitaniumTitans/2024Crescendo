@@ -1,0 +1,7 @@
+numpy = 1.26.3
+pillow = 10.2.0
+pycoral = 2.0.0
+setuptools = 69.0.3
+tflite-runtime = 2.5.0.post1
+robotpy
+opencv-python

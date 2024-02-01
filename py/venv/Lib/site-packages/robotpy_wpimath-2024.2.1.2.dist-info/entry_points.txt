@@ -1,0 +1,10 @@
+[robotpybuild]
+wpimath = wpimath.pkgcfg
+wpimath_controls = wpimath._controls.pkgcfg
+wpimath_cpp = wpimath._impl.pkgcfg
+wpimath_filter = wpimath.filter.pkgcfg
+wpimath_geometry = wpimath.geometry.pkgcfg
+wpimath_interpolation = wpimath.interpolation.pkgcfg
+wpimath_kinematics = wpimath.kinematics.pkgcfg
+wpimath_spline = wpimath.spline.pkgcfg
+

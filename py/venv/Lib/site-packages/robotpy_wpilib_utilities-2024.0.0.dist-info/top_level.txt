@@ -1,0 +1,2 @@
+magicbot
+robotpy_ext

@@ -1,0 +1,13 @@
+[robotpy]
+run = wpilib._impl.start:Main
+
+[robotpybuild]
+wpilib_core = wpilib.pkgcfg
+wpilibc = wpilib._impl.pkgcfg
+wpilibc_counter = wpilib.counter.pkgcfg
+wpilibc_drive = wpilib.drive.pkgcfg
+wpilibc_event = wpilib.event.pkgcfg
+wpilibc_interfaces = wpilib.interfaces.pkgcfg
+wpilibc_shuffleboard = wpilib.shuffleboard.pkgcfg
+wpilibc_simulation = wpilib.simulation.pkgcfg
+

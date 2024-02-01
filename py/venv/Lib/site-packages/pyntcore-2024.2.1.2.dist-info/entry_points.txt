@@ -1,0 +1,3 @@
+[robotpybuild]
+ntcore = ntcore.pkgcfg
+

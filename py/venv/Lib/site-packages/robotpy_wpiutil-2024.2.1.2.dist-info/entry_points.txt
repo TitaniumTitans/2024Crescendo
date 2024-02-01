@@ -1,0 +1,3 @@
+[robotpybuild]
+wpiutil = wpiutil.pkgcfg
+
