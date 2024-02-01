@@ -1,5 +1,7 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.shooter.ShooterIO;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ArmIO {
@@ -17,6 +19,8 @@ public interface ArmIO {
         public double wristCurrentDraw = 0.0;
     }
 
+    default void updateInputs(ShooterIOInputs inputs) {}
+
     default void setShoulderVoltage(double voltage) {}
 
     default void setShoulderAngle(double degrees) {}
@@ -24,4 +28,8 @@ public interface ArmIO {
     default void setWristVoltage(double voltage) {}
 
     default void setWristAngle(double degrees) {}
+
+    default Rotation2d getWristPosition() {return new Rotation2d();}
+
+    default Rotation2d getShoulderPosition() {return new Rotation2d();}
 }

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.arm;
 
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -10,9 +11,25 @@ public class ArmSubsystem extends SubsystemBase {
         m_io = io;
     }
 
-    public void setShoulderPower(double power) {m_io.setShoulderVoltage(power * 12.0);}
+    @Override
+    public void periodic() {
+        m_io.updateInputs(new ShooterIOInputsAutoLogged());
 
-    public void setShoulderPosition(double degrees) {m_io.setShoulderAngle(degrees);}
+        m_io.setWristVoltage(0.0);
+        m_io.setShoulderVoltage(0.0);
+        SmartDashboard.putNumber("Recorded Wrist Position", m_io.getWristPosition().getDegrees());
+        SmartDashboard.putNumber("Recorded Shoulder Position", m_io.getShoulderPosition().getDegrees());
+
+        stopArmFactory().schedule();
+    }
+
+    public void setShoulderPower(double power) {
+        m_io.setShoulderVoltage(power * 12.0);
+    }
+
+    public void setShoulderPosition(double degrees) {
+        m_io.setShoulderAngle(degrees);
+    }
 
     public void setWristPower(double power) {m_io.setWristVoltage(power * 12.0);}
 
@@ -34,6 +51,13 @@ public class ArmSubsystem extends SubsystemBase {
 
     public Command setWristPositionFactory(double degrees) {
         return runOnce(() -> setWristPosition(degrees));
+    }
+
+    public Command stopArmFactory() {
+        return runOnce(() -> {
+            setWristPower(0.0);
+            setShoulderPower(0.0);
+        });
     }
 }
 
