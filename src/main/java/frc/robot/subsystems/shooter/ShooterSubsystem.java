@@ -49,5 +49,13 @@ public class ShooterSubsystem extends SubsystemBase {
       setKickerPower(power == 0.0 ? 0.0 : 0.75);
     });
   }
+
+  public Command runFullShooter(double left, double right) {
+    return runOnce(() -> {
+      setShooterPowerLeft(left);
+      setShooterPowerRight(right);
+      setKickerPower(left == 0.0 ? 0.0 : 0.75);
+    });
+  }
 }
 
