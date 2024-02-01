@@ -54,4 +54,18 @@ public class ClimberIOPrototype implements ClimberIO {
         final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
         m_rightTalon.setControl(m_request.withPosition(degrees / 360.0));
     }
+
+    @Override
+    public void updateInputs(ClimberIOInputs inputs) {
+        inputs.leftClimberPosition = m_leftTalon.getPosition().getValueAsDouble();
+        inputs.rightClimberPosition = m_rightTalon.getPosition().getValueAsDouble();
+        inputs.leftClimberVelocity = m_leftTalon.getVelocity().getValueAsDouble();
+        inputs.rightClimberVelocity = m_rightTalon.getVelocity().getValueAsDouble();
+        inputs.leftClimberCurrentDraw = m_leftTalon.getSupplyCurrent().getValueAsDouble();
+        inputs.rightClimberCurrentDraw = m_rightTalon.getSupplyCurrent().getValueAsDouble();
+        inputs.leftClimberCurrentSetpoint = m_leftTalon.getClosedLoopReference().getValueAsDouble();
+        inputs.rightClimberCurrentSetpoint = m_rightTalon.getClosedLoopReference().getValueAsDouble();
+        inputs.leftClimberAppliedOutput = m_leftTalon.getBridgeOutput().getValueAsDouble();
+        inputs.rightClimberAppliedOutput = m_rightTalon.getBridgeOutput().getValueAsDouble();
+    }
 }

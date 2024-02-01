@@ -33,21 +33,6 @@ public class ShooterIOPrototype implements ShooterIO {
     m_intakeRight.burnFlash();
   }
 
-    @Override
-    public void updateInputs(ShooterIOInputs inputs) {
-        inputs.tLAngularVelocity = m_topLeftMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.tRAngularVelocity = m_topRightMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.bLAngularVelocity = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.bRAngularVelocity = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI;
-        inputs.kickerAngularVelocity = m_kickerMotor.getEncoder().getVelocity() * Math.PI;
-
-        inputs.tLAppliedInputs = m_topLeftMotor.getAppliedOutput();
-        inputs.tRAppliedInputs = m_topRightMotor.getAppliedOutput();
-        inputs.bLAppliedInputs = m_bottomLeftMotor.getAppliedOutput();
-        inputs.bRAppliedInputs = m_bottomRightMotor.getAppliedOutput();
-        inputs.kickerAppliedInputs = m_kickerMotor.getAppliedOutput();
-    }
-
   @Override
   public void setMotorVoltageTL(double voltage) {
     m_topLeftMotor.setVoltage(voltage);
