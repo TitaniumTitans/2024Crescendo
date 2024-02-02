@@ -22,8 +22,8 @@ public class ArmIOPrototype implements ArmIO {
 
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Feedback.SensorToMechanismRatio = 125.0 * (60.0 / 18.0);
-        config.Voltage.PeakForwardVoltage = 3;
-        config.Voltage.PeakReverseVoltage = -3;
+        config.Voltage.PeakForwardVoltage = 12;
+        config.Voltage.PeakReverseVoltage = -12;
 
         m_shoulder.getConfigurator().apply(config);
 
@@ -93,6 +93,6 @@ public class ArmIOPrototype implements ArmIO {
 
     @Override
     public Rotation2d getShoulderPosition() {
-        return Rotation2d.fromRotations(m_wrist.getPosition().getValueAsDouble());
+        return Rotation2d.fromRotations(m_shoulder.getPosition().getValueAsDouble());
     }
 }
