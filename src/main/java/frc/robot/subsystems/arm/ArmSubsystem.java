@@ -13,7 +13,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        m_io.updateInputs(new ShooterIOInputsAutoLogged());
+        m_io.updateInputs(new ArmIOInputsAutoLogged());
 
         m_io.setWristVoltage(0.0);
         m_io.setShoulderVoltage(0.0);

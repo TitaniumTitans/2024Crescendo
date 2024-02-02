@@ -19,7 +19,7 @@ public interface ArmIO {
         public double wristCurrentDraw = 0.0;
     }
 
-    default void updateInputs(ShooterIOInputs inputs) {}
+    default void updateInputs(ArmIOInputsAutoLogged inputs) {}
 
     default void setShoulderVoltage(double voltage) {}
 

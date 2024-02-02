@@ -5,8 +5,10 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
+import org.littletonrobotics.junction.Logger;
 
 public class ArmIOPrototype implements ArmIO {
     private final TalonFX m_shoulder;
@@ -19,13 +21,13 @@ public class ArmIOPrototype implements ArmIO {
         m_wrist = new TalonFX(24);
 
         TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Feedback.SensorToMechanismRatio = 125.0 * (18.0 / 60.0);
+        config.Feedback.SensorToMechanismRatio = 125.0 * (60.0 / 18.0);
         config.Voltage.PeakForwardVoltage = 3;
         config.Voltage.PeakReverseVoltage = -3;
 
         m_shoulder.getConfigurator().apply(config);
 
-        config.Feedback.SensorToMechanismRatio = 125.0 * (18.0 / 38.0);
+        config.Feedback.SensorToMechanismRatio = 125.0 * (38.0 / 18.0);
         m_wrist.getConfigurator().apply(config);
 
         m_wrist.stopMotor();
@@ -54,9 +56,12 @@ public class ArmIOPrototype implements ArmIO {
     }
 
     @Override
-    public void updateInputs(ShooterIOInputs inputs) {
+    public void updateInputs(ArmIOInputsAutoLogged inputs) {
         m_shoulderPID.updateIfChanged();
         m_wristPID.updateIfChanged();
+
+        Logger.recordOutput("Should PID Output", m_shoulder.getClosedLoopOutput().getValueAsDouble());
+        Logger.recordOutput("Wrist PID Output", m_wrist.getClosedLoopOutput().getValueAsDouble());
     }
 
     @Override
