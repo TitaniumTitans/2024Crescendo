@@ -7,10 +7,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterSubsystem extends SubsystemBase {
   private final ShooterIO m_io;
+  private final ShooterIOInputsAutoLogged m_inputs;
 
   private static final String TOP_WHEEL_RATIO = "Top wheel ratio";
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
+    m_inputs = new ShooterIOInputsAutoLogged();
     SmartDashboard.putNumber(TOP_WHEEL_RATIO, 0.8);
     SmartDashboard.putNumber("Left wheel", 0.6);
     SmartDashboard.putNumber("Right wheel", 0.6);
