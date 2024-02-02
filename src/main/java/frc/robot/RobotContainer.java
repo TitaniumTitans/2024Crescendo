@@ -141,8 +141,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
-                m_driveSubsystem,
+      DriveCommands.joystickDrive(
+            m_driveSubsystem,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
@@ -158,9 +158,9 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.a().whileTrue(m_shooter.setShooterPowerFactory(leftPower.get(), rightPower.get()))
-            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.b().whileTrue(m_shooter.runFullShooter(leftPower.get(), rightPower.get()))
-            .whileFalse(m_shooter.runFullShooter(0.0, 0.0));
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.b().whileTrue(Commands.run(m_shooter::runShooterVelocity))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
   }
 
   /**

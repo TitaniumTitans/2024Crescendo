@@ -1,49 +1,65 @@
 package frc.robot.subsystems.shooter;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
+import com.gos.lib.properties.pid.PidProperty;
+import com.gos.lib.rev.properties.pid.RevPidPropertyBuilder;
+import com.revrobotics.*;
+import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class ShooterIOPrototype implements ShooterIO {
   private final CANSparkFlex m_topLeftMotor;
   private final CANSparkFlex m_topRightMotor;
   private final CANSparkFlex m_bottomLeftMotor;
   private final CANSparkFlex m_bottomRightMotor;
-  private final CANSparkMax m_kickerkMotor;
-  public ShooterIOPrototype() {
-    m_topLeftMotor = new CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless);
-    m_topRightMotor = new CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless);
-    m_bottomLeftMotor = new CANSparkFlex(15, CANSparkLowLevel.MotorType.kBrushless);
-    m_bottomRightMotor = new CANSparkFlex(16, CANSparkLowLevel.MotorType.kBrushless);
-    m_kickerkMotor = new CANSparkMax(17, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkMax m_kickerMotor;
 
-    m_topLeftMotor.setInverted(false);
-    m_topRightMotor.setInverted(true);
-    m_bottomLeftMotor.setInverted(true);
-    m_bottomRightMotor.setInverted(true);
-    m_kickerkMotor.setInverted(true);
+  private final SparkPIDController m_leftPid;
+  private final PidProperty m_leftPidProperty;
+  private final SparkPIDController m_rightPid;
+  private final PidProperty m_rightPidProperty;
+
+  public ShooterIOPrototype() {
+    m_topLeftMotor = new CANSparkFlex(ShooterConstants.TOP_LEFT_ID, CANSparkLowLevel.MotorType.kBrushless);
+    m_topRightMotor = new CANSparkFlex(ShooterConstants.TOP_RIGHT_ID, CANSparkLowLevel.MotorType.kBrushless);
+    m_bottomLeftMotor = new CANSparkFlex(ShooterConstants.BOTTOM_LEFT_ID, CANSparkLowLevel.MotorType.kBrushless);
+    m_bottomRightMotor = new CANSparkFlex(ShooterConstants.BOTTOM_RIGHT_ID, CANSparkLowLevel.MotorType.kBrushless);
+    m_kickerMotor = new CANSparkMax(ShooterConstants.KICKER_ID, CANSparkLowLevel.MotorType.kBrushless);
+
+    m_topLeftMotor.setInverted(ShooterConstants.TOP_LEFT_INVERTED);
+    m_topRightMotor.setInverted(ShooterConstants.TOP_RIGHT_INVERTED);
+    m_bottomLeftMotor.setInverted(ShooterConstants.BOTTOM_LEFT_INVERTED);
+    m_bottomRightMotor.setInverted(ShooterConstants.BOTTOM_RIGHT_INVERTED);
+    m_kickerMotor.setInverted(ShooterConstants.KICKER_INVERTED);
+
+    m_topLeftMotor.enableVoltageCompensation(12);
+    m_topRightMotor.enableVoltageCompensation(12);
+    m_bottomLeftMotor.enableVoltageCompensation(12);
+    m_bottomRightMotor.enableVoltageCompensation(12);
+
+    m_bottomLeftMotor.follow(m_topLeftMotor);
+    m_bottomRightMotor.follow(m_topRightMotor);
+
+    m_leftPid = m_topLeftMotor.getPIDController();
+    m_leftPidProperty = new RevPidPropertyBuilder("Shooter/Left Shooter", false, m_leftPid, 0)
+                    .addP(ShooterConstants.SHOOTER_KP)
+                    .addI(ShooterConstants.SHOOTER_KI)
+                    .addD(ShooterConstants.SHOOTER_KD)
+                    .addFF(0.0)
+                    .build();
+    m_rightPid = m_topLeftMotor.getPIDController();
+    m_rightPidProperty = new RevPidPropertyBuilder("Shooter/Left Shooter", false, m_leftPid, 0)
+                    .addP(ShooterConstants.SHOOTER_KP)
+                    .addI(ShooterConstants.SHOOTER_KI)
+                    .addD(ShooterConstants.SHOOTER_KD)
+                    .addFF(0.0)
+                    .build();
 
     m_topLeftMotor.burnFlash();
     m_topRightMotor.burnFlash();
     m_topRightMotor.burnFlash();
     m_bottomRightMotor.burnFlash();
-    m_kickerkMotor.burnFlash();
+    m_kickerMotor.burnFlash();
   }
-
-//    @Override
-//    public void updateInputs(ShooterIOInputs inputs) {
-//        inputs.tLAngularVelocity = m_topLeftMotor.getEncoder().getVelocity() * Math.PI * 2;
-//        inputs.tRAngularVelocity = m_topRightMotor.getEncoder().getVelocity() * Math.PI;
-//        inputs.bLAngularVelocity = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI;
-//        inputs.bRAngularVelocity = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI;
-//        inputs.kickerAngularVelocity = m_kickerMotor.getEncoder().getVelocity() * Math.PI;
-//
-//        inputs.tLAppliedInputs = m_topLeftMotor.getAppliedOutput();
-//        inputs.tRAppliedInputs = m_topRightMotor.getAppliedOutput();
-//        inputs.bLAppliedInputs = m_bottomLeftMotor.getAppliedOutput();
-//        inputs.bRAppliedInputs = m_bottomRightMotor.getAppliedOutput();
-//        inputs.kickerAppliedInputs = m_kickerMotor.getAppliedOutput();
-//    }
 
   @Override
   public void setMotorVoltageTL(double voltage) {
@@ -67,25 +83,41 @@ public class ShooterIOPrototype implements ShooterIO {
 
   @Override
   public void setKickerVoltage(double voltage) {
-    m_kickerkMotor.setVoltage(voltage);
+    m_kickerMotor.setVoltage(voltage);
+  }
+
+  @Override
+  public void setLeftVelocityRpm(double rpm) {
+    m_leftPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
+  }
+
+  @Override
+  public void setRightVelocityRpm(double rpm) {
+    m_rightPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    inputs.tlVelocity = m_topLeftMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.trVelocity = m_topRightMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.blVelocity = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.brVelocity = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.tlAppliedOutput = m_topLeftMotor.getAppliedOutput();
-    inputs.trAppliedOutput = m_topRightMotor.getAppliedOutput();
-    inputs.blAppliedOutput = m_bottomLeftMotor.getAppliedOutput();
-    inputs.brAppliedOutput = m_bottomRightMotor.getAppliedOutput();
-    inputs.kickerAppliedOutput = m_kickerkMotor.getAppliedOutput();
+    m_leftPidProperty.updateIfChanged();
+    m_rightPidProperty.updateIfChanged();
+
+    inputs.tlVelocityRads = m_topLeftMotor.getEncoder().getVelocity() * Math.PI * 2.0;
+    inputs.trVelocityRads = m_topRightMotor.getEncoder().getVelocity() * Math.PI * 2.0;
+    inputs.blVelocityRads = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI * 2.0;
+    inputs.brVelocityRads = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI * 2.0;
+
+    inputs.tlAppliedVolts = m_topLeftMotor.getAppliedOutput() * m_topLeftMotor.getBusVoltage();
+    inputs.trAppliedVolts = m_topRightMotor.getAppliedOutput() * m_topRightMotor.getBusVoltage();
+    inputs.blAppliedVolts = m_bottomLeftMotor.getAppliedOutput() * m_bottomLeftMotor.getBusVoltage();
+    inputs.brAppliedVolts = m_bottomRightMotor.getAppliedOutput() * m_bottomRightMotor.getBusVoltage();
+    inputs.kickerAppliedVolts = m_kickerMotor.getAppliedOutput() * m_kickerMotor.getBusVoltage();
+
     inputs.tlCurrentDraw = m_topLeftMotor.getOutputCurrent();
     inputs.trCurrentDraw = m_topRightMotor.getOutputCurrent();
     inputs.blCurrentDraw = m_bottomLeftMotor.getOutputCurrent();
     inputs.brCurrentDraw = m_bottomRightMotor.getOutputCurrent();
-    inputs.kickerCurrentDraw = m_kickerkMotor.getOutputCurrent();
+    inputs.kickerCurrentDraw = m_kickerMotor.getOutputCurrent();
+
     inputs.tlTemperature = m_topLeftMotor.getMotorTemperature();
     inputs.trTemperature = m_topRightMotor.getMotorTemperature();
     inputs.blTemperature = m_bottomLeftMotor.getMotorTemperature();
