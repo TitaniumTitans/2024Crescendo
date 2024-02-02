@@ -165,15 +165,13 @@ public class RobotContainer {
 //                            m_driveSubsystem)
 //                .ignoringDisable(true));
 
-    m_armSubsystem.setDefaultCommand(m_armSubsystem.stopArmFactory());
-
     controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
     controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
 
     controller.b().whileTrue(m_armSubsystem.setShoulderPositionFactory(armPosition.get()))
-            .whileFalse(m_armSubsystem.setShoulderPositionFactory(0.0));
+            .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
 
     controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
@@ -181,7 +179,7 @@ public class RobotContainer {
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
     controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
-            .whileFalse(m_armSubsystem.setWristPositionFactory(0.0));
+            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
   }
 

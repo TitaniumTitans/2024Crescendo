@@ -19,8 +19,6 @@ public class ArmSubsystem extends SubsystemBase {
         m_io.setShoulderVoltage(0.0);
         SmartDashboard.putNumber("Recorded Wrist Position", m_io.getWristPosition().getDegrees());
         SmartDashboard.putNumber("Recorded Shoulder Position", m_io.getShoulderPosition().getDegrees());
-
-        stopArmFactory().schedule();
     }
 
     public void setShoulderPower(double power) {
