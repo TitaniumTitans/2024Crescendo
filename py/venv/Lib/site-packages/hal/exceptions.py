@@ -1,2 +1,0 @@
-class HALError(RuntimeError):
-    pass
