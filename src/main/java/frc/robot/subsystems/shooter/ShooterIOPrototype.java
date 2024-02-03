@@ -46,9 +46,6 @@ public class ShooterIOPrototype implements ShooterIO {
     m_bottomLeftMotor.enableVoltageCompensation(12);
     m_bottomRightMotor.enableVoltageCompensation(12);
 
-//    m_bottomLeftMotor.follow(m_topLeftMotor, ShooterConstants.BOTTOM_LEFT_INVERTED);
-//    m_bottomRightMotor.follow(m_topRightMotor, ShooterConstants.BOTTOM_RIGHT_INVERTED);
-
     m_topLeftPid = m_topLeftMotor.getPIDController();
     m_topLeftPidProperty = new RevPidPropertyBuilder("Shooter/Top Left Shooter", false, m_topLeftPid, 0)
         .addP(ShooterConstants.SHOOTER_KP)
