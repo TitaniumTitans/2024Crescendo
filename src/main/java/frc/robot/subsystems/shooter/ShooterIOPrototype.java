@@ -35,6 +35,11 @@ public class ShooterIOPrototype implements ShooterIO {
     m_bottomLeftMotor.restoreFactoryDefaults();
     m_bottomRightMotor.restoreFactoryDefaults();
 
+    m_topLeftMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+    m_topRightMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+    m_bottomLeftMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+    m_bottomRightMotor.setIdleMode(CANSparkBase.IdleMode.kCoast);
+
     m_topLeftMotor.setInverted(ShooterConstants.TOP_LEFT_INVERTED);
     m_topRightMotor.setInverted(ShooterConstants.TOP_RIGHT_INVERTED);
     m_bottomLeftMotor.setInverted(ShooterConstants.BOTTOM_LEFT_INVERTED);
