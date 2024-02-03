@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -14,7 +12,6 @@ public class ShooterSubsystem extends SubsystemBase {
   private final LoggedDashboardNumber m_leftSetpoint;
   private final LoggedDashboardNumber m_rightSetpoint;
 
-  private static final String TOP_WHEEL_RATIO = "Top wheel ratio";
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
     m_inputs = new ShooterIOInputsAutoLogged();
@@ -30,12 +27,12 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public void setShooterPowerLeft(double power) {
-    m_io.setMotorVoltageTL((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
+    m_io.setMotorVoltageTL(power * 12.0);
     m_io.setMotorVoltageBL(power * 12.0);
   }
 
   public void setShooterPowerRight(double power) {
-    m_io.setMotorVoltageTR((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
+    m_io.setMotorVoltageTR(power * 12.0);
     m_io.setMotorVoltageBR(power * 12.0);
   }
 
@@ -54,8 +51,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command setShooterPowerFactory(double left, double right) {
     return run(() -> {
-      setShooterPowerLeft(left == 0.0 ? 0.0 : SmartDashboard.getNumber("Left wheel", 0.6));
-      setShooterPowerRight(right == 0.0 ? 0.0 : SmartDashboard.getNumber("Right wheel", 0.6));
+      setShooterPowerLeft(left);
+      setShooterPowerRight(right);
       setKickerPower(left == 0.0 ? 0.0 : 1.0);
       setIntakePower(left == 0.0 ? 0.0 : 0.35);
     });
