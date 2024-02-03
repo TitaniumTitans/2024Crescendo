@@ -1,7 +1,8 @@
 import ntcore
 import json
 
-from src.config.Config import RemoteConfig, ConfigStore
+from Config import ConfigStore
+
 
 class ConfigSource:
     def update(self, config: ConfigStore) -> None:
@@ -12,6 +13,7 @@ class FileConfigSource(ConfigSource):
     CONFIG_FILENAME = "config.json"
 
     def __init__(self) -> None:
+        # dataclass updater doesn't need a constructor
         pass
 
     def update(self, config: ConfigStore) -> None:
