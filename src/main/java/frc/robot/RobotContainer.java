@@ -24,6 +24,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOPrototype;
+import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
@@ -45,6 +48,7 @@ public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
+  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -64,6 +68,7 @@ public class RobotContainer {
               new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+          m_climber = new ClimberSubsystem(new ClimberIOPrototype());
         }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -76,6 +81,7 @@ public class RobotContainer {
             new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
     default -> {
       // Replayed robot, disable IO implementations
@@ -92,6 +98,7 @@ public class RobotContainer {
                         new ModuleIO() {
                         });
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
@@ -134,8 +141,15 @@ public class RobotContainer {
                             m_driveSubsystem)
                 .ignoringDisable(true));
 
-    controller.a().whileTrue(m_shooter.setShooterPower(0.6, 0.6))
-            .whileFalse(m_shooter.setShooterPower(0.0, 0.0));
+    controller.a().whileTrue(m_shooter.setShooterPowerFactory(0.6, 0.6))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.b().whileTrue(m_shooter.setIntakePowerFactory(0.75))
+            .whileFalse(m_shooter.setIntakePowerFactory(0.0));
+
+    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25))
+            .whileFalse(m_climber.setClimberPowerFactory(0.0));
+    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25))
+            .whileFalse(m_climber.setClimberPowerFactory(0.0));
   }
 
   /**
