@@ -4,7 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
-public class ShooterIOSim implements ShooterIO{
+public class ShooterIOSim implements ShooterIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
   private final FlywheelSim m_simLeft = new FlywheelSim(
       DCMotor.getNeoVortex(1), 1, 0.001);

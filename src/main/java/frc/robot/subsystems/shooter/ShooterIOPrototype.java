@@ -111,11 +111,6 @@ public class ShooterIOPrototype implements ShooterIO {
   }
 
   @Override
-  public void setKickerVoltage(double voltage) {
-    m_kickerMotor.setVoltage(voltage);
-  }
-
-  @Override
   public void setLeftVelocityRpm(double rpm) {
     m_topLeftPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
     m_bottomLeftPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
