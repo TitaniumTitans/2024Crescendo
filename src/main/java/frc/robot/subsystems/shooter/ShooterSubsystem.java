@@ -47,6 +47,7 @@ public class ShooterSubsystem extends SubsystemBase {
   public void runShooterVelocity() {
     m_io.setLeftVelocityRpm(m_leftSetpoint.get());
     m_io.setRightVelocityRpm(m_rightSetpoint.get());
+//    m_io.setKickerVoltage(9.0);
   }
 
   public Command setShooterPowerFactory(double left, double right) {
