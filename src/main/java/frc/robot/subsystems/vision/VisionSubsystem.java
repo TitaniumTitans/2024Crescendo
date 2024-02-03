@@ -42,14 +42,6 @@ public class VisionSubsystem extends SubsystemBase {
       this.camLatency = camLatency;
     }
 
-    public boolean isTagsFound() {
-      return tagsFound;
-    }
-
-    public void setTagsFound(boolean tagsFound) {
-      this.tagsFound = tagsFound;
-    }
-
     public int[] getTagIds() {
       return tagIds;
     }
@@ -65,6 +57,14 @@ public class VisionSubsystem extends SubsystemBase {
     public void setNumTagsFound(int numTagsFound) {
       this.numTagsFound = numTagsFound;
     }
+
+    public boolean isTagsFound() {
+      return tagsFound;
+    }
+
+    public void setTagsFound(boolean tagsFound) {
+      this.tagsFound = tagsFound;
+    }
   }
 
   private final PhotonCamera m_camera;
@@ -75,10 +75,12 @@ public class VisionSubsystem extends SubsystemBase {
 
   private final PhotonVisionIO inputs = new PhotonVisionIO();
 
-  private void updateInputs(){
+  public void updateInputs(){
     inputs.setCamConnected(m_camera.isConnected());
     inputs.setCamLatency(m_camera.getLatestResult().getLatencyMillis());
-//    inputs.setTagIds(m_camera.getLatestResult().getTargets().);
+    inputs.setTagIds(getTargetIDs());
+    inputs.setNumTagsFound(m_camera.getLatestResult().targets.size());
+    inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
   }
 
   public VisionSubsystem(String camName, Transform3d camPose) {
@@ -133,6 +135,25 @@ public class VisionSubsystem extends SubsystemBase {
 
     PhotonPipelineResult camResult = m_camera.getLatestResult();
     return m_photonPoseEstimator.update(camResult);
+  }
+
+  public int[] getTargetIDs () {
+    PhotonPipelineResult targets = m_camera.getLatestResult();
+    int[] results;
+
+    if(targets.hasTargets()) {
+      results = new int[targets.getTargets().size()];
+
+      for (int i = 0; i < results.length; i++) {
+        results[i] = targets.getTargets().get(i).getFiducialId();
+      }
+
+    }
+    else {
+      results = new int[0];
+    }
+
+    return results;
   }
 }
 
