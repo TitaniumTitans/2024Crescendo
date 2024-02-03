@@ -58,8 +58,11 @@ public class ArmIOPrototype implements ArmIO {
     m_shoulderPID.updateIfChanged();
     m_wristPID.updateIfChanged();
 
-    Logger.recordOutput("Should PID Output", m_shoulder.getClosedLoopOutput().getValueAsDouble());
-    Logger.recordOutput("Wrist PID Output", m_wrist.getClosedLoopOutput().getValueAsDouble());
+    Logger.recordOutput("Arm/Should PID Output", m_shoulder.getClosedLoopOutput().getValueAsDouble());
+    Logger.recordOutput("Arm/Wrist PID Output", m_wrist.getClosedLoopOutput().getValueAsDouble());
+
+    Logger.recordOutput("Arm/Shoulder PID Setpoint", m_shoulder.getClosedLoopReference().getValueAsDouble());
+    Logger.recordOutput("Arm/Wrist PID Setpoint", m_wrist.getClosedLoopReference().getValueAsDouble());
   }
 
   @Override
