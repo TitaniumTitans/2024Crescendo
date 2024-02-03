@@ -9,7 +9,7 @@ public class ShooterIOPrototype implements ShooterIO {
   private final CANSparkFlex m_topRightMotor;
   private final CANSparkMax m_bottomLeftMotor;
   private final CANSparkMax m_bottomRightMotor;
-  private final CANSparkMax m_kickekMotor;
+  private final CANSparkMax m_kickerMotor;
   private final CANSparkMax m_intakeLeft;
   private final CANSparkMax m_intakeRight;
   public ShooterIOPrototype() {
@@ -17,7 +17,7 @@ public class ShooterIOPrototype implements ShooterIO {
     m_topRightMotor = new CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless);
     m_bottomLeftMotor = new CANSparkMax(15, CANSparkLowLevel.MotorType.kBrushless);
     m_bottomRightMotor = new CANSparkMax(16, CANSparkLowLevel.MotorType.kBrushless);
-    m_kickekMotor = new CANSparkMax(17, CANSparkLowLevel.MotorType.kBrushless);
+    m_kickerMotor = new CANSparkMax(17, CANSparkLowLevel.MotorType.kBrushless);
     m_intakeLeft = new CANSparkMax(20, CANSparkLowLevel.MotorType.kBrushless);
     m_intakeRight = new CANSparkMax(21, CANSparkLowLevel.MotorType.kBrushless);
 
@@ -55,7 +55,7 @@ public class ShooterIOPrototype implements ShooterIO {
 
   @Override
   public void setKickerVoltage(double voltage) {
-    m_kickekMotor.setVoltage(voltage);
+    m_kickerMotor.setVoltage(voltage);
   }
 
   @Override
