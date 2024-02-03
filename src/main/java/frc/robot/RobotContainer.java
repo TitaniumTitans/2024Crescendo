@@ -157,9 +157,9 @@ public class RobotContainer {
                             m_driveSubsystem)
                 .ignoringDisable(true));
 
-    controller.a().whileTrue(m_shooter.setShooterPowerFactory(leftPower.get(), rightPower.get()))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.b().whileTrue(Commands.run(m_shooter::runShooterVelocity))
+//    controller.a().whileTrue(m_shooter.setShooterPowerFactory(leftPower.get(), rightPower.get()))
+//        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.a().whileTrue(Commands.run(m_shooter::runShooterVelocity))
         .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
   }
 

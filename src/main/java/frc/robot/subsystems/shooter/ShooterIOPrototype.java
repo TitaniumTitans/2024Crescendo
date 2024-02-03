@@ -4,7 +4,6 @@ import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.rev.properties.pid.RevPidPropertyBuilder;
 import com.revrobotics.*;
 import frc.robot.Constants.ShooterConstants;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class ShooterIOPrototype implements ShooterIO {
   private final CANSparkFlex m_topLeftMotor;
@@ -13,10 +12,16 @@ public class ShooterIOPrototype implements ShooterIO {
   private final CANSparkFlex m_bottomRightMotor;
   private final CANSparkMax m_kickerMotor;
 
-  private final SparkPIDController m_leftPid;
-  private final PidProperty m_leftPidProperty;
-  private final SparkPIDController m_rightPid;
-  private final PidProperty m_rightPidProperty;
+  private final SparkPIDController m_topLeftPid;
+  private final PidProperty m_topLeftPidProperty;
+  private final SparkPIDController m_topRightPid;
+  private final PidProperty m_topRightPidProperty;
+
+  private final SparkPIDController m_bottomLeftPid;
+  private final PidProperty m_bottomLeftPidProperty;
+  private final SparkPIDController m_bottomRightPid;
+  private final PidProperty m_bottomRightPidProperty;
+
 
   public ShooterIOPrototype() {
     m_topLeftMotor = new CANSparkFlex(ShooterConstants.TOP_LEFT_ID, CANSparkLowLevel.MotorType.kBrushless);
@@ -24,6 +29,11 @@ public class ShooterIOPrototype implements ShooterIO {
     m_bottomLeftMotor = new CANSparkFlex(ShooterConstants.BOTTOM_LEFT_ID, CANSparkLowLevel.MotorType.kBrushless);
     m_bottomRightMotor = new CANSparkFlex(ShooterConstants.BOTTOM_RIGHT_ID, CANSparkLowLevel.MotorType.kBrushless);
     m_kickerMotor = new CANSparkMax(ShooterConstants.KICKER_ID, CANSparkLowLevel.MotorType.kBrushless);
+
+    m_topLeftMotor.restoreFactoryDefaults();
+    m_topRightMotor.restoreFactoryDefaults();
+    m_bottomLeftMotor.restoreFactoryDefaults();
+    m_bottomRightMotor.restoreFactoryDefaults();
 
     m_topLeftMotor.setInverted(ShooterConstants.TOP_LEFT_INVERTED);
     m_topRightMotor.setInverted(ShooterConstants.TOP_RIGHT_INVERTED);
@@ -36,23 +46,40 @@ public class ShooterIOPrototype implements ShooterIO {
     m_bottomLeftMotor.enableVoltageCompensation(12);
     m_bottomRightMotor.enableVoltageCompensation(12);
 
-    m_bottomLeftMotor.follow(m_topLeftMotor);
-    m_bottomRightMotor.follow(m_topRightMotor);
+//    m_bottomLeftMotor.follow(m_topLeftMotor, ShooterConstants.BOTTOM_LEFT_INVERTED);
+//    m_bottomRightMotor.follow(m_topRightMotor, ShooterConstants.BOTTOM_RIGHT_INVERTED);
 
-    m_leftPid = m_topLeftMotor.getPIDController();
-    m_leftPidProperty = new RevPidPropertyBuilder("Shooter/Left Shooter", false, m_leftPid, 0)
-                    .addP(ShooterConstants.SHOOTER_KP)
-                    .addI(ShooterConstants.SHOOTER_KI)
-                    .addD(ShooterConstants.SHOOTER_KD)
-                    .addFF(0.0)
-                    .build();
-    m_rightPid = m_topLeftMotor.getPIDController();
-    m_rightPidProperty = new RevPidPropertyBuilder("Shooter/Left Shooter", false, m_leftPid, 0)
-                    .addP(ShooterConstants.SHOOTER_KP)
-                    .addI(ShooterConstants.SHOOTER_KI)
-                    .addD(ShooterConstants.SHOOTER_KD)
-                    .addFF(0.0)
-                    .build();
+    m_topLeftPid = m_topLeftMotor.getPIDController();
+    m_topLeftPidProperty = new RevPidPropertyBuilder("Shooter/Top Left Shooter", false, m_topLeftPid, 0)
+        .addP(ShooterConstants.SHOOTER_KP)
+        .addI(ShooterConstants.SHOOTER_KI)
+        .addD(ShooterConstants.SHOOTER_KD)
+        .addFF(ShooterConstants.SHOOTER_KF)
+        .build();
+
+    m_topRightPid = m_topRightMotor.getPIDController();
+    m_topRightPidProperty = new RevPidPropertyBuilder("Shooter/Top Right Shooter", false, m_topRightPid, 0)
+        .addP(ShooterConstants.SHOOTER_KP)
+        .addI(ShooterConstants.SHOOTER_KI)
+        .addD(ShooterConstants.SHOOTER_KD)
+        .addFF(ShooterConstants.SHOOTER_KF)
+        .build();
+
+    m_bottomLeftPid = m_bottomLeftMotor.getPIDController();
+    m_bottomLeftPidProperty = new RevPidPropertyBuilder("Shooter/Bottom Left Shooter", false, m_bottomLeftPid, 0)
+        .addP(ShooterConstants.SHOOTER_KP)
+        .addI(ShooterConstants.SHOOTER_KI)
+        .addD(ShooterConstants.SHOOTER_KD)
+        .addFF(ShooterConstants.SHOOTER_KF)
+        .build();
+
+    m_bottomRightPid = m_bottomRightMotor.getPIDController();
+    m_bottomRightPidProperty = new RevPidPropertyBuilder("Shooter/Bottom Right Shooter", false, m_bottomRightPid, 0)
+        .addP(ShooterConstants.SHOOTER_KP)
+        .addI(ShooterConstants.SHOOTER_KI)
+        .addD(ShooterConstants.SHOOTER_KD)
+        .addFF(ShooterConstants.SHOOTER_KF)
+        .build();
 
     m_topLeftMotor.burnFlash();
     m_topRightMotor.burnFlash();
@@ -88,23 +115,27 @@ public class ShooterIOPrototype implements ShooterIO {
 
   @Override
   public void setLeftVelocityRpm(double rpm) {
-    m_leftPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
+    m_topLeftPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
+    m_bottomLeftPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
   }
 
   @Override
   public void setRightVelocityRpm(double rpm) {
-    m_rightPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
+    m_topRightPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
+    m_bottomRightPid.setReference(rpm, CANSparkBase.ControlType.kVelocity);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    m_leftPidProperty.updateIfChanged();
-    m_rightPidProperty.updateIfChanged();
+    m_topLeftPidProperty.updateIfChanged();
+    m_topRightPidProperty.updateIfChanged();
+    m_bottomLeftPidProperty.updateIfChanged();
+    m_bottomRightPidProperty.updateIfChanged();
 
-    inputs.tlVelocityRads = m_topLeftMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.trVelocityRads = m_topRightMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.blVelocityRads = m_bottomLeftMotor.getEncoder().getVelocity() * Math.PI * 2.0;
-    inputs.brVelocityRads = m_bottomRightMotor.getEncoder().getVelocity() * Math.PI * 2.0;
+    inputs.tlVelocityRots = m_topLeftMotor.getEncoder().getVelocity();
+    inputs.trVelocityRots = m_topRightMotor.getEncoder().getVelocity();
+    inputs.blVelocityRots = m_bottomLeftMotor.getEncoder().getVelocity();
+    inputs.brVelocityRots = m_bottomRightMotor.getEncoder().getVelocity();
 
     inputs.tlAppliedVolts = m_topLeftMotor.getAppliedOutput() * m_topLeftMotor.getBusVoltage();
     inputs.trAppliedVolts = m_topRightMotor.getAppliedOutput() * m_topRightMotor.getBusVoltage();

@@ -5,10 +5,10 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
   @AutoLog
   class ShooterIOInputs {
-    public double tlVelocityRads = 0.0;
-    public double trVelocityRads = 0.0;
-    public double blVelocityRads = 0.0;
-    public double brVelocityRads = 0.0;
+    public double tlVelocityRots = 0.0;
+    public double trVelocityRots = 0.0;
+    public double blVelocityRots = 0.0;
+    public double brVelocityRots = 0.0;
     public double tlAppliedVolts = 0.0;
     public double trAppliedVolts = 0.0;
     public double blAppliedVolts = 0.0;

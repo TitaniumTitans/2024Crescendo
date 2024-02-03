@@ -22,10 +22,10 @@ public class ShooterIOSim implements ShooterIO{
     m_simLeft.update(LOOP_PERIOD_SECS);
     m_simRight.update(LOOP_PERIOD_SECS);
 
-    inputs.tlVelocityRads = m_simLeft.getAngularVelocityRadPerSec();
-    inputs.trVelocityRads = m_simRight.getAngularVelocityRadPerSec();
-    inputs.blVelocityRads = m_simLeft.getAngularVelocityRadPerSec();
-    inputs.brVelocityRads = m_simRight.getAngularVelocityRadPerSec();
+    inputs.tlVelocityRots = m_simLeft.getAngularVelocityRadPerSec();
+    inputs.trVelocityRots = m_simRight.getAngularVelocityRadPerSec();
+    inputs.blVelocityRots = m_simLeft.getAngularVelocityRadPerSec();
+    inputs.brVelocityRots = m_simRight.getAngularVelocityRadPerSec();
 
     inputs.tlAppliedVolts = leftAppliedVolts;
     inputs.trAppliedVolts = rightAppliedVolts;
