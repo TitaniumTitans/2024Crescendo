@@ -18,10 +18,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
@@ -45,28 +43,28 @@ public class Module {
   public Module(ModuleIO io) {
     this.m_io = io;
     this.m_moduleConstants = m_io.getModuleConstants();
-    this.m_index = m_moduleConstants.MODULE_INDEX;
+    this.m_index = m_moduleConstants.MODULE_INDEX();
     // delay to initialize all hardware
     Timer.delay(0.5);
 
     // Switch constants based on mode (the physics simulator is treated as a
     // separate robot with different tuning)
-      switch (Constants.currentMode) {
-          case REAL, REPLAY -> {
-              m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
-              m_driveFeedback = new PIDController(0.05, 0.0, 0.0);
-              m_turnFeedback = new PIDController(7.0, 0.0, 0.0);
-          }
-          case SIM -> {
-              m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-              m_driveFeedback = new PIDController(0.1, 0.0, 0.0);
-              m_turnFeedback = new PIDController(10.0, 0.0, 0.0);
-          }
-          default -> {
-              m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
-              m_driveFeedback = new PIDController(0.0, 0.0, 0.0);
-              m_turnFeedback = new PIDController(0.0, 0.0, 0.0);
-          }
+    switch (Constants.currentMode) {
+        case REAL, REPLAY -> {
+          m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
+          m_driveFeedback = new PIDController(0.05, 0.0, 0.0);
+          m_turnFeedback = new PIDController(7.0, 0.0, 0.0);
+        }
+        case SIM -> {
+          m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
+          m_driveFeedback = new PIDController(0.1, 0.0, 0.0);
+          m_turnFeedback = new PIDController(10.0, 0.0, 0.0);
+        }
+        default -> {
+          m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
+          m_driveFeedback = new PIDController(0.0, 0.0, 0.0);
+          m_turnFeedback = new PIDController(0.0, 0.0, 0.0);
+        }
       }
 
     m_turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
@@ -86,13 +84,13 @@ public class Module {
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (m_turnRelativeOffset == null && m_inputs.turnAbsolutePosition.getRadians() != 0.0) {
-      m_turnRelativeOffset = m_inputs.turnAbsolutePosition.minus(m_inputs.turnPosition);
+    if (m_turnRelativeOffset == null && m_inputs.getTurnAbsolutePosition().getRadians() != 0.0) {
+      m_turnRelativeOffset = m_inputs.getTurnAbsolutePosition().minus(m_inputs.getTurnPosition());
     }
 
     // Run closed loop turn control
     if (m_angleSetpoint != null) {
-      m_io.setTurnVoltage(
+      m_io.setTurnPositionDegs(
           m_turnFeedback.calculate(getAngle().getRadians(), m_angleSetpoint.getRadians()));
 
       // Run closed loop drive control
@@ -107,20 +105,20 @@ public class Module {
 
         // Run drive controller
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        m_io.setDriveVoltage(
+        m_io.setDriveVelocityMPS(
             m_driveFeedforward.calculate(velocityRadPerSec)
-                + m_driveFeedback.calculate(m_inputs.driveVelocityRadPerSec, velocityRadPerSec));
+                + m_driveFeedback.calculate(m_inputs.getDriveVelocityRadPerSec(), velocityRadPerSec));
       }
     }
 
     // Calculate position deltas for odometry
     int deltaCount =
-        Math.min(m_inputs.odometryDrivePositionsRad.length, m_inputs.odometryTurnPositions.length);
+        Math.min(m_inputs.getOdometryDrivePositionsRad().length, m_inputs.getOdometryTurnPositions().length);
     m_positionDeltas = new SwerveModulePosition[deltaCount];
     for (int i = 0; i < deltaCount; i++) {
-      double positionMeters = m_inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
+      double positionMeters = m_inputs.getOdometryDrivePositionsRad()[i] * WHEEL_RADIUS;
       Rotation2d angle =
-          m_inputs.odometryTurnPositions[i].plus(
+          m_inputs.getOdometryTurnPositions()[i].plus(
               m_turnRelativeOffset != null ? m_turnRelativeOffset : new Rotation2d());
       m_positionDeltas[i] = new SwerveModulePosition(positionMeters - m_lastPositionMeters, angle);
       m_lastPositionMeters = positionMeters;
@@ -146,14 +144,14 @@ public class Module {
     m_angleSetpoint = new Rotation2d();
 
     // Open loop drive control
-    m_io.setDriveVoltage(volts);
+    m_io.setDriveVelocityMPS(volts);
     m_speedSetpoint = null;
   }
 
   /** Disables all outputs to motors. */
   public void stop() {
-    m_io.setTurnVoltage(0.0);
-    m_io.setDriveVoltage(0.0);
+    m_io.setTurnPositionDegs(0.0);
+    m_io.setDriveVelocityMPS(0.0);
 
     // Disable closed loop control for turn and drive
     m_angleSetpoint = null;
@@ -171,18 +169,18 @@ public class Module {
     if (m_turnRelativeOffset == null) {
       return new Rotation2d();
     } else {
-      return m_inputs.turnPosition.plus(m_turnRelativeOffset);
+      return m_inputs.getTurnPosition().plus(m_turnRelativeOffset);
     }
   }
 
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
-    return m_inputs.drivePositionRad * WHEEL_RADIUS;
+    return m_inputs.getDrivePositionRad() * WHEEL_RADIUS;
   }
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return m_inputs.driveVelocityRadPerSec * WHEEL_RADIUS;
+    return m_inputs.getDriveVelocityRadPerSec() * WHEEL_RADIUS;
   }
 
   /** Returns the module position (turn angle and drive position). */
@@ -202,6 +200,6 @@ public class Module {
 
   /** Returns the drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
-    return m_inputs.driveVelocityRadPerSec;
+    return m_inputs.getDriveVelocityRadPerSec();
   }
 }

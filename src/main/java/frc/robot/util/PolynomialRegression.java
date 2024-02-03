@@ -2,6 +2,7 @@ package frc.robot.util;
 
 import Jama.Matrix;
 import Jama.QRDecomposition;
+import edu.wpi.first.wpilibj.DriverStation;
 
 // NOTE: This file is available at
 // http://algs4.cs.princeton.edu/14analysis/PolynomialRegression.java.html
@@ -25,8 +26,8 @@ import Jama.QRDecomposition;
 public class PolynomialRegression implements Comparable<PolynomialRegression> {
   private final String variableName; // name of the predictor variable
   private int degree; // degree of the polynomial regression
-  private Matrix beta; // the polynomial regression coefficients
-  private double sse; // sum of squares due to error
+  private final Matrix beta; // the polynomial regression coefficients
+  private final double sse; // sum of squares due to error
   private double sst; // total sum of squares
 
   /**
@@ -74,7 +75,9 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
 
       // find least squares solution
       qr = new QRDecomposition(matrixX);
-      if (qr.isFullRank()) break;
+      if (qr.isFullRank()) {
+        break;
+      }
 
       // decrease degree and try again
       this.degree--;
@@ -88,7 +91,9 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
 
     // mean of y[] values
     double sum = 0.0;
-    for (int i = 0; i < n; i++) sum += y[i];
+    for (int i = 0; i < n; i++) {
+      sum += y[i];
+    }
     double mean = sum / n;
 
     // total variation to be accounted for
@@ -110,7 +115,9 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
    */
   public double beta(int j) {
     // to make -0.0 print as 0.0
-    if (Math.abs(beta.get(j, 0)) < 1E-4) return 0.0;
+    if (Math.abs(beta.get(j, 0)) < 1E-4) {
+      return 0.0;
+    }
     return beta.get(j, 0);
   }
 
@@ -129,8 +136,10 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
    * @return the coefficient of determination <em>R</em><sup>2</sup>, which is a real number between
    *     0 and 1
    */
-  public double R2() {
-    if (sst == 0.0) return 1.0; // constant function
+  public double r2() {
+    if (sst == 0.0) {
+      return 1.0; // constant function
+    }
     return 1.0 - sse / sst;
   }
 
@@ -143,7 +152,9 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
   public double predict(double x) {
     // horner's method
     double y = 0.0;
-    for (int j = degree; j >= 0; j--) y = beta(j) + (x * y);
+    for (int j = degree; j >= 0; j--) {
+      y = beta(j) + (x * y);
+    }
     return y;
   }
 
@@ -158,36 +169,71 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
     int j = degree;
 
     // ignoring leading zero coefficients
-    while (j >= 0 && Math.abs(beta(j)) < 1E-5) j--;
+    while (j >= 0 && Math.abs(beta(j)) < 1E-5) {
+      j--;
+    }
 
     // create remaining terms
     while (j >= 0) {
-      if (j == 0) s.append(String.format("%.10f ", beta(j)));
-      else if (j == 1) s.append(String.format("%.10f %s + ", beta(j), variableName));
+      if (j == 0) {
+        s.append(String.format("%.10f ", beta(j)));
+      }
+      else if (j == 1) {
+        s.append(String.format("%.10f %s + ", beta(j), variableName));
+      }
       else s.append(String.format("%.10f %s^%d + ", beta(j), variableName, j));
       j--;
     }
-    s = s.append("  (R^2 = " + String.format("%.3f", R2()) + ")");
+	  s.append("  (R^2 = ").append(String.format("%.3f", r2())).append(")");
 
-    // replace "+ -2n" with "- 2n"
+	  // replace "+ -2n" with "- 2n"
     return s.toString().replace("+ -", "- ");
   }
 
   /** Compare lexicographically. */
   public int compareTo(PolynomialRegression that) {
-    double EPSILON = 1E-5;
+    double lEPSILON = 1E-5;
     int maxDegree = Math.max(this.degree(), that.degree());
     for (int j = maxDegree; j >= 0; j--) {
       double term1 = 0.0;
       double term2 = 0.0;
-      if (this.degree() >= j) term1 = this.beta(j);
-      if (that.degree() >= j) term2 = that.beta(j);
-      if (Math.abs(term1) < EPSILON) term1 = 0.0;
-      if (Math.abs(term2) < EPSILON) term2 = 0.0;
-      if (term1 < term2) return -1;
-      else if (term1 > term2) return +1;
+      if (this.degree() >= j) {
+        term1 = this.beta(j);
+      }
+      if (that.degree() >= j) {
+        term2 = that.beta(j);
+      }
+      if (Math.abs(term1) < lEPSILON) {
+        term1 = 0.0;
+      }
+      if (Math.abs(term2) < lEPSILON) {
+        term2 = 0.0;
+      }
+      if (term1 < term2) {
+        return -1;
+      }
+      else if (term1 > term2) {
+        return +1;
+      }
     }
     return 0;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null) {
+      return false;
+    }
+    if (o.getClass() == this.getClass()) {
+      return this.compareTo((PolynomialRegression) o) == 0;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
   }
 
   /**
@@ -200,6 +246,6 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
     double[] y = {100, 350, 1500, 6700, 20160, 40000};
     PolynomialRegression regression = new PolynomialRegression(x, y, 3);
 
-    System.out.println(regression);
+    DriverStation.reportWarning(String.valueOf(regression), false);
   }
 }
