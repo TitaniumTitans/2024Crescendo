@@ -47,16 +47,12 @@ public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
-  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-
-  private final LoggedDashboardNumber leftPower;
-  private final LoggedDashboardNumber rightPower;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -70,7 +66,6 @@ public class RobotContainer {
               new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
           m_shooter = new ShooterSubsystem(new ShooterIntakeIOPrototype());
-          m_climber = new ClimberSubsystem(new ClimberIOPrototype());
         }
         case PROTO_SHOOTER -> {
           m_driveSubsystem = new DriveSubsystem(
@@ -81,7 +76,6 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {});
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-          m_climber = new ClimberSubsystem(new ClimberIO() {});
         }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -94,7 +88,6 @@ public class RobotContainer {
             new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
-        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
     default -> {
       // Replayed robot, disable IO implementations
@@ -111,15 +104,11 @@ public class RobotContainer {
                         new ModuleIO() {
                         });
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
-    leftPower = new LoggedDashboardNumber("Left Power", 0.6);
-    rightPower = new LoggedDashboardNumber("Right Power", 0.6);
 
     // Set up feedforward characterization
     autoChooser.addOption(
@@ -157,8 +146,6 @@ public class RobotContainer {
                             m_driveSubsystem)
                 .ignoringDisable(true));
 
-//    controller.a().whileTrue(m_shooter.setShooterPowerFactory(leftPower.get(), rightPower.get()))
-//        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
     controller.a().whileTrue(Commands.run(m_shooter::runShooterVelocity))
         .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
   }
