@@ -134,26 +134,26 @@ public class ShooterIOPrototype implements ShooterIO {
     m_bottomLeftPidProperty.updateIfChanged();
     m_bottomRightPidProperty.updateIfChanged();
 
-    inputs.tlVelocityRots = m_topLeftMotor.getEncoder().getVelocity();
-    inputs.trVelocityRots = m_topRightMotor.getEncoder().getVelocity();
-    inputs.blVelocityRots = m_bottomLeftMotor.getEncoder().getVelocity();
-    inputs.brVelocityRots = m_bottomRightMotor.getEncoder().getVelocity();
+    inputs.setTlVelocityRots(m_topLeftMotor.getEncoder().getVelocity());
+    inputs.setTrVelocityRots(m_topRightMotor.getEncoder().getVelocity());
+    inputs.setBlVelocityRots(m_bottomLeftMotor.getEncoder().getVelocity());
+    inputs.setBrVelocityRots(m_bottomRightMotor.getEncoder().getVelocity());
 
-    inputs.tlAppliedVolts = m_topLeftMotor.getAppliedOutput() * m_topLeftMotor.getBusVoltage();
-    inputs.trAppliedVolts = m_topRightMotor.getAppliedOutput() * m_topRightMotor.getBusVoltage();
-    inputs.blAppliedVolts = m_bottomLeftMotor.getAppliedOutput() * m_bottomLeftMotor.getBusVoltage();
-    inputs.brAppliedVolts = m_bottomRightMotor.getAppliedOutput() * m_bottomRightMotor.getBusVoltage();
-    inputs.kickerAppliedVolts = m_kickerMotor.getAppliedOutput() * m_kickerMotor.getBusVoltage();
+    inputs.setTlAppliedVolts(m_topLeftMotor.getAppliedOutput() * m_topLeftMotor.getBusVoltage());
+    inputs.setTrAppliedVolts(m_topRightMotor.getAppliedOutput() * m_topRightMotor.getBusVoltage());
+    inputs.setBlAppliedVolts(m_bottomLeftMotor.getAppliedOutput() * m_bottomLeftMotor.getBusVoltage());
+    inputs.setBrAppliedVolts(m_bottomRightMotor.getAppliedOutput() * m_bottomRightMotor.getBusVoltage());
+    inputs.setKickerAppliedVolts(m_kickerMotor.getAppliedOutput() * m_kickerMotor.getBusVoltage());
 
-    inputs.tlCurrentDraw = m_topLeftMotor.getOutputCurrent();
-    inputs.trCurrentDraw = m_topRightMotor.getOutputCurrent();
-    inputs.blCurrentDraw = m_bottomLeftMotor.getOutputCurrent();
-    inputs.brCurrentDraw = m_bottomRightMotor.getOutputCurrent();
-    inputs.kickerCurrentDraw = m_kickerMotor.getOutputCurrent();
+    inputs.setTlCurrentDraw(m_topLeftMotor.getOutputCurrent());
+    inputs.setTrCurrentDraw(m_topRightMotor.getOutputCurrent());
+    inputs.setBlCurrentDraw(m_bottomLeftMotor.getOutputCurrent());
+    inputs.setBrCurrentDraw(m_bottomRightMotor.getOutputCurrent());
+    inputs.setKickerCurrentDraw(m_kickerMotor.getOutputCurrent());
 
-    inputs.tlTemperature = m_topLeftMotor.getMotorTemperature();
-    inputs.trTemperature = m_topRightMotor.getMotorTemperature();
-    inputs.blTemperature = m_bottomLeftMotor.getMotorTemperature();
-    inputs.brTemperature = m_bottomRightMotor.getMotorTemperature();
+    inputs.setTlTemperature(m_topLeftMotor.getMotorTemperature());
+    inputs.setTrTemperature(m_topRightMotor.getMotorTemperature());
+    inputs.setBlTemperature(m_bottomLeftMotor.getMotorTemperature());
+    inputs.setBrTemperature(m_bottomRightMotor.getMotorTemperature());
   }
 }
