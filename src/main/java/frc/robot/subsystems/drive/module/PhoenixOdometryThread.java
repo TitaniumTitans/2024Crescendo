@@ -95,6 +95,7 @@ public class PhoenixOdometryThread extends Thread {
         }
       } catch (InterruptedException e) {
         DriverStation.reportError(e.toString(), true);
+        Thread.currentThread().interrupt();
       } finally {
         signalsLock.unlock();
       }

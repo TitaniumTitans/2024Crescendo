@@ -28,12 +28,8 @@ public class Module {
 
   private final ModuleIO m_io;
   private final ModuleIOInputsAutoLogged m_inputs = new ModuleIOInputsAutoLogged();
-  private final ModuleConstants m_moduleConstants;
   private final int m_index;
 
-  private final SimpleMotorFeedforward m_driveFeedforward;
-  private final PIDController m_driveFeedback;
-  private final PIDController m_turnFeedback;
   private Rotation2d m_angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double m_speedSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Rotation2d m_turnRelativeOffset = null; // Relative + Offset = Absolute
@@ -42,32 +38,11 @@ public class Module {
 
   public Module(ModuleIO io) {
     this.m_io = io;
-    this.m_moduleConstants = m_io.getModuleConstants();
-    this.m_index = m_moduleConstants.MODULE_INDEX();
+    ModuleConstants moduleConstants = m_io.getModuleConstants();
+    this.m_index = moduleConstants.MODULE_INDEX();
     // delay to initialize all hardware
     Timer.delay(0.5);
 
-    // Switch constants based on mode (the physics simulator is treated as a
-    // separate robot with different tuning)
-    switch (Constants.currentMode) {
-        case REAL, REPLAY -> {
-          m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
-          m_driveFeedback = new PIDController(0.05, 0.0, 0.0);
-          m_turnFeedback = new PIDController(0.1, 0.0, 0.0);
-        }
-        case SIM -> {
-          m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-          m_driveFeedback = new PIDController(0.1, 0.0, 0.0);
-          m_turnFeedback = new PIDController(10.0, 0.0, 0.0);
-        }
-        default -> {
-          m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
-          m_driveFeedback = new PIDController(0.0, 0.0, 0.0);
-          m_turnFeedback = new PIDController(0.0, 0.0, 0.0);
-        }
-      }
-
-    m_turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
     setBrakeMode(true);
   }
 
@@ -95,18 +70,8 @@ public class Module {
       // Run closed loop drive control
       // Only allowed if closed loop turn control is running
       if (m_speedSetpoint != null) {
-        // Scale velocity based on turn error
-        //
-        // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
-        // towards the setpoint, its velocity should increase. This is achieved by
-        // taking the component of the velocity in the direction of the setpoint.
-        double adjustSpeedSetpoint = m_speedSetpoint * Math.cos(m_turnFeedback.getPositionError());
-
         // Run drive controller
-        m_io.setDriveVelocityMPS(adjustSpeedSetpoint);
-//        m_io.setDriveVelocityMPS(
-//            m_driveFeedforward.calculate(velocityRadPerSec)
-//                + m_driveFeedback.calculate(m_inputs.getDriveVelocityRadPerSec(), velocityRadPerSec));
+        m_io.setDriveVelocityMPS(m_speedSetpoint);
       }
     }
 

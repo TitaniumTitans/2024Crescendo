@@ -79,7 +79,17 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
     m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID());
     m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID());
-    CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID());
+    try (CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID())) {
+      // run factory default on cancoder
+      var encoderConfig = new CANcoderConfiguration();
+      encoderConfig.MagnetSensor.SensorDirection =
+          moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
+              : SensorDirectionValue.CounterClockwise_Positive;
+      encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+      cancoder.getConfigurator().apply(encoderConfig);
+
+      m_turnAbsolutePosition = cancoder.getAbsolutePosition();
+    }
 
     m_moduleConstants = moduleConstants;
 
@@ -128,13 +138,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
 
-    // run factory default on cancoder
-    var encoderConfig = new CANcoderConfiguration();
-    encoderConfig.MagnetSensor.SensorDirection =
-            moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
-              : SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
-    cancoder.getConfigurator().apply(encoderConfig);
+
 
     // Fancy multithreaded odometry update stuff
     // setup drive values
@@ -148,7 +152,6 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // setup turn values
     m_turnTalon.setPosition(0.0);
-    m_turnAbsolutePosition = cancoder.getAbsolutePosition();
     m_turnPosition = m_turnTalon.getPosition();
     m_turnPositionQueue =
         PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
