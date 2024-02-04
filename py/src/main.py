@@ -1,6 +1,6 @@
-from src.config.Config import ConfigStore, LocalConfig, RemoteConfig
-from src.pipeline.Capture import CVCapture
-from src.output.StreamServer import StreamServer
+from config.Config import ConfigStore, LocalConfig, RemoteConfig
+from pipeline.Capture import CVCapture
+from output.StreamServer import StreamServer
 
 import time
 
@@ -24,6 +24,7 @@ if __name__ == '__main__':
         fps = None
         frame_count += 1
         if time.time() - last_print > 1:
+            last_print = time.time()
             fps = frame_count
             print("Running at", frame_count, "fps")
             frame_count = 0

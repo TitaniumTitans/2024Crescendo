@@ -3,6 +3,7 @@ import sys
 from src.config.Config import ConfigStore
 from typing import Dict
 
+from pycoral.adapters.common import input_size
 from pycoral.adapters.detect import get_objects, Object
 from pycoral.utils.edgetpu import run_inference
 from pycoral.utils.edgetpu import make_interpreter
@@ -23,6 +24,8 @@ class Detector:
         self._interpreter = make_interpreter(config.local_config.model_path)
         self._interpreter.allocate_tensors()
         self._labels = read_label_file(config.local_config.label_path)
+
+        self._inference_size = input_size(self._interpreter)
 
         if self._interpreter is None:
             print("Failed to create interpreter. Exiting.")
