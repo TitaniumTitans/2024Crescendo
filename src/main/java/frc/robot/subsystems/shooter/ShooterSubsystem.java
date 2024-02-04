@@ -6,6 +6,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class ShooterSubsystem extends SubsystemBase {
+
   private final ShooterIO m_io;
   private final ShooterIOInputsAutoLogged m_inputs;
 
@@ -47,7 +48,6 @@ public class ShooterSubsystem extends SubsystemBase {
   public void runShooterVelocity() {
     m_io.setLeftVelocityRpm(m_leftSetpoint.get());
     m_io.setRightVelocityRpm(m_rightSetpoint.get());
-//    m_io.setKickerVoltage(9.0);
   }
 
   public Command setShooterPowerFactory(double left, double right) {

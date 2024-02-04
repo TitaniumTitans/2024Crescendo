@@ -54,7 +54,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
-//  private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   private final LoggedDashboardNumber wristPower;
   private final LoggedDashboardNumber wristPosition;
@@ -73,6 +73,7 @@ public class RobotContainer {
               new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
               new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
           m_shooter = new ShooterSubsystem(new ShooterIntakeIOPrototype());
+          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         }
         case PROTO_SHOOTER -> {
           m_driveSubsystem = new DriveSubsystem(
@@ -86,16 +87,16 @@ public class RobotContainer {
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         }
     case PROTO_ARM -> {
-//          m_driveSubsystem = new DriveSubsystem(
-//                  new GyroIO() {
-//                  },
-//                  new ModuleIO() {},
-//                  new ModuleIO() {},
-//                  new ModuleIO() {},
-//                  new ModuleIO() {});
+          m_driveSubsystem = new DriveSubsystem(
+                  new GyroIO() {
+                  },
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
           m_shooter = new ShooterSubsystem(new ShooterIO() {});
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
-    }
+        }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
@@ -107,21 +108,17 @@ public class RobotContainer {
             new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
     default -> {
       // Replayed robot, disable IO implementations
         m_driveSubsystem =
                 new DriveSubsystem(
-                        new GyroIO() {
-                        },
-                        new ModuleIO() {
-                        },
-                        new ModuleIO() {
-                        },
-                        new ModuleIO() {
-                        },
-                        new ModuleIO() {
-                        });
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
@@ -129,6 +126,12 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    // Set up dashboard tuners
+    wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
+    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0);
+    armPower = new LoggedDashboardNumber("Wrist Power", 0.0);
+    armPosition = new LoggedDashboardNumber("Wrist Position", 0.0);
 
     // Set up feedforward characterization
     autoChooser.addOption(
@@ -176,6 +179,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-      return new InstantCommand();//autoChooser.get();
+      return autoChooser.get();
   }
 }

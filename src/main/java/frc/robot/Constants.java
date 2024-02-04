@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
@@ -102,8 +103,17 @@ public final class Constants {
     );
   }
 
-  private static class ArmConstants {
+  public static class ArmConstants {
     private ArmConstants(){}
+
+    public static final double SHOULDER_BAR_LENGTH_METERS = 0.0;
+    public static final double SHOOTER_BAR_LENGTH_METERS = 0.0;
+
+    public static final Translation3d PIVOT_TRANSLATION_METERS = new Translation3d(
+      0.0,
+      0.0,
+      0.0
+    );
   }
 
 

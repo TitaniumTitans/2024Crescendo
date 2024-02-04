@@ -1,61 +1,58 @@
 package frc.robot.subsystems.arm;
 
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class ArmSubsystem extends SubsystemBase {
-    private final ArmIO m_io;
-    public ArmSubsystem(ArmIO io) {
-        m_io = io;
-    }
+  public enum ArmStates {
+    STOW,
+    AIM,
+    AIM_BLOCKED,
+    AMP,
+    TRAP,
+    MOVING
+  }
 
-    @Override
-    public void periodic() {
-        m_io.updateInputs(new ArmIOInputsAutoLogged());
+  private final ArmIO m_io;
+  public ArmSubsystem(ArmIO io) {
+    m_io = io;
+  }
 
-//        m_io.setWristVoltage(0.0);
-//        m_io.setShoulderVoltage(0.0);
-        SmartDashboard.putNumber("Recorded Wrist Position", m_io.getWristPosition().getDegrees());
-        SmartDashboard.putNumber("Recorded Shoulder Position", m_io.getShoulderPosition().getDegrees());
-    }
+  @Override
+  public void periodic() {
+    m_io.updateInputs(new ArmIOInputsAutoLogged());
+  }
 
-    public void setShoulderPower(double power) {
-        m_io.setShoulderVoltage(power * 12.0);
-    }
+  public void setShoulderPower(double power) {
+    m_io.setShoulderVoltage(power * 12.0);
+  }
 
-    public void setShoulderPosition(double degrees) {
-        m_io.setShoulderAngle(degrees);
-    }
+  public void setShoulderPosition(double degrees) {
+    m_io.setShoulderAngle(degrees);
+  }
 
-    public void setWristPower(double power) {m_io.setWristVoltage(power * 12.0);}
+  public void setWristPower(double power) {
+    m_io.setWristVoltage(power * 12.0);
+  }
 
-    public void setWristPosition(double degrees) {
-        m_io.setWristAngle(degrees);
-    }
+  public void setWristPosition(double degrees) {
+    m_io.setWristAngle(degrees);
+  }
 
-    public Command setShoulderPowerFactory(double power) {
-        return runOnce(() -> setShoulderPower(power));
-    }
-
-    public Command setShoulderPositionFactory(double degrees) {
-        return runOnce(() -> setShoulderPosition(degrees));
-    }
-
-    public Command setWristPowerFactory(double power) {
-        return runOnce(() -> setWristPower(power));
-    }
-
-    public Command setWristPositionFactory(double degrees) {
-        return runOnce(() -> setWristPosition(degrees));
-    }
-
-    public Command stopArmFactory() {
-        return runOnce(() -> {
-            setWristPower(0.0);
-            setShoulderPower(0.0);
-        });
-    }
+  public Translation3d getShooterTranslation(Rotation2d shoulderRotation, Rotation2d shooterRotation) {
+    return Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
+            new Translation3d(
+                Constants.ArmConstants.SHOULDER_BAR_LENGTH_METERS,
+                new Rotation3d(0.0, shoulderRotation.getDegrees(), 0.0)))
+        .plus(
+            new Translation3d(
+                Constants.ArmConstants.SHOOTER_BAR_LENGTH_METERS,
+                new Rotation3d(0.0, shooterRotation.getDegrees(), 0.0))
+        );
+  }
 }
 
