@@ -27,12 +27,13 @@ public final class Constants {
   private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
-  public static final Mode currentMode = Mode.PROTO_SHOOTER;
+  public static final Mode currentMode = Mode.PROTO_ARM;
 
   public enum Mode {
     /** Running on a real robot. */
     REAL,
     PROTO_SHOOTER,
+    PROTO_ARM,
 
     /** Running a physics simulator. */
     SIM,
@@ -62,7 +63,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.457764), // offset
+            Units.rotationsToDegrees(-0.017578), // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3
     );
@@ -101,6 +102,10 @@ public final class Constants {
     );
   }
 
+  private static class ArmConstants {
+    private ArmConstants(){}
+  }
+
 
   public static class ShooterConstants {
     private ShooterConstants() {
@@ -124,7 +129,7 @@ public final class Constants {
     public static final boolean KICKER_INVERTED = true;
   }
 
-  public class ClimberConstants {
+  public static class ClimberConstants {
     private ClimberConstants() {
       throw new IllegalStateException("Static class should not be constructed");
     }

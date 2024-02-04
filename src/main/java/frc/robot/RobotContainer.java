@@ -20,10 +20,14 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOPrototype;
+import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
@@ -32,6 +36,7 @@ import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -43,12 +48,18 @@ public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
+  public final ArmSubsystem m_armSubsystem;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+//  private final LoggedDashboardChooser<Command> autoChooser;
+
+  private final LoggedDashboardNumber wristPower;
+  private final LoggedDashboardNumber wristPosition;
+  private final LoggedDashboardNumber armPower;
+  private final LoggedDashboardNumber armPosition;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -72,7 +83,19 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {});
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         }
+    case PROTO_ARM -> {
+//          m_driveSubsystem = new DriveSubsystem(
+//                  new GyroIO() {
+//                  },
+//                  new ModuleIO() {},
+//                  new ModuleIO() {},
+//                  new ModuleIO() {},
+//                  new ModuleIO() {});
+          m_shooter = new ShooterSubsystem(new ShooterIO() {});
+          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
+    }
     case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
@@ -100,6 +123,7 @@ public class RobotContainer {
                         new ModuleIO() {
                         });
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
     }
 
@@ -152,6 +176,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+      return new InstantCommand();//autoChooser.get();
   }
 }

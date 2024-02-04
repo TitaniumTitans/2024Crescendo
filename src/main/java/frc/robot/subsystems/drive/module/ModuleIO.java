@@ -139,6 +139,6 @@ public interface ModuleIO {
 
   // Used to pass moduleConstants
   default ModuleConstants getModuleConstants() {
-    return ModuleConstants.BLANK_CONSTANTS;
+    return new ModuleConstants();
   }
 }
