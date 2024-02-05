@@ -11,6 +11,15 @@ from pycoral.utils.dataset import read_label_file
 import cv2 as cv
 
 
+def draw_bbox(image: cv.Mat, objs: list[Object]) -> cv.Mat:
+    for obj in objs:
+        cv.rectangle(image,
+                     (obj.bbox.xmin.item(), obj.bbox.ymin.item()),
+                     (obj.bbox.xmax.item(), obj.bbox.ymax.item()),
+                     (0, 255, 0))
+    return image
+
+
 class Detector:
     """Runs a tflite model on the coral to detect objects"""
     _labels: Dict[int, str]
