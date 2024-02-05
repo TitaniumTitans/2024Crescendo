@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -43,15 +44,15 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.setWristAngle(degrees);
   }
 
-  public Translation3d getShooterTranslation(Rotation2d shoulderRotation, Rotation2d shooterRotation) {
+  public Translation2d getShooterTranslation(Rotation2d shoulderRotation, Rotation2d shooterRotation) {
     return Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
-            new Translation3d(
+            new Translation2d(
                 Constants.ArmConstants.SHOULDER_BAR_LENGTH_METERS,
-                new Rotation3d(0.0, shoulderRotation.getDegrees(), 0.0)))
+                shoulderRotation))
         .plus(
-            new Translation3d(
+            new Translation2d(
                 Constants.ArmConstants.SHOOTER_BAR_LENGTH_METERS,
-                new Rotation3d(0.0, shooterRotation.getDegrees(), 0.0))
+                shooterRotation)
         );
   }
 }
