@@ -46,7 +46,8 @@ class Detector:
         print("Created interpreter successfully.")
 
     def run_inference(self, image: cv.Mat) -> list[Object]:
-        run_inference(self._interpreter, image)
+        image = cv.resize(image, self._inference_size)
+        run_inference(self._interpreter, image.tobytes())
         objs = get_objects(self._interpreter, self._config.remote_config.detection_threshold)[
                :self._config.remote_config.max_targets]
         return objs
@@ -63,7 +64,7 @@ class Detector:
             detections.append(element)
 
         detections = np.array(detections)
-        
+
         if detections.any():
             trdata = self._tracker.update(detections)
 
@@ -74,7 +75,7 @@ class Detector:
 
             for td in trdata:
                 x0, y0, x1, y1, track_id = (td[0].item(), td[1].item(),
-                                            td[2].item, td[3].item, td[4].item())
+                                            td[2].item(), td[3].item(), td[4].item())
                 overlap = 0
                 obj = None
                 # Find the overlap between each object and the tracked object

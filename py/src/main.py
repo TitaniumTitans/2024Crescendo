@@ -2,7 +2,7 @@ from config.Config import ConfigStore, LocalConfig, RemoteConfig
 from config.ConfigSource import FileConfigSource, NTConfigSource
 from pipeline.Capture import CVCapture
 from pipeline.Detector import Detector
-from output.StreamServer import StreamServer
+from output.StreamServer import MjpegServer
 
 import time
 
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     config = ConfigStore(LocalConfig(), RemoteConfig())
 
     capture = CVCapture()
-    stream_server = StreamServer()
+    stream_server = MjpegServer()
     file_config = FileConfigSource()
     remote_config = NTConfigSource()
 
