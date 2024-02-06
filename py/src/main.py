@@ -1,7 +1,7 @@
 from config.Config import ConfigStore, LocalConfig, RemoteConfig
 from config.ConfigSource import FileConfigSource, NTConfigSource
 from pipeline.Capture import CVCapture
-from pipeline.Detector import Detector, draw_bbox
+from pipeline.Detector import Detector
 from output.StreamServer import StreamServer
 
 import time
@@ -40,5 +40,5 @@ if __name__ == '__main__':
 
         objs = detector.run_inference(image)
 
-        image = draw_bbox(image, objs)
+        image = detector.draw_bbox(image, objs)
         stream_server.set_frame(image)

@@ -11,15 +11,6 @@ from pycoral.utils.dataset import read_label_file
 import cv2 as cv
 
 
-def draw_bbox(image: cv.Mat, objs: list[Object]) -> cv.Mat:
-    for obj in objs:
-        cv.rectangle(image,
-                     (obj.bbox.xmin.item(), obj.bbox.ymin.item()),
-                     (obj.bbox.xmax.item(), obj.bbox.ymax.item()),
-                     (0, 255, 0))
-    return image
-
-
 class Detector:
     """Runs a tflite model on the coral to detect objects"""
     _labels: Dict[int, str]
@@ -46,3 +37,20 @@ class Detector:
         run_inference(self._interpreter, image)
         objs = get_objects(self._interpreter, self._config.remote_config.detection_threshold)[:self._config.remote_config.max_targets]
         return objs
+
+    def draw_bbox(self, image: cv.Mat, objs: list[Object]) -> cv.Mat:
+        height, width, channels = image.shape
+        scale_x, scale_y = width / self._inference_size[0], height / self._inference_size[1]
+        for obj in objs:
+            bbox = obj.bbox.scale(scale_x, scale_y)
+            x0, y0 = int(bbox.xmin), int(bbox.ymin)
+            x1, y1 = int(bbox.xmax), int(bbox.ymax)
+
+            percent = int(100 * obj.score)
+            label = '{}% {}'.format(percent, self._labels.get(obj.id, obj.id))
+
+            image = cv.rectangle(image, (x0, y0), (x1, y1), (0, 255, 0), 2)
+            image = cv.putText(image, label, (x0, y0+30),
+                               cv.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 2)
+
+        return image

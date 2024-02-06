@@ -1,0 +1,7 @@
+{
+  "device_id": "ai-spy",
+  "server_ip": "10.44.67.2",
+  "stream_port": 8000,
+  "model_path": "./model/edgetpu.tflite",
+  "label_path": "./model/labelmap.pbtxt"
+}
