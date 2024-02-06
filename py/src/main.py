@@ -39,6 +39,7 @@ if __name__ == '__main__':
             frame_count = 0
 
         objs = detector.run_inference(image)
+        tracked_objs = detector.update_tracker(objs)
 
-        image = detector.draw_bbox(image, objs)
+        image = detector.draw_bbox(image, tracked_objs)
         stream_server.set_frame(image)
