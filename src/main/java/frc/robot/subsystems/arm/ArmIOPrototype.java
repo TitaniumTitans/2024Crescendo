@@ -4,10 +4,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.math.geometry.Rotation2d;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import org.littletonrobotics.junction.Logger;
+
+import frc.robot.Constants.ArmConstants;
 
 public class ArmIOPrototype implements ArmIO {
   private final TalonFX m_shoulder;
@@ -43,9 +45,12 @@ public class ArmIOPrototype implements ArmIO {
         false,
         m_shoulder,
         0)
-        .addP(0.0)
-        .addI(0.0)
-        .addD(0.0)
+        .addP(ArmConstants.SHOULDER_KP)
+        .addI(ArmConstants.SHOULDER_KI)
+        .addD(ArmConstants.SHOULDER_KD)
+        .addKS(ArmConstants.SHOULDER_KS)
+        .addKV(ArmConstants.SHOULDER_KV)
+        .addKG(ArmConstants.SHOULDER_KG, GravityTypeValue.Arm_Cosine)
         .build();
 
     m_wristPID = new Phoenix6PidPropertyBuilder(
