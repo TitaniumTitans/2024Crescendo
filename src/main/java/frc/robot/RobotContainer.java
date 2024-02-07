@@ -98,16 +98,15 @@ public class RobotContainer {
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
         }
     case SIM -> {
-      // Sim robot, instantiate physics sim IO implementations
+//       Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
           new DriveSubsystem(
-            new GyroIO() {
-            },
+            new GyroIO() {},
             new ModuleIOSim(DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOSim());
+        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
     default -> {

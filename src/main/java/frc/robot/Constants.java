@@ -105,7 +105,24 @@ public final class Constants {
   }
 
   public static class ArmConstants {
-    private ArmConstants(){}
+    private ArmConstants() {}
+
+    public static int WRIST_ID = 0;
+    public static int SHOULDER_ID = 0;
+
+    public static double WRIST_KP = 0.0;
+    public static double WRIST_KI = 0.0;
+    public static double WRIST_KD = 0.0;
+    public static double WRIST_KS = 0.0;
+    public static double WRIST_KV = 0.0;
+    public static double WRIST_KG = 0.0;
+
+    public static double SHOULDER_KP = 0.0;
+    public static double SHOULDER_KI = 0.0;
+    public static double SHOULDER_KD = 0.0;
+    public static double SHOULDER_KS = 0.0;
+    public static double SHOULDER_KV = 0.0;
+    public static double SHOULDER_KG = 0.0;
 
     public static final double SHOULDER_BAR_LENGTH_METERS = 0.0;
     public static final double SHOOTER_BAR_LENGTH_METERS = 0.0;
