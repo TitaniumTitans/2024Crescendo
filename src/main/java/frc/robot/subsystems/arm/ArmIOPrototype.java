@@ -5,6 +5,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import org.littletonrobotics.junction.Logger;
@@ -28,12 +29,20 @@ public class ArmIOPrototype implements ArmIO {
     m_wrist = new TalonFX(24);
 
     TalonFXConfiguration config = new TalonFXConfiguration();
+    // config for the shoulder joint
     config.Feedback.SensorToMechanismRatio = 125.0 * (60.0 / 18.0);
+
+    config.CurrentLimits.
     config.Voltage.PeakForwardVoltage = 12;
     config.Voltage.PeakReverseVoltage = -12;
 
+    // motion magic configs for both joints
+    config.MotionMagic.MotionMagicCruiseVelocity = Units.degreesToRotations(360);
+    config.MotionMagic.MotionMagicAcceleration = Units.degreesToRotations(720);
+
     m_shoulder.getConfigurator().apply(config);
 
+    // wrist joint config
     config.Feedback.SensorToMechanismRatio = 125.0 * (38.0 / 18.0);
     m_wrist.getConfigurator().apply(config);
 
