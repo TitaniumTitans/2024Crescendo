@@ -58,9 +58,12 @@ public class ArmIOPrototype implements ArmIO {
         false,
         m_wrist,
         0)
-        .addP(0.0)
-        .addI(0.0)
-        .addD(0.0)
+        .addP(ArmConstants.WRIST_KP)
+        .addI(ArmConstants.WRIST_KI)
+        .addD(ArmConstants.WRIST_KD)
+        .addKS(ArmConstants.WRIST_KS)
+        .addKV(ArmConstants.WRIST_KV)
+        .addKG(ArmConstants.WRIST_KG, GravityTypeValue.Arm_Cosine)
         .build();
 
     m_shoulderReqPID = new PositionVoltage(0).withSlot(0);
