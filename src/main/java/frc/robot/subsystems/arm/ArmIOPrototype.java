@@ -1,6 +1,7 @@
 package frc.robot.subsystems.arm;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,6 +14,12 @@ public class ArmIOPrototype implements ArmIO {
   private final TalonFX m_wrist;
   private final PidPropertyPublic m_shoulderPID;
   private final PidPropertyPublic m_wristPID;
+
+  private final PositionVoltage m_wristReqPID;
+  private final PositionVoltage m_shoulderReqPID;
+
+  private final MotionMagicVoltage m_wristReqMM;
+  private final MotionMagicVoltage m_shoulderReqMM;
 
   public ArmIOPrototype() {
     m_shoulder = new TalonFX(23);
@@ -51,12 +58,34 @@ public class ArmIOPrototype implements ArmIO {
         .addD(0.0)
         .build();
 
+    m_shoulderReqPID = new PositionVoltage(0).withSlot(0);
+    m_wristReqPID = new PositionVoltage(0).withSlot(0);
+    m_shoulderReqMM = new MotionMagicVoltage(0).withSlot(0);
+    m_wristReqMM = new MotionMagicVoltage(0).withSlot(0);
   }
 
   @Override
   public void updateInputs(ArmIOInputsAutoLogged inputs) {
     m_shoulderPID.updateIfChanged();
     m_wristPID.updateIfChanged();
+
+    inputs.shoulderPositionRots = m_shoulder.getPosition().getValueAsDouble();
+    inputs.wristPositionRots = m_wrist.getPosition().getValueAsDouble();
+
+    inputs.shoulerVelocityRotsPerSecond = m_shoulder.getVelocity().getValueAsDouble();
+    inputs.wristVelocityRotsPerSecond = m_wrist.getVelocity().getValueAsDouble();
+
+    inputs.shoulderAppliedOutput = m_shoulder.get();
+    inputs.wristAppliedOutput = m_wrist.get();
+
+    inputs.shoulderClosedLoopOutput = m_shoulder.getClosedLoopOutput().getValueAsDouble();
+    inputs.wristClosedLoopOutput = m_wrist.getClosedLoopOutput().getValueAsDouble();
+
+    inputs.shoulderDesiredSetpoint = m_shoulder.getClosedLoopReference().getValueAsDouble();
+    inputs.wristDesiredSetpoint = m_wrist.getClosedLoopReference().getValueAsDouble();
+
+    inputs.shoulderCurrentDraw = m_shoulder.getSupplyCurrent().getValueAsDouble();
+    inputs.wristCurrentDraw = m_wrist.getSupplyCurrent().getValueAsDouble();
 
     Logger.recordOutput("Arm/Should PID Output", m_shoulder.getClosedLoopOutput().getValueAsDouble());
     Logger.recordOutput("Arm/Wrist PID Output", m_wrist.getClosedLoopOutput().getValueAsDouble());
@@ -71,9 +100,12 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void setShoulderAngle(double degrees) {
-    final PositionVoltage request = new PositionVoltage(0).withSlot(0);
-    m_shoulder.setControl(request.withPosition(degrees / 360.0));
+  public void setShoulderAngle(double degrees, boolean useMM) {
+    if (useMM) {
+      m_shoulder.setControl(m_shoulderReqMM.withPosition(degrees / 360.0));
+    } else {
+      m_shoulder.setControl(m_shoulderReqPID.withPosition(degrees / 360.0));
+    }
   }
 
   @Override
@@ -82,18 +114,11 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void setWristAngle(double degrees) {
-    final PositionVoltage request = new PositionVoltage(0).withSlot(0);
-    m_wrist.setControl(request.withPosition(degrees / 360.0));
-  }
-
-  @Override
-  public Rotation2d getWristPosition() {
-    return Rotation2d.fromRotations(m_wrist.getPosition().getValueAsDouble());
-  }
-
-  @Override
-  public Rotation2d getShoulderPosition() {
-    return Rotation2d.fromRotations(m_shoulder.getPosition().getValueAsDouble());
+  public void setWristAngle(double degrees, boolean useMM) {
+    if (useMM) {
+      m_wrist.setControl(m_wristReqMM.withPosition(degrees / 360.0));
+    } else {
+      m_wrist.setControl(m_wristReqPID.withPosition(degrees / 360.0));
+    }
   }
 }

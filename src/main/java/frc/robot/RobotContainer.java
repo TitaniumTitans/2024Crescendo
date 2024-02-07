@@ -48,7 +48,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
  */
 public class RobotContainer {
   // Subsystems
-//  private final DriveSubsystem m_driveSubsystem;
+  private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
   public final ArmSubsystem m_armSubsystem;
 
@@ -68,53 +68,47 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL -> {
           // Real robot, instantiate hardware IO implementations
-//          m_driveSubsystem = new DriveSubsystem(
-//            new GyroIOPigeon1(12),
-//            new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
-//            new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-//            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-//            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+          m_driveSubsystem = new DriveSubsystem(
+            new GyroIOPigeon1(12),
+            new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
           m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         }
     case PROTO_ARM -> {
-//          m_driveSubsystem = new DriveSubsystem(
-//                  new GyroIO() {
-//                  },
-//                  new ModuleIO() {},
-//                  new ModuleIO() {},
-//                  new ModuleIO() {},
-//                  new ModuleIO() {});
+          m_driveSubsystem = new DriveSubsystem(
+                  new GyroIO() {
+                  },
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
           m_shooter = new ShooterSubsystem(new ShooterIO() {});
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
-    }
+        }
     case SIM -> {
-      // Sim robot, instantiate physics sim IO implementations
-//        m_driveSubsystem =
-//          new DriveSubsystem(
-//            new GyroIO() {
-//            },
-//            new ModuleIOSim(DriveConstants.FL_MOD_CONSTANTS),
-//            new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
-//            new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
-//            new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
+//       Sim robot, instantiate physics sim IO implementations
+        m_driveSubsystem =
+          new DriveSubsystem(
+            new GyroIO() {},
+            new ModuleIOSim(DriveConstants.FL_MOD_CONSTANTS),
+            new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
+            new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
     default -> {
       // Replayed robot, disable IO implementations
-//        m_driveSubsystem =
-//                new DriveSubsystem(
-//                        new GyroIO() {
-//                        },
-//                        new ModuleIO() {
-//                        },
-//                        new ModuleIO() {
-//                        },
-//                        new ModuleIO() {
-//                        },
-//                        new ModuleIO() {
-//                        });
+        m_driveSubsystem =
+                new DriveSubsystem(
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
