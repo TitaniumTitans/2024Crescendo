@@ -1,12 +1,12 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lib.utils.AllianceFlipUtil;
+import lib.utils.FieldConstants;
+import lib.utils.GeomUtils;
 import org.littletonrobotics.junction.Logger;
 import frc.robot.Constants;
 
@@ -78,16 +78,25 @@ public class ArmSubsystem extends SubsystemBase {
       m_io.setShoulderVoltage(0.0);
     });
   }
-  public Translation2d getShooterTranslation(Rotation2d shoulderRotation, Rotation2d shooterRotation) {
-    return Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
-            new Translation2d(
+
+  public Transform3d getShooterTransformation() {
+    return new Transform3d(new Pose3d(),
+        Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
+            GeomUtils.translationToTransform(new Translation3d(
                 Constants.ArmConstants.SHOULDER_BAR_LENGTH_METERS,
-                shoulderRotation))
-        .plus(
-            new Translation2d(
-                Constants.ArmConstants.SHOOTER_BAR_LENGTH_METERS,
-                shooterRotation)
-        );
+                new Rotation3d(0.0, m_inputs.shoulderPositionRots * Math.PI * 2, 0.0)
+            ))
+        ));
+  }
+
+  public double calcShooterAngle(Pose3d robotPose) {
+    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+    Pose3d shooterPivotPose = robotPose.plus(getShooterTransformation());
+    Transform3d robotToSpeaker = new Transform3d(shooterPivotPose.plus(getShooterTransformation()), speakerPose);
+
+    double groundDistance =
+        Math.sqrt(Math.pow(robotToSpeaker.getX(), 2) + Math.pow(robotToSpeaker.getY(), 2));
+    return Math.atan2(groundDistance, robotToSpeaker.getZ());
   }
 }
 

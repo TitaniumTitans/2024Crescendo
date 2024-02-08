@@ -15,7 +15,10 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,6 +38,7 @@ import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
+import lib.utils.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -170,6 +174,16 @@ public class RobotContainer {
 
     controller.a().whileTrue(Commands.run(m_shooter::runShooterVelocity))
         .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+
+    controller.y().whileTrue(Commands.run(() -> {
+      m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+          -controller.getLeftY(),
+          -controller.getLeftX(),
+          m_driveSubsystem.alignToPoint(new Pose3d(FieldConstants.CENTER_SPEAKER, new Rotation3d())),
+          m_driveSubsystem.getRotation()
+      ));
+      m_armSubsystem.setWristPositionFactory(m_armSubsystem.calcShooterAngle(new Pose3d()));
+    }));
   }
 
   /**

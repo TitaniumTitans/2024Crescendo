@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -127,10 +128,7 @@ public final class Constants {
     public static final double SHOULDER_BAR_LENGTH_METERS = 0.0;
     public static final double SHOOTER_BAR_LENGTH_METERS = 0.0;
 
-    public static final Translation2d PIVOT_TRANSLATION_METERS = new Translation2d(
-      0.0,
-      0.0
-    );
+    public static final Pose3d PIVOT_TRANSLATION_METERS = new Pose3d();
   }
 
 
