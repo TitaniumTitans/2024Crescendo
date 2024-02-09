@@ -74,54 +74,61 @@ public class RobotContainer {
             new GyroIOPigeon1(12),
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
-          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        }
-    case PROTO_ARM -> {
-          m_driveSubsystem = new DriveSubsystem(
-                  new GyroIO() {
-                  },
-                  new ModuleIO() {},
-                  new ModuleIO() {},
-                  new ModuleIO() {},
-                  new ModuleIO() {});
-          m_shooter = new ShooterSubsystem(new ShooterIO() {});
-          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
-          m_climber = new ClimberSubsystem(new ClimberIOPrototype());
-        case PROTO_SHOOTER -> {
-          m_driveSubsystem = new DriveSubsystem(
-                  new GyroIO() {
-                  },
-                  new ModuleIO() {},
-                  new ModuleIO() {},
-                  new ModuleIO() {},
-                  new ModuleIO() {});
-          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-        }
-    case SIM -> {
+              new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
+              new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+      }
+      case PROTO_ARM -> {
+        m_driveSubsystem = new DriveSubsystem(
+            new GyroIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            });
+        m_shooter = new ShooterSubsystem(new ShooterIO() {
+        });
+        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {
+        });
+        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+      }
+      case PROTO_SHOOTER -> {
+        m_driveSubsystem = new DriveSubsystem(
+            new GyroIO() {
+            },
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+      }
+      case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
-          new DriveSubsystem(
-            new GyroIO() {},
-            new ModuleIOSim(DriveConstants.FL_MOD_CONSTANTS),
-            new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
-            new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
+            new DriveSubsystem(
+                new GyroIO() {},
+                new ModuleIOSim(DriveConstants.FL_MOD_CONSTANTS),
+                new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
+                new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
+                new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
         m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
-    default -> {
-      // Replayed robot, disable IO implementations
+      default -> {
+        // Replayed robot, disable IO implementations
         m_driveSubsystem =
-                new DriveSubsystem(
-                        new GyroIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {},
-                        new ModuleIO() {});
+            new DriveSubsystem(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
         m_climber = new ClimberSubsystem(new ClimberIO() {});
@@ -157,23 +164,23 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
-            .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
     controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
-            .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
 
     controller.b().whileTrue(m_armSubsystem.setShoulderPositionFactory(armPosition.get()))
-            .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
 
     controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
     controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory(-wristPower.get()))
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
     controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
     m_driveSubsystem.setDefaultCommand(
-      DriveCommands.joystickDrive(
+        DriveCommands.joystickDrive(
             m_driveSubsystem,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
@@ -186,7 +193,7 @@ public class RobotContainer {
                     () ->
                         m_driveSubsystem.setPose(
                             new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-                            m_driveSubsystem)
+                    m_driveSubsystem)
                 .ignoringDisable(true));
   }
 
@@ -196,6 +203,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-      return new InstantCommand();//autoChooser.get();
+    return new InstantCommand();//autoChooser.get();
   }
 }
