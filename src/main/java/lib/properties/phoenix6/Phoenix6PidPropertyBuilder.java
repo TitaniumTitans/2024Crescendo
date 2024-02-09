@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.gos.lib.properties.BaseHeavyProperty;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
 
@@ -105,6 +106,17 @@ public final class Phoenix6PidPropertyBuilder {
     return this;
   }
 
+  public void updateIfChanged(boolean forceUpdate) {
+    m_props.forEach((HeavyDoubleProperty prop) -> prop.updateIfChanged(forceUpdate));
+  }
+
+  public void updateIfChanged() {
+    updateIfChanged(false);
+  }
+
+  public SlotConfigs getSlotConfigs() {
+    return m_slot;
+  }
   public PidPropertyPublic build() {
     return new PidPropertyPublic(m_props);
   }

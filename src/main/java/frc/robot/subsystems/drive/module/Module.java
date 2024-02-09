@@ -53,7 +53,7 @@ public class Module {
         case REAL, REPLAY -> {
           m_driveFeedforward = new SimpleMotorFeedforward(0.1, 0.13);
           m_driveFeedback = new PIDController(0.05, 0.0, 0.0);
-          m_turnFeedback = new PIDController(7.0, 0.0, 0.0);
+          m_turnFeedback = new PIDController(0.1, 0.0, 0.0);
         }
         case SIM -> {
           m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
@@ -90,8 +90,7 @@ public class Module {
 
     // Run closed loop turn control
     if (m_angleSetpoint != null) {
-      m_io.setTurnPositionDegs(
-          m_turnFeedback.calculate(getAngle().getRadians(), m_angleSetpoint.getRadians()));
+      m_io.setTurnPositionDegs(m_angleSetpoint.minus(m_turnRelativeOffset).getRotations());
 
       // Run closed loop drive control
       // Only allowed if closed loop turn control is running
@@ -104,10 +103,10 @@ public class Module {
         double adjustSpeedSetpoint = m_speedSetpoint * Math.cos(m_turnFeedback.getPositionError());
 
         // Run drive controller
-        double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        m_io.setDriveVelocityMPS(
-            m_driveFeedforward.calculate(velocityRadPerSec)
-                + m_driveFeedback.calculate(m_inputs.getDriveVelocityRadPerSec(), velocityRadPerSec));
+        m_io.setDriveVelocityMPS(adjustSpeedSetpoint);
+//        m_io.setDriveVelocityMPS(
+//            m_driveFeedforward.calculate(velocityRadPerSec)
+//                + m_driveFeedback.calculate(m_inputs.getDriveVelocityRadPerSec(), velocityRadPerSec));
       }
     }
 
