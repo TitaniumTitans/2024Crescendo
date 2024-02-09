@@ -32,7 +32,6 @@ public class ArmIOPrototype implements ArmIO {
     // config for the shoulder joint
     config.Feedback.SensorToMechanismRatio = 125.0 * (60.0 / 18.0);
 
-    config.CurrentLimits.
     config.Voltage.PeakForwardVoltage = 12;
     config.Voltage.PeakReverseVoltage = -12;
 
