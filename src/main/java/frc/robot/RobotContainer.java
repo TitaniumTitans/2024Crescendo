@@ -78,6 +78,7 @@ public class RobotContainer {
               new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -95,7 +96,7 @@ public class RobotContainer {
         });
         m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {
         });
-        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -106,6 +107,8 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
       case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
