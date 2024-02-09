@@ -27,11 +27,14 @@ public final class Constants {
   private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.PROTO_ARM;
 
   public enum Mode {
     /** Running on a real robot. */
     REAL,
+    PROTO_ARM,
+
+    PROTO_SHOOTER,
 
     /** Running a physics simulator. */
     SIM,
@@ -98,6 +101,49 @@ public final class Constants {
             true,
             ModuleConstants.GearRatios.L3
     );
+  }
+
+
+  public static class ArmConstants {
+    private ArmConstants() {}
+
+    public static int WRIST_ID = 0;
+    public static int SHOULDER_ID = 0;
+
+    public static double WRIST_KP = 0.0;
+    public static double WRIST_KI = 0.0;
+    public static double WRIST_KD = 0.0;
+    public static double WRIST_KS = 0.0;
+    public static double WRIST_KV = 0.0;
+    public static double WRIST_KG = 0.0;
+
+    public static double SHOULDER_KP = 0.0;
+    public static double SHOULDER_KI = 0.0;
+    public static double SHOULDER_KD = 0.0;
+    public static double SHOULDER_KS = 0.0;
+    public static double SHOULDER_KV = 0.0;
+    public static double SHOULDER_KG = 0.0;
+  }
+  public static class ShooterConstants {
+    private ShooterConstants() {
+      throw new IllegalStateException("Static classes should not be constructed");
+    }
+    public static final int TOP_LEFT_ID = 13;
+    public static final int TOP_RIGHT_ID = 14;
+    public static final int BOTTOM_LEFT_ID = 15;
+    public static final int BOTTOM_RIGHT_ID = 16;
+    public static final int KICKER_ID = 17;
+
+    public static final double SHOOTER_KP = 0.000061;
+    public static final double SHOOTER_KI = 0.0;
+    public static final double SHOOTER_KD = 0.005;
+    public static final double SHOOTER_KF = 0.000152;
+
+    public static final boolean TOP_LEFT_INVERTED = false;
+    public static final boolean TOP_RIGHT_INVERTED = true;
+    public static final boolean BOTTOM_LEFT_INVERTED = true;
+    public static final boolean BOTTOM_RIGHT_INVERTED = false;
+    public static final boolean KICKER_INVERTED = true;
   }
 
   public class ClimberConstants {
