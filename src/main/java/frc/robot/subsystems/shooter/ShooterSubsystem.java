@@ -1,28 +1,38 @@
 package frc.robot.subsystems.shooter;
 
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class ShooterSubsystem extends SubsystemBase {
   private final ShooterIO m_io;
+  private final ShooterIOInputsAutoLogged m_inputs;
 
-  private static final String TOP_WHEEL_RATIO = "Top wheel ratio";
+  private final LoggedDashboardNumber m_leftSetpoint;
+  private final LoggedDashboardNumber m_rightSetpoint;
+
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
-    SmartDashboard.putNumber(TOP_WHEEL_RATIO, 0.8);
-    SmartDashboard.putNumber("Left wheel", 0.6);
-    SmartDashboard.putNumber("Right wheel", 0.6);
+    m_inputs = new ShooterIOInputsAutoLogged();
+
+    m_leftSetpoint = new LoggedDashboardNumber("Shooter/Left Flywheel Setpoint RPM");
+    m_rightSetpoint = new LoggedDashboardNumber("Shooter/Right Flywheel Setpoint RPM");
+  }
+
+  @Override
+  public void periodic() {
+    m_io.updateInputs(m_inputs);
+    Logger.processInputs("Shooter", m_inputs);
   }
 
   public void setShooterPowerLeft(double power) {
-    m_io.setMotorVoltageTL((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
+    m_io.setMotorVoltageTL(power * 12.0);
     m_io.setMotorVoltageBL(power * 12.0);
   }
 
   public void setShooterPowerRight(double power) {
-    m_io.setMotorVoltageTR((power * 12.0) * SmartDashboard.getNumber(TOP_WHEEL_RATIO, 0.85));
+    m_io.setMotorVoltageTR(power * 12.0);
     m_io.setMotorVoltageBR(power * 12.0);
   }
 
@@ -34,18 +44,18 @@ public class ShooterSubsystem extends SubsystemBase {
     m_io.setIntakeVoltage(power * 12.0);
   }
 
-  public Command setShooterPowerFactory(double left, double right) {
-    return run(() -> {
-      setShooterPowerLeft(left == 0.0 ? 0.0 : SmartDashboard.getNumber("Left wheel", 0.6));
-      setShooterPowerRight(right == 0.0 ? 0.0 : SmartDashboard.getNumber("Right wheel", 0.6));
-      setKickerPower(left == 0.0 ? 0.0 : 1.0);
-    });
+  public void runShooterVelocity() {
+    m_io.setLeftVelocityRpm(m_leftSetpoint.get());
+    m_io.setRightVelocityRpm(m_rightSetpoint.get());
+//    m_io.setKickerVoltage(9.0);
   }
 
-  public Command setIntakePowerFactory(double power) {
+  public Command setShooterPowerFactory(double left, double right) {
     return run(() -> {
-      setIntakePower(power);
-      setKickerPower(power == 0.0 ? 0.0 : 0.75);
+      setShooterPowerLeft(left);
+      setShooterPowerRight(right);
+      setKickerPower(left == 0.0 ? 0.0 : 1.0);
+      setIntakePower(left == 0.0 ? 0.0 : 0.35);
     });
   }
 }
