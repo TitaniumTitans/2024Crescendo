@@ -73,6 +73,20 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final VisionSubsystem[] m_cameras;
 
+  public DriveSubsystem (
+      GyroIO gyroIO,
+      ModuleIO flModuleIO,
+      ModuleIO frModuleIO,
+      ModuleIO blModuleIO,
+      ModuleIO brModuleIO) {
+    this (gyroIO,
+        flModuleIO,
+        frModuleIO,
+        blModuleIO,
+        brModuleIO,
+        new VisionSubsystem[]{});
+  }
+
   public DriveSubsystem(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
