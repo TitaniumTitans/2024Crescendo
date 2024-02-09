@@ -49,18 +49,8 @@ public class VisionSubsystem {
     m_camera = new PhotonCamera(camName);
     m_name = camName;
     robotToCam = camPose;
-//    if(DriverStation.getAlliance().isPresent()) {
-//      m_alliance = DriverStation.getAlliance().get();
-//    } else {
-//      m_alliance = DriverStation.Alliance.Blue;
-//    }
     try {
       m_aprilTagFieldLayout =AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-//      if(m_alliance == DriverStation.Alliance.Blue){
-//        m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
-//      } else {
-//        m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
-//      }
       m_photonPoseEstimator = new PhotonPoseEstimator(
           m_aprilTagFieldLayout,
           PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
@@ -74,22 +64,6 @@ public class VisionSubsystem {
   public Optional<VisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
 
     m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-
-    // We shouldn't have to do this anymore, as pathplanners new lib doesn't have the weird origin thing
-//    if(DriverStation.getAlliance().isPresent()){
-//      if (m_alliance != DriverStation.getAlliance().get()){
-//        m_alliance = DriverStation.getAlliance().get();
-//
-//        if (m_alliance == DriverStation.Alliance.Red) {
-//          m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kRedAllianceWallRightSide);
-//        } else {
-//          m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
-//        }
-//      }
-//    }
-//    else {
-//      m_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
-//    }
 
     PhotonPipelineResult camResult = m_camera.getLatestResult();
     Optional<EstimatedRobotPose> opPose = m_photonPoseEstimator.update(camResult);
