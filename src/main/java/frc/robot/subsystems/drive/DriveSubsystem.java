@@ -18,6 +18,7 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -29,14 +30,21 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
+import frc.robot.subsystems.vision.VisionSubsystem;
 import frc.robot.util.LocalADStarAK;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
+
+import frc.robot.util.PoseEstimator;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -54,24 +62,48 @@ public class DriveSubsystem extends SubsystemBase {
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  private final PoseEstimator m_poseEstimator;
   private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
+
+  private final VisionSubsystem[] m_cameras;
+
+  public DriveSubsystem (
+      GyroIO gyroIO,
+      ModuleIO flModuleIO,
+      ModuleIO frModuleIO,
+      ModuleIO blModuleIO,
+      ModuleIO brModuleIO) {
+    this (gyroIO,
+        flModuleIO,
+        frModuleIO,
+        blModuleIO,
+        brModuleIO,
+        new VisionSubsystem[]{});
+  }
 
   public DriveSubsystem(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIO brModuleIO,
+      VisionSubsystem[] cameras) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO);
     modules[1] = new Module(frModuleIO);
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
 
+    m_cameras = cameras;
+    m_poseEstimator =
+        new PoseEstimator(VecBuilder.fill(Units.inchesToMeters(0.5),
+            Units.inchesToMeters(0.5),
+            Units.degreesToRadians(15)));
+
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configureHolonomic(
-        this::getPose,
+        this::getVisionPose,
         this::setPose,
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
@@ -141,8 +173,15 @@ public class DriveSubsystem extends SubsystemBase {
       }
       Logger.recordOutput("Odometry/Twist", twist);
       // Apply the twist (change since last sample) to the current pose
+      m_poseEstimator.addDriveData(Timer.getFPGATimestamp(), twist);
       pose = pose.exp(twist);
     }
+    m_poseEstimator.addVisionData(
+        Arrays.stream(m_cameras)
+            .flatMap((VisionSubsystem camera) -> Stream.of(camera.getPose(m_poseEstimator.getLatestPose())))
+            .filter(Optional::isPresent)
+            .flatMap(update -> Stream.of(update.get()))
+            .toList());
   }
 
   /**
@@ -216,6 +255,12 @@ public class DriveSubsystem extends SubsystemBase {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return pose;
+  }
+
+  /** Returns the robot pose with vision updates */
+  @AutoLogOutput(key = "Odometry/RobotVision")
+  public Pose2d getVisionPose() {
+    return m_poseEstimator.getLatestPose();
   }
 
   /** Returns the current odometry rotation. */
