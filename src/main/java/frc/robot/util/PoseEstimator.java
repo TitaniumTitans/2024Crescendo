@@ -23,7 +23,7 @@ import java.util.TreeMap;
 import lib.GeomUtil;
 
 public class PoseEstimator {
-  private static final double historyLengthSecs = 0.3;
+  private static final double HISTORY_LENGTH_SECS = 0.3;
 
   private Pose2d basePose = new Pose2d();
   private Pose2d latestPose = new Pose2d();
@@ -104,7 +104,7 @@ public class PoseEstimator {
   private void update() {
     // Clear old data and update base pose
     while (updates.size() > 1
-        && updates.firstKey() < Timer.getFPGATimestamp() - historyLengthSecs) {
+        && updates.firstKey() < Timer.getFPGATimestamp() - HISTORY_LENGTH_SECS) {
       var update = updates.pollFirstEntry();
       basePose = update.getValue().apply(basePose, q);
     }
@@ -163,11 +163,9 @@ public class PoseEstimator {
   /** Represents a single vision pose with associated standard deviations. */
   public record VisionUpdate(Pose2d pose, Matrix<N3, N1> stdDevs) {
     public static final Comparator<VisionUpdate> compareDescStdDev =
-        (VisionUpdate a, VisionUpdate b) -> {
-          return -Double.compare(
-              a.stdDevs().get(0, 0) + a.stdDevs().get(1, 0),
-              b.stdDevs().get(0, 0) + b.stdDevs().get(1, 0));
-        };
+        (VisionUpdate a, VisionUpdate b) -> -Double.compare(
+            a.stdDevs().get(0, 0) + a.stdDevs().get(1, 0),
+            b.stdDevs().get(0, 0) + b.stdDevs().get(1, 0));
   }
 
   /** Represents a single vision pose with a timestamp and associated standard deviations. */

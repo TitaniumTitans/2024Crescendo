@@ -18,7 +18,6 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,8 +27,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -45,7 +42,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import frc.robot.util.PoseEstimator;
@@ -68,7 +64,6 @@ public class DriveSubsystem extends SubsystemBase {
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private final PoseEstimator m_poseEstimator;
   private Pose2d pose = new Pose2d();
-  private Pose2d visionPose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
 
   private final VisionSubsystem[] m_cameras;
@@ -186,7 +181,7 @@ public class DriveSubsystem extends SubsystemBase {
             .flatMap((VisionSubsystem camera) -> Stream.of(camera.getPose(m_poseEstimator.getLatestPose())))
             .filter(Optional::isPresent)
             .flatMap(update -> Stream.of(update.get()))
-            .collect(Collectors.toList()));
+            .toList());
   }
 
   /**

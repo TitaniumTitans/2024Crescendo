@@ -12,10 +12,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.PoseEstimator;
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -30,7 +27,6 @@ public class VisionSubsystem {
   private final PhotonCamera m_camera;
   private final Transform3d robotToCam;
   private PhotonPoseEstimator m_photonPoseEstimator;
-  private DriverStation.Alliance m_alliance;
   private AprilTagFieldLayout m_aprilTagFieldLayout;
   private final String m_name;
 
