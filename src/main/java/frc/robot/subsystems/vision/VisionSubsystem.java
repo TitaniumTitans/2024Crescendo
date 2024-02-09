@@ -14,6 +14,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.PoseEstimator;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
@@ -61,7 +62,7 @@ public class VisionSubsystem {
     }
   }
 
-  public Optional<VisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
+  public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
 
     m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
 
@@ -72,9 +73,9 @@ public class VisionSubsystem {
       return Optional.empty();
     } else {
       EstimatedRobotPose estPose = opPose.get();
-      return Optional.of(new VisionUpdate(estPose.estimatedPose.toPose2d(),
-          VecBuilder.fill(Units.inchesToMeters(0.5), Units.inchesToMeters(0.5), Units.degreesToRadians(15)),
-          estPose.timestampSeconds));
+      return Optional.of(new PoseEstimator.TimestampedVisionUpdate(estPose.timestampSeconds,
+          estPose.estimatedPose.toPose2d(),
+          VecBuilder.fill(Units.inchesToMeters(0.5), Units.inchesToMeters(0.5), Units.degreesToRadians(15))));
     }
   }
 
