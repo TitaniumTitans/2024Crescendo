@@ -28,10 +28,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
-import lib.properties.phoenix6.PidPropertyPublic;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.Queue;
 
@@ -79,6 +76,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
     m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID());
     m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID());
+    
     /*
     * this is technically the proper way of using any class that
     * implements the "Closeable" or "AutoClosable", typically things
@@ -87,8 +85,8 @@ public class ModuleIOTalonFX implements ModuleIO {
       // run factory default on cancoder
       var encoderConfig = new CANcoderConfiguration();
       encoderConfig.MagnetSensor.SensorDirection =
-              moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
-                      : SensorDirectionValue.CounterClockwise_Positive;
+          moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
+              : SensorDirectionValue.CounterClockwise_Positive;
       encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
       cancoder.getConfigurator().apply(encoderConfig);
 
@@ -141,6 +139,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addD(m_moduleConstants.TURN_KD());
 
     m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
+
 
     // Fancy multithreaded odometry update stuff
     // setup drive values
@@ -205,9 +204,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnPid.updateIfChanged();
 
     inputs.drivePositionRad =
-        Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
+        Units.rotationsToRadians(m_drivePosition.getValueAsDouble());
     inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
+        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = m_driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {m_driveCurrent.getValueAsDouble()};
 
@@ -216,28 +215,19 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.setTurnPosition(Rotation2d.fromRotations((
             m_turnPosition.getValueAsDouble())));
     inputs.setTurnVelocityRadPerSec(
-            Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()) / m_moduleConstants.TURNING_GEAR_RATIO());
+            Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()));
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
 
     inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
-        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / m_moduleConstants.DRIVE_GEAR_RATIO())
+        .mapToDouble(Units::rotationsToRadians)
         .toArray());
     inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
-        .map((Double value) -> Rotation2d.fromRotations(value / m_moduleConstants.DRIVE_GEAR_RATIO()))
+        .map(Rotation2d::fromRotations)
         .toArray(Rotation2d[]::new));
+
     m_drivePositionQueue.clear();
     m_turnPositionQueue.clear();
-
-    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Closed Loop Output", m_turnClosedLoopOutput.getValueAsDouble());
-    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Closed Loop Error", m_turnClosedLoopError.getValueAsDouble());
-    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Closed Loop Reference", m_turnClosedLoopReference.getValueAsDouble());
-
-    SmartDashboard.putNumber("Module " + m_moduleConstants.MODULE_INDEX() +
-            "/Recorded kP", m_turnPid.getSlotConfigs().kP);
   }
 
   @Override
@@ -248,9 +238,8 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void setTurnPositionDegs(double degrees) {
-//    double rots = degrees / 360;
-    m_turnTalon.setControl(m_posRequest.withPosition(degrees));
+  public void setTurnPositionRots(double rotations) {
+    m_turnTalon.setControl(m_posRequest.withPosition(rotations));
   }
 
   @Override
