@@ -21,5 +21,6 @@ public interface ShooterIO {
   default void setMotorVoltageBL(double voltage) {}
   default void setMotorVoltageBR(double voltage) {}
   default void setKickerVoltage(double voltage) {}
+  default void setIntakeVoltage(double voltage) {}
 
 }

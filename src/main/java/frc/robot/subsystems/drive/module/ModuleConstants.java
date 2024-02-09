@@ -18,6 +18,16 @@ public record ModuleConstants(
     // Turning loop gains
     double TURN_KP, double TURN_KI, double TURN_KD) {
   public static final double DEFAULT_WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+  public static final ModuleConstants BLANK_CONSTANTS = new ModuleConstants(
+          0,
+          new int[] {0, 0, 0},
+          new double[] {0.0, 0.0, 0.0},
+          new double[] {0.0, 0.0, 0.0},
+          new double[] {0.0, 0.0, 0.0},
+          0.0,
+          false,
+          GearRatios.L3
+  );
 
   public ModuleConstants() {
     this (0, new int[] {0, 0, 0},

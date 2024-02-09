@@ -101,6 +101,7 @@ public final class Constants {
     );
   }
 
+
   public static class ArmConstants {
     private ArmConstants() {}
 
@@ -120,5 +121,24 @@ public final class Constants {
     public static double SHOULDER_KS = 0.0;
     public static double SHOULDER_KV = 0.0;
     public static double SHOULDER_KG = 0.0;
+  }
+  public class ClimberConstants {
+    private ClimberConstants() {
+      throw new IllegalStateException("Static class should not be constructed");
+    }
+
+    public static final int LEFT_CLIMBER_ID = 18;
+    public static final int RIGHT_CLIMBER_ID = 19;
+
+    public static final double CLIMBER_KP = 0.0;
+    public static final double CLIMBER_KI = 0.0;
+    public static final double CLIMBER_KD = 0.0;
+
+    public static final double CLIMBER_KV = 0.0;
+    public static final double CLIMBER_KS = 0.0;
+    public static final double CLIMBER_KA = 0.0;
+
+    public static final double CLIMBER_GEAR_RATIO = 0.0;
+    public static final double CLIMBER_CONVERSION_FACTOR_INCHES = 0.0;
   }
 }

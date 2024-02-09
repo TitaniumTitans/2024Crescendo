@@ -28,6 +28,9 @@ import frc.robot.commands.FeedForwardCharacterization;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOPrototype;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOPrototype;
+import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
@@ -51,6 +54,7 @@ public class RobotContainer {
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
   public final ArmSubsystem m_armSubsystem;
+  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -87,6 +91,7 @@ public class RobotContainer {
                   new ModuleIO() {});
           m_shooter = new ShooterSubsystem(new ShooterIO() {});
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
+          m_climber = new ClimberSubsystem(new ClimberIOPrototype());
         }
     case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
@@ -99,6 +104,7 @@ public class RobotContainer {
             new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
     default -> {
       // Replayed robot, disable IO implementations
@@ -111,6 +117,7 @@ public class RobotContainer {
                         new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
@@ -142,23 +149,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-//    m_driveSubsystem.setDefaultCommand(
-//        DriveCommands.joystickDrive(
-//                m_driveSubsystem,
-//            () -> -controller.getLeftX(),
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getRightX()));
-//    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
-//    controller
-//        .b()
-//        .onTrue(
-//            Commands.runOnce(
-//                    () ->
-//                        m_driveSubsystem.setPose(
-//                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-//                            m_driveSubsystem)
-//                .ignoringDisable(true));
-
     controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
             .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
     controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
@@ -175,6 +165,22 @@ public class RobotContainer {
     controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
+    m_driveSubsystem.setDefaultCommand(
+        DriveCommands.joystickDrive(
+                m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
+    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
+    controller
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        m_driveSubsystem.setPose(
+                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+                            m_driveSubsystem)
+                .ignoringDisable(true));
   }
 
   /**
