@@ -24,7 +24,7 @@ public class ObjectDetectionSubsystem extends SubsystemBase {
 
     double[] obs = m_inputs.getObservations();
 
-    for (int i = 2; i < obs[0]; i += 4) {
+    for (int i = 1; i < obs[0]; i += 4) {
       m_observations.add(new DetectionObservation(
           obs[i],
           obs[i + 1],
