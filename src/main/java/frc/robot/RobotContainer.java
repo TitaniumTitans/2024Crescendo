@@ -37,9 +37,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon1;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
-import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOPrototype;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.shooter.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -92,6 +90,15 @@ public class RobotContainer {
           m_shooter = new ShooterSubsystem(new ShooterIO() {});
           m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {});
           m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+        case PROTO_SHOOTER -> {
+          m_driveSubsystem = new DriveSubsystem(
+                  new GyroIO() {
+                  },
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {},
+                  new ModuleIO() {});
+          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
         }
     case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
@@ -166,8 +173,8 @@ public class RobotContainer {
             .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
-                m_driveSubsystem,
+      DriveCommands.joystickDrive(
+            m_driveSubsystem,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
