@@ -14,6 +14,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -58,7 +59,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
-//  private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   private final LoggedDashboardNumber wristPower;
   private final LoggedDashboardNumber wristPosition;
@@ -74,28 +75,21 @@ public class RobotContainer {
             new GyroIOPigeon1(12),
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-              new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-              new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-      }
+            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+          m_shooter = new ShooterSubsystem(new ShooterIntakeIOPrototype());
+          m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+          m_climber = new ClimberSubsystem(new ClimberIO() {});
+        }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
-            new GyroIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            });
-        m_shooter = new ShooterSubsystem(new ShooterIO() {
-        });
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {
-        });
+            new GyroIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
@@ -139,7 +133,7 @@ public class RobotContainer {
     }
 
     // Set up auto routines
-//    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
 
     armPower = new LoggedDashboardNumber("Arm Power", 0.0);
@@ -157,6 +151,8 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    // configure named commands for auto
+    configureNamedCommands();
   }
 
   /**
@@ -201,11 +197,19 @@ public class RobotContainer {
   }
 
   /**
+   * Use this method to configure any named commands needed for PathPlanner autos
+   */
+  private void configureNamedCommands() {
+    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
+    NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+  }
+
+  /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new InstantCommand();//autoChooser.get();
+    return autoChooser.get();
   }
 }
