@@ -24,12 +24,13 @@ public class ObjectDetectionSubsystem extends SubsystemBase {
 
     double[] obs = m_inputs.getObservations();
 
-    for (int i = 1; i < obs[0]; i += 4) {
+    for (int i = 2; i < obs[0]; i += 5) {
       m_observations.add(new DetectionObservation(
-          obs[i],
-          obs[i + 1],
-          obs[i + 2],
-          obs[i + 3]
+          (int) obs[i], // Object ID
+          obs[i + 1], // Object tX
+          obs[i + 2], // Object tY
+          obs[i + 3], // Object confidence
+          obs[i + 4] // Object area
       ));
     }
   }
@@ -47,6 +48,7 @@ public class ObjectDetectionSubsystem extends SubsystemBase {
   }
 
   public record DetectionObservation(
+      int id,
       double deltaX,
       double deltaY,
       double confidence,

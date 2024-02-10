@@ -10,6 +10,8 @@ class LocalConfig:
     model_path: str = ""
     label_path: str = ""
     inference_size: Tuple[int, int] = 0, 0
+    scale_x: int = 1
+    scale_y: int = 1
 
 
 @dataclass

@@ -38,6 +38,8 @@ class Detector:
         self._tracker = Sort()
 
         self._inference_size = input_size(self._interpreter)
+        config.local_config.scale_x = config.remote_config.camera_resolution_width / self._inference_size[0]
+        config.local_config.scale_y = config.remote_config.camera_resolution_height / self._inference_size[1]
 
         if self._interpreter is None:
             print("Failed to create interpreter. Exiting.")

@@ -133,9 +133,6 @@ public class RobotContainer {
                             new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
                             m_driveSubsystem)
                 .ignoringDisable(true));
-
-    controller.a().whileTrue(m_shooter.setShooterPower(0.6, 0.6))
-            .whileFalse(m_shooter.setShooterPower(0.0, 0.0));
   }
 
   /**
