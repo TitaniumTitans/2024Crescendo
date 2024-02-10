@@ -3,8 +3,10 @@ from config.ConfigSource import FileConfigSource, NTConfigSource
 from pipeline.Capture import CVCapture
 from pipeline.Detector import Detector
 from output.StreamServer import MjpegServer
+from output.OutputPublisher import NTOutputPublisher
 
 import time
+import ntcore
 
 if __name__ == '__main__':
     config = ConfigStore(LocalConfig(), RemoteConfig())
@@ -13,8 +15,11 @@ if __name__ == '__main__':
     stream_server = MjpegServer()
     file_config = FileConfigSource()
     remote_config = NTConfigSource()
+    observation_publisher = NTOutputPublisher()
 
     file_config.update(config)
+    ntcore.NetworkTableInstance.getDefault().setServer(config.local_config.server_ip)
+    ntcore.NetworkTableInstance.getDefault().startClient4(config.local_config.device_id)
 
     detector = Detector(config)
     stream_server.start(config)
@@ -42,4 +47,5 @@ if __name__ == '__main__':
         tracked_objs = detector.update_tracker(objs)
 
         image = detector.draw_bbox(image, tracked_objs)
+        observation_publisher.publish(config, timestamp, tracked_objs, fps)
         stream_server.set_frame(image)
