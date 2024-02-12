@@ -9,16 +9,19 @@ public interface ShooterIO {
     protected double trVelocityRots = 0.0;
     protected double blVelocityRots = 0.0;
     protected double brVelocityRots = 0.0;
+
     protected double tlAppliedVolts = 0.0;
     protected double trAppliedVolts = 0.0;
     protected double blAppliedVolts = 0.0;
     protected double brAppliedVolts = 0.0;
     protected double kickerAppliedVolts = 0.0;
+
     protected double tlCurrentDraw = 0.0;
     protected double trCurrentDraw = 0.0;
     protected double blCurrentDraw = 0.0;
     protected double brCurrentDraw = 0.0;
     protected double kickerCurrentDraw = 0.0;
+
     protected double tlTemperature = 0.0;
     protected double trTemperature = 0.0;
     protected double blTemperature = 0.0;

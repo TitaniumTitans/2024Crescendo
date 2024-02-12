@@ -7,12 +7,16 @@ public interface ClimberIO {
   class ClimberIOInputs {
     protected double leftClimberPosition = 0.0;
     protected double rightClimberPosition = 0.0;
+
     protected double leftClimberVelocity = 0.0;
     protected double rightClimberVelocity = 0.0;
+
     protected double leftClimberCurrentDraw = 0.0;
     protected double rightClimberCurrentDraw = 0.0;
+
     protected double leftClimberCurrentSetpoint = 0.0;
     protected double rightClimberCurrentSetpoint = 0.0;
+
     protected double leftClimberAppliedOutput = 0.0;
     protected double rightClimberAppliedOutput = 0.0;
 

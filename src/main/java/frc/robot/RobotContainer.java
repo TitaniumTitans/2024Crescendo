@@ -111,7 +111,7 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_shooter = new ShooterSubsystem(new ShooterIOSim());
 //        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
 //        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
