@@ -45,7 +45,7 @@ public class VisionSubsystem {
       m_aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
       m_photonPoseEstimator = new PhotonPoseEstimator(
           m_aprilTagFieldLayout,
-          PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
+          PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
           m_camera,
           robotToCam);
     } catch (IOException e){
