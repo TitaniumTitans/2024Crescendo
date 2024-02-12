@@ -31,7 +31,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -97,9 +99,12 @@ public class DriveSubsystem extends SubsystemBase {
 
     m_cameras = cameras;
     m_poseEstimator =
-        new PoseEstimator(VecBuilder.fill(Units.inchesToMeters(0.5),
-            Units.inchesToMeters(0.5),
-            Units.degreesToRadians(15)));
+        new PoseEstimator(VecBuilder.fill(
+            Units.inchesToMeters(1.0),
+            Units.inchesToMeters(1.0),
+            Units.degreesToRadians(30)));
+
+    m_poseEstimator.resetPose(new Pose2d());
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configureHolonomic(
@@ -176,12 +181,15 @@ public class DriveSubsystem extends SubsystemBase {
       m_poseEstimator.addDriveData(Timer.getFPGATimestamp(), twist);
       pose = pose.exp(twist);
     }
-    m_poseEstimator.addVisionData(
-        Arrays.stream(m_cameras)
-            .flatMap((VisionSubsystem camera) -> Stream.of(camera.getPose(m_poseEstimator.getLatestPose())))
-            .filter(Optional::isPresent)
-            .flatMap(update -> Stream.of(update.get()))
-            .toList());
+
+    List<PoseEstimator.TimestampedVisionUpdate> visionUpdates = new java.util.ArrayList<>(List.of());
+    for (VisionSubsystem camera : m_cameras) {
+      camera.updateInputs();
+      Optional<PoseEstimator.TimestampedVisionUpdate> update = camera.getPose(m_poseEstimator.getLatestPose());
+      update.ifPresent(visionUpdates::add);
+    }
+
+//    m_poseEstimator.addVisionData(visionUpdates);
   }
 
   /**
@@ -265,12 +273,12 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
-    return pose.getRotation();
+    return m_poseEstimator.getLatestPose().getRotation();
   }
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
-    this.pose = pose;
+    m_poseEstimator.resetPose(pose);
   }
 
   /** Returns the maximum linear speed in meters per sec. */
@@ -281,6 +289,10 @@ public class DriveSubsystem extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return MAX_ANGULAR_SPEED;
+  }
+
+  public Command pathfollowFactory(Pose2d pose) {
+    return AutoBuilder.pathfindToPose(pose, Constants.DriveConstants.DEFAULT_CONSTRAINTS);
   }
 
   /** Returns an array of module translations. */

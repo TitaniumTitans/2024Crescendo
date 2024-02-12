@@ -7,6 +7,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
@@ -30,24 +31,18 @@ public class VisionSubsystem {
   private AprilTagFieldLayout m_aprilTagFieldLayout;
   private final String m_name;
 
+  private Pose3d m_lastEstimatedPose = new Pose3d();
+  private final double xyStdDevCoefficient = 0.01;
+  private final double thetaStdDevCoefficient = 0.01;
+
   private final PhotonVisionIOInputsAutoLogged inputs = new PhotonVisionIOInputsAutoLogged();
-
-  public void updateInputs(){
-    inputs.setCamConnected(m_camera.isConnected());
-    inputs.setCamLatency(m_camera.getLatestResult().getLatencyMillis());
-    inputs.setTagIds(getTargetIDs());
-    inputs.setNumTagsFound(m_camera.getLatestResult().targets.size());
-    inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
-
-    Logger.processInputs("PhotonVision/" + m_name, inputs);
-  }
 
   public VisionSubsystem(String camName, Transform3d camPose) {
     m_camera = new PhotonCamera(camName);
     m_name = camName;
     robotToCam = camPose;
     try {
-      m_aprilTagFieldLayout =AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+      m_aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
       m_photonPoseEstimator = new PhotonPoseEstimator(
           m_aprilTagFieldLayout,
           PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
@@ -56,6 +51,17 @@ public class VisionSubsystem {
     } catch (IOException e){
       throw new IllegalStateException(e);
     }
+  }
+
+  public void updateInputs() {
+    inputs.setCamConnected(m_camera.isConnected());
+    inputs.setCamLatency(m_camera.getLatestResult().getLatencyMillis());
+    inputs.setTagIds(getTargetIDs());
+    inputs.setNumTagsFound(m_camera.getLatestResult().targets.size());
+    inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
+
+    Logger.recordOutput("PhotonVision/" + m_name + "/Last Estimated Pose", m_lastEstimatedPose);
+//    Logger.processInputs("PhotonVision/" + m_name, inputs);
   }
 
   public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
@@ -69,9 +75,17 @@ public class VisionSubsystem {
       return Optional.empty();
     } else {
       EstimatedRobotPose estPose = opPose.get();
+      m_lastEstimatedPose = estPose.estimatedPose;
+
+      double distance = estPose.estimatedPose.toPose2d().getTranslation().getDistance(
+          robotToCam.getTranslation().toTranslation2d());
+
+      double xyStdDev = xyStdDevCoefficient * Math.pow(distance, 2.0);
+      double thetaStdDev = thetaStdDevCoefficient * Math.pow(distance, 2.0);
+
       return Optional.of(new PoseEstimator.TimestampedVisionUpdate(estPose.timestampSeconds,
           estPose.estimatedPose.toPose2d(),
-          VecBuilder.fill(Units.inchesToMeters(0.5), Units.inchesToMeters(0.5), Units.degreesToRadians(15))));
+          VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev)));
     }
   }
 

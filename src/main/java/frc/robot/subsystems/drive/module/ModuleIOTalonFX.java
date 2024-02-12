@@ -232,7 +232,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveVelocityMPS(double mps) {
-    double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
+    double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS());
     VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0);
     m_driveTalon.setControl(velRequest.withVelocity(rps));
   }

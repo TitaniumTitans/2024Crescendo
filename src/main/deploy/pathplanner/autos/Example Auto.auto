@@ -18,18 +18,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Run Flywheel"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "New Path"

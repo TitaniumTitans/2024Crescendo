@@ -21,17 +21,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FeedForwardCharacterization;
-import frc.robot.subsystems.arm.ArmIO;
-import frc.robot.subsystems.arm.ArmIOPrototype;
-import frc.robot.subsystems.arm.ArmSubsystem;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOPrototype;
-import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
@@ -39,6 +31,7 @@ import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
+import frc.robot.subsystems.vision.VisionSubsystem;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -52,8 +45,8 @@ public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
-  public final ArmSubsystem m_armSubsystem;
-  private final ClimberSubsystem m_climber;
+//  public final ArmSubsystem m_armSubsystem;
+//  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -76,10 +69,15 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
+              new VisionSubsystem[]{
+                  new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
+                  new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
+              });
+//          );
           m_shooter = new ShooterSubsystem(new ShooterIntakeIOPrototype());
-          m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-          m_climber = new ClimberSubsystem(new ClimberIO() {});
+//          m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+//          m_climber = new ClimberSubsystem(new ClimberIO() {});
         }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -89,8 +87,8 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -101,8 +99,8 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
       case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
@@ -114,8 +112,8 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+//        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -127,8 +125,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
@@ -162,22 +160,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
-        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
-    controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
-        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
-
-    controller.b().whileTrue(m_armSubsystem.setShoulderPositionFactory(armPosition.get()))
-        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
-
-    controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory(-wristPower.get()))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-
-    controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
             m_driveSubsystem,

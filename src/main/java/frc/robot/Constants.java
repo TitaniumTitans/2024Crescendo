@@ -12,6 +12,10 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
@@ -27,7 +31,7 @@ public final class Constants {
   private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
-  public static final Mode currentMode = Mode.PROTO_ARM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -57,6 +61,31 @@ public final class Constants {
     protected static final double[] DRIVE_FB_GAINS = new double[]{0.05, 0.0, 0.0};
     // kP, kI, kD in order
     protected static final double[] TURN_FB_GAINS = new double[]{0.1, 0.0, 0.0};
+
+//    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+//        new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),
+//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(-18))
+//    );
+//    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
+//                new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(-8.5), Units.inchesToMeters(6)),
+//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(18))
+//        );
+
+    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(9.0), Units.inchesToMeters(6.0)),
+        new Rotation3d(Units.degreesToRadians(5.0), Units.degreesToRadians(-28.125), Units.degreesToRadians(35.0 + 180))
+    );
+    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(-9.0), Units.inchesToMeters(6.0)),
+        new Rotation3d(Units.degreesToRadians(2.0), Units.degreesToRadians(-26.0), Units.degreesToRadians(-35.0 - 180))
+    );
+
+    public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
+        Units.feetToMeters(19.5),
+        Units.feetToMeters(19.5),
+        360,
+        360
+    );
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
