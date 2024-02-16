@@ -12,7 +12,7 @@ public class TalonFXFactory {
     //ArrayList of all TalonFX motors. This should be accessable from all files.
     public static ArrayList<TalonFX> TalonFxMotors = new ArrayList<TalonFX>();
 
-    //CONSTURCTOR: This allows for the creation of a new Talon Brushless Motor
+    //CONSTRUCTOR: This allows for the creation of a new Talon Brushless Motor
     public TalonFXFactory(int id, String CanbusName) {
         TalonFXConfiguration Config = new TalonFXConfiguration();
         TalonFX talonFX = new TalonFX(id, CanbusName);
@@ -23,7 +23,7 @@ public class TalonFXFactory {
         TalonFxMotors.add(talonFX);
     }
 
-    //CONSTURCTOR: This allows for the creation of a new Talon Brushless Motor with a preset Config
+    //CONSTRUCTOR: This allows for the creation of a new Talon Brushless Motor with a preset Config
     public TalonFXFactory(int id, String CanbusName, TalonFXConfiguration Config) {
         TalonFX talonFX = new TalonFX(id, CanbusName);
 
@@ -33,7 +33,7 @@ public class TalonFXFactory {
         TalonFxMotors.add(talonFX);
     }
 
-    //METHOD: Allows us to make edits to the config of a motor
+    //METHOD: Allows us to make edits to the config of a motora
     public void EditConfig(TalonFX talonFX, TalonFXConfiguration Config) {
         TalonFXConfigurator Configurator = talonFX.getConfigurator();
         Configurator.apply(Config);
