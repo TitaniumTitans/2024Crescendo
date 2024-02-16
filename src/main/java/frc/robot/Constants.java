@@ -48,6 +48,8 @@ public final class Constants {
       throw new IllegalStateException("Constants class should not be constructed");
     }
 
+    public static final int PIGEON_ID = 13;
+
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
@@ -60,7 +62,7 @@ public final class Constants {
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
-            new int[]{0, 1, 2}, // drive, turn, encoder
+            new int[]{1, 2, 3}, // drive, turn, encoder
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
@@ -71,7 +73,7 @@ public final class Constants {
 
     public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
             1,
-            new int[]{3, 4, 5}, // drive, turn, encoder
+            new int[]{4, 5, 6}, // drive, turn, encoder
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
@@ -82,7 +84,7 @@ public final class Constants {
 
     public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
             2,
-            new int[]{6, 7, 8}, // drive, turn, encoder
+            new int[]{7, 8, 9}, // drive, turn, encoder
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
@@ -93,7 +95,7 @@ public final class Constants {
 
     public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
             3,
-            new int[]{9, 10, 11}, // drive, turn, encoder
+            new int[]{10, 11, 12}, // drive, turn, encoder
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
@@ -107,32 +109,39 @@ public final class Constants {
   public static class ArmConstants {
     private ArmConstants() {}
 
-    public static int WRIST_ID = 0;
-    public static int SHOULDER_ID = 0;
+    public static final int WRIST_MASTER_ID = 21;
+    public static final int WRIST_FOLLOWER_ID = 22;
+    public static final int WRIST_ENCODER_ID = 23;
+    public static final int SHOULDER_MASTER_ID = 18;
+    public static final int SHOULDER_FOLLOWER_ID = 19;
+    public static final int SHOULDER_ENCODER_ID = 20;
 
-    public static double WRIST_KP = 0.0;
-    public static double WRIST_KI = 0.0;
-    public static double WRIST_KD = 0.0;
-    public static double WRIST_KS = 0.0;
-    public static double WRIST_KV = 0.0;
-    public static double WRIST_KG = 0.0;
+    public static final double WRIST_KP = 0.0;
+    public static final double WRIST_KI = 0.0;
+    public static final double WRIST_KD = 0.0;
+    public static final double WRIST_KS = 0.0;
+    public static final double WRIST_KV = 0.0;
+    public static final double WRIST_KG = 0.0;
 
-    public static double SHOULDER_KP = 0.0;
-    public static double SHOULDER_KI = 0.0;
-    public static double SHOULDER_KD = 0.0;
-    public static double SHOULDER_KS = 0.0;
-    public static double SHOULDER_KV = 0.0;
-    public static double SHOULDER_KG = 0.0;
+    public static final double SHOULDER_KP = 0.0;
+    public static final double SHOULDER_KI = 0.0;
+    public static final double SHOULDER_KD = 0.0;
+    public static final double SHOULDER_KS = 0.0;
+    public static final double SHOULDER_KV = 0.0;
+    public static final double SHOULDER_KG = 0.0;
   }
+
   public static class ShooterConstants {
     private ShooterConstants() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
-    public static final int TOP_LEFT_ID = 13;
-    public static final int TOP_RIGHT_ID = 14;
-    public static final int BOTTOM_LEFT_ID = 15;
-    public static final int BOTTOM_RIGHT_ID = 16;
-    public static final int KICKER_ID = 17;
+    public static final int TOP_LEFT_ID = 25;
+    public static final int TOP_RIGHT_ID = 26;
+    public static final int BOTTOM_LEFT_ID = 28;
+    public static final int BOTTOM_RIGHT_ID = 29;
+    public static final int KICKER_ID = 24;
+    public static final int INTAKE_ID = 14;
+    public static final int INDEXER_ID = 15;
 
     public static final double SHOOTER_KP = 0.000061;
     public static final double SHOOTER_KI = 0.0;
@@ -146,13 +155,13 @@ public final class Constants {
     public static final boolean KICKER_INVERTED = true;
   }
 
-  public class ClimberConstants {
+  public static class ClimberConstants {
     private ClimberConstants() {
       throw new IllegalStateException("Static class should not be constructed");
     }
 
-    public static final int LEFT_CLIMBER_ID = 18;
-    public static final int RIGHT_CLIMBER_ID = 19;
+    public static final int LEFT_CLIMBER_ID = 16;
+    public static final int RIGHT_CLIMBER_ID = 17;
 
     public static final double CLIMBER_KP = 0.0;
     public static final double CLIMBER_KI = 0.0;

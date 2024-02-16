@@ -34,4 +34,7 @@ public interface ArmIO {
   default void setWristVoltage(double voltage) {}
 
   default void setWristAngle(double degrees, boolean useMM) {}
+
+  default void resetPosition() {}
+  default void stop() {}
 }
