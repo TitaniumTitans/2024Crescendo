@@ -4,36 +4,50 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TalonFXFactory {
 
-    //ArrayList of all TalonFX motors. This should be accessable from all files.
-    public static ArrayList<TalonFX> TalonFxMotors = new ArrayList<TalonFX>();
+  //ArrayList of all TalonFX motors. This should be accessable from all files.
+  // Note: This should be private as we're only using it inside this class
+  private static List<TalonFX> TalonFxMotors = new ArrayList<TalonFX>();
 
-    //CONSTRUCTOR: This allows for the creation of a new Talon Brushless Motor
-    public TalonFXFactory(int id, String CanbusName) {
-        TalonFXConfiguration Config = new TalonFXConfiguration();
-        TalonFX talonFX = new TalonFX(id, CanbusName);
+  // Note: This is a static helper class, and as such shouldn't have an accessable constructor
+  private TalonFXFactory() {
+    throw new IllegalStateException("Helper class shouldn't be constructed");
+  }
 
-        TalonFXConfigurator Configurator = talonFX.getConfigurator();
-        Configurator.apply(Config);
+  //NOTE: This and the next method should return a talonFX, and both be static methods, not constructors
+  //METHOD: This allows for the creation of a new Talon Brushless Motor
+  public static TalonFX createTalon(int id) {
+    TalonFX talonFX = new TalonFX(id, "canivore");
+    talonFX.getConfigurator().apply(new TalonFXConfiguration());
+    TalonFxMotors.add(talonFX);
+    return talonFX;
+  }
 
-        TalonFxMotors.add(talonFX);
-    }
+  public static TalonFX createTalon(int id, String canbusName) {
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    TalonFX talonFX = new TalonFX(id, canbusName);
 
-    //CONSTRUCTOR: This allows for the creation of a new Talon Brushless Motor with a preset Config
-    public TalonFXFactory(int id, String CanbusName, TalonFXConfiguration Config) {
-        TalonFX talonFX = new TalonFX(id, CanbusName);
+    talonFX.getConfigurator().apply(config);
 
-        TalonFXConfigurator Configurator = talonFX.getConfigurator();
-        Configurator.apply(Config);
+    TalonFxMotors.add(talonFX);
+    return talonFX;
+  }
 
-        TalonFxMotors.add(talonFX);
-    }
+  //METHOD: This allows for the creation of a new Talon Brushless Motor with a preset Config
+  public static TalonFX createTalon(int id, String canbusName, TalonFXConfiguration config) {
+    TalonFX talonFX = new TalonFX(id, canbusName);
 
-    //METHOD: Allows us to make edits to the config of a motora
-    public void EditConfig(TalonFX talonFX, TalonFXConfiguration Config) {
-        TalonFXConfigurator Configurator = talonFX.getConfigurator();
-        Configurator.apply(Config);
-    }
+    talonFX.getConfigurator().apply(config);
+
+    TalonFxMotors.add(talonFX);
+    return talonFX;
+  }
+
+  // METHOD: Checks each motor and handles sticky faults
+  public static void handleFaults() {
+
+  }
 }
