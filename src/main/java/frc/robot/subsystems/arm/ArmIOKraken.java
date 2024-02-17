@@ -70,6 +70,8 @@ public class ArmIOKraken implements ArmIO {
     armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     armConfig.Feedback.FeedbackRemoteSensorID = m_armEncoder.getDeviceID();
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    armConfig.Feedback.RotorToSensorRatio = 202.80;
+    armConfig.Feedback.SensorToMechanismRatio = 1.0;
 
     m_armMaster.getConfigurator().apply(armConfig);
     m_armFollower.getConfigurator().apply(armConfig);
@@ -84,6 +86,8 @@ public class ArmIOKraken implements ArmIO {
     wristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     wristConfig.Feedback.FeedbackRemoteSensorID = m_wristEncoder.getDeviceID();
     wristConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    wristConfig.Feedback.RotorToSensorRatio = 152.10;
+    wristConfig.Feedback.SensorToMechanismRatio = 1.0;
 
     m_wristMaster.getConfigurator().apply(wristConfig);
     m_wristFollower.getConfigurator().apply(wristConfig);
