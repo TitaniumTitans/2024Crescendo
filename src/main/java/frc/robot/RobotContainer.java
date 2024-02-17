@@ -26,9 +26,11 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
 import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOKraken;
 import frc.robot.subsystems.arm.ArmIOPrototype;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOKraken;
 import frc.robot.subsystems.climber.ClimberIOPrototype;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -76,26 +78,19 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken());
+        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
-            new GyroIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            },
-            new ModuleIO() {
-            });
-        m_shooter = new ShooterSubsystem(new ShooterIO() {
-        });
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype() {
-        });
+            new GyroIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {},
+            new ModuleIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
@@ -190,7 +185,7 @@ public class RobotContainer {
             () -> -controller.getRightX()));
     controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
     controller
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(
                     () ->
