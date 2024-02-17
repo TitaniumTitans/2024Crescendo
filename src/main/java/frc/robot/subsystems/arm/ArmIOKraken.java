@@ -124,8 +124,12 @@ public class ArmIOKraken implements ArmIO {
         .build();
 
     // config output requests
-    m_pidRequest = new PositionVoltage(0);
-    m_mmRequest = new MotionMagicVoltage(0);
+    m_pidRequest = new PositionVoltage(0)
+        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
+        .withSlot(0);
+    m_mmRequest = new MotionMagicVoltage(0)
+        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
+        .withSlot(0);
     m_armFollowerRequest = new Follower(m_armMaster.getDeviceID(), false);
     m_wristFollowerRequest = new Follower(m_wristFollower.getDeviceID(), false);
     m_stopRequest = new NeutralOut();
@@ -185,6 +189,9 @@ public class ArmIOKraken implements ArmIO {
 
     inputs.shoulderCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
+
+    m_wristProperty.updateIfChanged();
+    m_armProperty.updateIfChanged();
   }
 
   @Override

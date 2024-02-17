@@ -135,6 +135,8 @@ public final class Constants {
     private ShooterConstants() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
+
+
     public static final int TOP_LEFT_ID = 25;
     public static final int TOP_RIGHT_ID = 26;
     public static final int BOTTOM_LEFT_ID = 28;
@@ -147,6 +149,8 @@ public final class Constants {
     public static final double SHOOTER_KI = 0.0;
     public static final double SHOOTER_KD = 0.005;
     public static final double SHOOTER_KF = 0.000152;
+    public static final double SHOOTER_KS = 0.0;
+    public static final double SHOOTER_KV = 0.0;
 
     public static final boolean TOP_LEFT_INVERTED = false;
     public static final boolean TOP_RIGHT_INVERTED = true;

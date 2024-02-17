@@ -9,20 +9,29 @@ public interface ShooterIO {
     protected double trVelocityRots = 0.0;
     protected double blVelocityRots = 0.0;
     protected double brVelocityRots = 0.0;
+
     protected double tlAppliedVolts = 0.0;
     protected double trAppliedVolts = 0.0;
     protected double blAppliedVolts = 0.0;
     protected double brAppliedVolts = 0.0;
     protected double kickerAppliedVolts = 0.0;
+    protected double indexerAppliedVolts = 0.0;
+    protected double intakeAppliedVolts = 0.0;
+
     protected double tlCurrentDraw = 0.0;
     protected double trCurrentDraw = 0.0;
     protected double blCurrentDraw = 0.0;
     protected double brCurrentDraw = 0.0;
     protected double kickerCurrentDraw = 0.0;
+    protected double intakeCurrentDraw = 0.0;
+    protected double indexerCurrentDraw = 0.0;
+
     protected double tlTemperature = 0.0;
     protected double trTemperature = 0.0;
     protected double blTemperature = 0.0;
     protected double brTemperature = 0.0;
+    protected double indexerTemperature = 0.0;
+    protected double intakeTemperature = 0.0;
 
 
     public double getTlVelocityRots() {
@@ -97,6 +106,14 @@ public interface ShooterIO {
       this.kickerAppliedVolts = kickerAppliedVolts;
     }
 
+    public void setIndexerAppliedVolts(double indexerAppliedVolts) {
+      this.indexerAppliedVolts = indexerAppliedVolts;
+    }
+
+    public double getIndexerAppliedVolts(double indexerAppliedVolts) {
+      return this.indexerAppliedVolts;
+    }
+
     public double getTlCurrentDraw() {
       return tlCurrentDraw;
     }
@@ -168,6 +185,50 @@ public interface ShooterIO {
     public void setBrTemperature(double brTemperature) {
       this.brTemperature = brTemperature;
     }
+
+    public double getIndexerAppliedVolts() {
+      return indexerAppliedVolts;
+    }
+
+    public double getIntakeAppliedVolts() {
+      return intakeAppliedVolts;
+    }
+
+    public void setIntakeAppliedVolts(double intakeAppliedVolts) {
+      this.intakeAppliedVolts = intakeAppliedVolts;
+    }
+
+    public double getIntakeCurrentDraw() {
+      return intakeCurrentDraw;
+    }
+
+    public void setIntakeCurrentDraw(double intakeCurrentDraw) {
+      this.intakeCurrentDraw = intakeCurrentDraw;
+    }
+
+    public double getIndexerCurrentDraw() {
+      return indexerCurrentDraw;
+    }
+
+    public void setIndexerCurrentDraw(double indexerCurrentDraw) {
+      this.indexerCurrentDraw = indexerCurrentDraw;
+    }
+
+    public double getIndexerTemperature() {
+      return indexerTemperature;
+    }
+
+    public void setIndexerTemperature(double indexerTemperature) {
+      this.indexerTemperature = indexerTemperature;
+    }
+
+    public double getIntakeTemperature() {
+      return intakeTemperature;
+    }
+
+    public void setIntakeTemperature(double intakeTemperature) {
+      this.intakeTemperature = intakeTemperature;
+    }
   }
   default void setMotorVoltageTL(double voltage) {}
   default void setMotorVoltageTR(double voltage) {}
@@ -178,5 +239,6 @@ public interface ShooterIO {
   default void setLeftVelocityRpm(double rpm) {}
   default void setRightVelocityRpm(double rpm) {}
   default void updateInputs(ShooterIOInputs inputs) {}
+  default void stop() {}
 
 }
