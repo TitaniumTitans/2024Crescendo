@@ -11,9 +11,9 @@ public class TalonFXFactory {
 
   //ArrayList of all TalonFX motors. This should be accessable from all files.
   // Note: This should be private as we're only using it inside this class
-  private static List<Pair<TalonFX, TalonFXConfiguration>> TalonFxMotors = new ArrayList<>();
+  private static final List<Pair<TalonFX, TalonFXConfiguration>> TalonFxMotors = new ArrayList<>();
 
-  // Note: This is a static helper class, and as such shouldn't have an accessable constructor
+  // Note: This is a static helper class, and as such shouldn't have an accessible constructor
   private TalonFXFactory() {
     throw new IllegalStateException("Helper class shouldn't be constructed");
   }
