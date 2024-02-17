@@ -1,8 +1,9 @@
 package lib.factories;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class TalonFXFactory {
 
   //ArrayList of all TalonFX motors. This should be accessable from all files.
   // Note: This should be private as we're only using it inside this class
-  private static List<TalonFX> TalonFxMotors = new ArrayList<TalonFX>();
+  private static List<Pair<TalonFX, TalonFXConfiguration>> TalonFxMotors = new ArrayList<>();
 
   // Note: This is a static helper class, and as such shouldn't have an accessable constructor
   private TalonFXFactory() {
@@ -22,7 +23,7 @@ public class TalonFXFactory {
   public static TalonFX createTalon(int id) {
     TalonFX talonFX = new TalonFX(id, "canivore");
     talonFX.getConfigurator().apply(new TalonFXConfiguration());
-    TalonFxMotors.add(talonFX);
+    TalonFxMotors.add(new Pair<>(talonFX, new TalonFXConfiguration()));
     return talonFX;
   }
 
@@ -32,7 +33,7 @@ public class TalonFXFactory {
 
     talonFX.getConfigurator().apply(config);
 
-    TalonFxMotors.add(talonFX);
+    TalonFxMotors.add(new Pair<>(talonFX, config));
     return talonFX;
   }
 
@@ -42,12 +43,17 @@ public class TalonFXFactory {
 
     talonFX.getConfigurator().apply(config);
 
-    TalonFxMotors.add(talonFX);
+    TalonFxMotors.add(new Pair<>(talonFX, config));
     return talonFX;
   }
 
   // METHOD: Checks each motor and handles sticky faults
   public static void handleFaults() {
-
+    TalonFxMotors.forEach((Pair<TalonFX, TalonFXConfiguration> pair) -> {
+      TalonFX talon = pair.getFirst();
+      if (Boolean.TRUE.equals(talon.getStickyFault_BootDuringEnable().getValue())) {
+        talon.getConfigurator().apply(pair.getSecond());
+      }
+    });
   }
 }
