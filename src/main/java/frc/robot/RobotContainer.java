@@ -13,7 +13,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -24,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FeedForwardCharacterization;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOKraken;
 import frc.robot.subsystems.arm.ArmIOPrototype;
@@ -40,7 +38,6 @@ import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
@@ -161,13 +158,13 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.a().whileTrue(m_armSubsystem.setShoulderPowerFactory(armPower.get()))
-        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
-    controller.y().whileTrue(m_armSubsystem.setShoulderPowerFactory(-armPower.get()))
-        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+    controller.a().whileTrue(m_armSubsystem.setArmPowerFactory(armPower.get()))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.y().whileTrue(m_armSubsystem.setArmPowerFactory(-armPower.get()))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
 
-    controller.b().whileTrue(m_armSubsystem.setShoulderPositionFactory(armPosition.get()))
-        .whileFalse(m_armSubsystem.setShoulderPowerFactory(0.0));
+    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(armPosition.get()))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
 
     controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
         .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));

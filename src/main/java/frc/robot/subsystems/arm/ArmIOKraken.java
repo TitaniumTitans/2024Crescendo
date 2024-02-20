@@ -172,22 +172,22 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void updateInputs(ArmIOInputsAutoLogged inputs) {
-    inputs.shoulderPositionRots = m_armPositionSignal.getValueAsDouble();
+    inputs.armPositionRots = m_armPositionSignal.getValueAsDouble();
     inputs.wristPositionRots = m_wristPositionSignal.getValueAsDouble();
 
-    inputs.shoulerVelocityRotsPerSecond = m_armVelocitySignal.getValueAsDouble();
+    inputs.armVelocityRotsPerSecond = m_armVelocitySignal.getValueAsDouble();
     inputs.wristVelocityRotsPerSecond = m_wristVelocitySignal.getValueAsDouble();
 
-    inputs.shoulderAppliedOutput = m_armOutputSignal.getValueAsDouble();
+    inputs.armAppliedOutput = m_armOutputSignal.getValueAsDouble();
     inputs.wristAppliedOutput = m_wristOutputSignal.getValueAsDouble();
 
-    inputs.shoulderClosedLoopOutput = m_armClosedOutputSignal.getValueAsDouble();
+    inputs.armClosedLoopOutput = m_armClosedOutputSignal.getValueAsDouble();
     inputs.wristClosedLoopOutput = m_wristClosedOutputSignal.getValueAsDouble();
 
-    inputs.shoulderDesiredSetpoint = m_armSetpointSignal.getValueAsDouble();
+    inputs.armDesiredSetpoint = m_armSetpointSignal.getValueAsDouble();
     inputs.wristDesiredSetpoint = m_wristSetpointSignal.getValueAsDouble();
 
-    inputs.shoulderCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
+    inputs.armCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
 
     m_wristProperty.updateIfChanged();
@@ -195,13 +195,13 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setShoulderVoltage(double voltage) {
+  public void setArmVoltage(double voltage) {
     m_armMaster.setVoltage(voltage);
     m_armFollower.setControl(m_armFollowerRequest);
   }
 
   @Override
-  public void setShoulderAngle(double degrees, boolean useMM) {
+  public void setArmAngle(double degrees, boolean useMM) {
     if (useMM) {
       m_armMaster.setControl(m_mmRequest.withPosition(degrees / 360));
     } else {

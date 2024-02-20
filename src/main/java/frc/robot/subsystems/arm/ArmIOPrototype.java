@@ -85,22 +85,22 @@ public class ArmIOPrototype implements ArmIO {
     m_shoulderPID.updateIfChanged();
     m_wristPID.updateIfChanged();
 
-    inputs.shoulderPositionRots = m_shoulder.getPosition().getValueAsDouble();
+    inputs.armPositionRots = m_shoulder.getPosition().getValueAsDouble();
     inputs.wristPositionRots = m_wrist.getPosition().getValueAsDouble();
 
-    inputs.shoulerVelocityRotsPerSecond = m_shoulder.getVelocity().getValueAsDouble();
+    inputs.armVelocityRotsPerSecond = m_shoulder.getVelocity().getValueAsDouble();
     inputs.wristVelocityRotsPerSecond = m_wrist.getVelocity().getValueAsDouble();
 
-    inputs.shoulderAppliedOutput = m_shoulder.get();
+    inputs.armAppliedOutput = m_shoulder.get();
     inputs.wristAppliedOutput = m_wrist.get();
 
-    inputs.shoulderClosedLoopOutput = m_shoulder.getClosedLoopOutput().getValueAsDouble();
+    inputs.armClosedLoopOutput = m_shoulder.getClosedLoopOutput().getValueAsDouble();
     inputs.wristClosedLoopOutput = m_wrist.getClosedLoopOutput().getValueAsDouble();
 
-    inputs.shoulderDesiredSetpoint = m_shoulder.getClosedLoopReference().getValueAsDouble();
+    inputs.armDesiredSetpoint = m_shoulder.getClosedLoopReference().getValueAsDouble();
     inputs.wristDesiredSetpoint = m_wrist.getClosedLoopReference().getValueAsDouble();
 
-    inputs.shoulderCurrentDraw = m_shoulder.getSupplyCurrent().getValueAsDouble();
+    inputs.armCurrentDraw = m_shoulder.getSupplyCurrent().getValueAsDouble();
     inputs.wristCurrentDraw = m_wrist.getSupplyCurrent().getValueAsDouble();
 
     Logger.recordOutput("Arm/Should PID Output", m_shoulder.getClosedLoopOutput().getValueAsDouble());
@@ -111,12 +111,12 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void setShoulderVoltage(double voltage){
+  public void setArmVoltage(double voltage){
     m_shoulder.setVoltage(voltage);
   }
 
   @Override
-  public void setShoulderAngle(double degrees, boolean useMM) {
+  public void setArmAngle(double degrees, boolean useMM) {
     if (useMM) {
       m_shoulder.setControl(m_shoulderReqMM.withPosition(degrees / 360.0));
     } else {
