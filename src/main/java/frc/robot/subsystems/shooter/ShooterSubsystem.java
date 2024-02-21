@@ -1,9 +1,19 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+
+import static edu.wpi.first.units.BaseUnits.Voltage;
+import static edu.wpi.first.units.MutableMeasure.mutable;
+import static edu.wpi.first.units.Units.*;
 
 public class ShooterSubsystem extends SubsystemBase {
   private final ShooterIO m_io;
@@ -12,12 +22,53 @@ public class ShooterSubsystem extends SubsystemBase {
   private final LoggedDashboardNumber m_leftSetpoint;
   private final LoggedDashboardNumber m_rightSetpoint;
 
+  private final SysIdRoutine m_sysIdLeft;
+  private final SysIdRoutine m_sysIdRight;
+
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
     m_inputs = new ShooterIOInputsAutoLogged();
 
     m_leftSetpoint = new LoggedDashboardNumber("Shooter/Left Flywheel Setpoint RPM");
     m_rightSetpoint = new LoggedDashboardNumber("Shooter/Right Flywheel Setpoint RPM");
+
+    if (m_io.getClass() == ShooterIOKraken.class) {
+      m_sysIdLeft = new SysIdRoutine(
+          new SysIdRoutine.Config(null,
+              Voltage.of(9),
+              null,
+              (SysIdRoutineLog.State state) -> SignalLogger.writeString("shooter-left-state", state.toString())),
+          new SysIdRoutine.Mechanism(
+              (Measure<Voltage> volt) -> setShooterPowerLeft(volt.in(Volts) / 12.0),
+              null,
+              this));
+      m_sysIdRight = new SysIdRoutine(
+          new SysIdRoutine.Config(null,
+              Voltage.of(9),
+              null,
+              (SysIdRoutineLog.State state) -> SignalLogger.writeString("shooter-right-state", state.toString())),
+          new SysIdRoutine.Mechanism(
+              (Measure<Voltage> volt) -> setShooterPowerRight(volt.in(Volts) / 12.0),
+              null,
+              this));
+    } else {
+      m_sysIdLeft = new SysIdRoutine(
+          new SysIdRoutine.Config(null, Voltage.of(9), null),
+          new SysIdRoutine.Mechanism(
+              (Measure<Voltage> volt) -> setShooterPowerLeft(volt.in(Volts) / 12.0),
+              (SysIdRoutineLog log) -> log.motor("shooter-left")
+                  .voltage(mutable(Volts.of(m_inputs.tlAppliedVolts)))
+                  .angularVelocity(mutable(RotationsPerSecond.of(m_inputs.tlVelocityRPM * 60.0))),
+              this));
+      m_sysIdRight = new SysIdRoutine(
+          new SysIdRoutine.Config(null, Voltage.of(9), null),
+          new SysIdRoutine.Mechanism(
+              (Measure<Voltage> volt) -> setShooterPowerRight(volt.in(Volts) / 12.0),
+              (SysIdRoutineLog log) -> log.motor("shooter-right")
+                  .voltage(mutable(Volts.of(m_inputs.trAppliedVolts)))
+                  .angularVelocity(mutable(RotationsPerSecond.of(m_inputs.trVelocityRPM * 60.0))),
+              this));
+    }
   }
 
   @Override
