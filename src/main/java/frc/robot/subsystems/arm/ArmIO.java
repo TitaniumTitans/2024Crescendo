@@ -5,11 +5,11 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ArmIO {
   @AutoLog
   class ArmIOInputs {
-    public double armPositionRots = 0.0;
-    public double wristPositionRots = 0.0;
+    public double armPositionDegs = 0.0;
+    public double wristPositionDegs = 0.0;
 
-    public double armVelocityRotsPerSecond = 0.0;
-    public double wristVelocityRotsPerSecond = 0.0;
+    public double armVelocityDegsPerSecond = 0.0;
+    public double wristVelocityDegsPerSecond = 0.0;
 
     public double armAppliedOutput = 0.0;
     public double wristAppliedOutput = 0.0;

@@ -85,11 +85,11 @@ public class ArmIOPrototype implements ArmIO {
     m_shoulderPID.updateIfChanged();
     m_wristPID.updateIfChanged();
 
-    inputs.armPositionRots = m_shoulder.getPosition().getValueAsDouble();
-    inputs.wristPositionRots = m_wrist.getPosition().getValueAsDouble();
+    inputs.armPositionDegs = Units.rotationsToDegrees(m_shoulder.getPosition().getValueAsDouble());
+    inputs.wristPositionDegs = Units.rotationsToDegrees(m_wrist.getPosition().getValueAsDouble());
 
-    inputs.armVelocityRotsPerSecond = m_shoulder.getVelocity().getValueAsDouble();
-    inputs.wristVelocityRotsPerSecond = m_wrist.getVelocity().getValueAsDouble();
+    inputs.armVelocityDegsPerSecond = Units.rotationsToDegrees(m_shoulder.getVelocity().getValueAsDouble());
+    inputs.wristVelocityDegsPerSecond = Units.rotationsToDegrees(m_wrist.getVelocity().getValueAsDouble());
 
     inputs.armAppliedOutput = m_shoulder.get();
     inputs.wristAppliedOutput = m_wrist.get();
@@ -97,8 +97,8 @@ public class ArmIOPrototype implements ArmIO {
     inputs.armClosedLoopOutput = m_shoulder.getClosedLoopOutput().getValueAsDouble();
     inputs.wristClosedLoopOutput = m_wrist.getClosedLoopOutput().getValueAsDouble();
 
-    inputs.armDesiredSetpoint = m_shoulder.getClosedLoopReference().getValueAsDouble();
-    inputs.wristDesiredSetpoint = m_wrist.getClosedLoopReference().getValueAsDouble();
+    inputs.armDesiredSetpoint = Units.rotationsToDegrees(m_shoulder.getClosedLoopReference().getValueAsDouble());
+    inputs.wristDesiredSetpoint = Units.rotationsToDegrees(m_wrist.getClosedLoopReference().getValueAsDouble());
 
     inputs.armCurrentDraw = m_shoulder.getSupplyCurrent().getValueAsDouble();
     inputs.wristCurrentDraw = m_wrist.getSupplyCurrent().getValueAsDouble();

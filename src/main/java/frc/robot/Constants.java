@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import com.gos.lib.properties.GosDoubleProperty;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
@@ -112,9 +113,16 @@ public final class Constants {
     public static final int WRIST_MASTER_ID = 21;
     public static final int WRIST_FOLLOWER_ID = 22;
     public static final int WRIST_ENCODER_ID = 23;
-    public static final int SHOULDER_MASTER_ID = 18;
-    public static final int SHOULDER_FOLLOWER_ID = 19;
-    public static final int SHOULDER_ENCODER_ID = 20;
+    public static final int ARM_MASTER_ID = 18;
+    public static final int ARM_FOLLOWER_ID = 19;
+    public static final int ARM_ENCODER_ID = 20;
+
+    public static final double ARM_ROTOR_SENSOR_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (36.0 / 26.0);
+    public static final double ARM_SENSOR_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
+
+    // the pulley on the encoder is a 1:1
+    public static final double WRIST_ROTOR_SENSOR_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0);
+    public static final double WRIST_SENSOR_MECHANISM_RATIO = (48.0 / 24.0);
 
     public static final double WRIST_KP = 0.0;
     public static final double WRIST_KI = 0.0;
@@ -129,6 +137,19 @@ public final class Constants {
     public static final double SHOULDER_KS = 0.0;
     public static final double SHOULDER_KV = 0.0;
     public static final double SHOULDER_KG = 0.0;
+
+    public static final GosDoubleProperty WRIST_LOWER_LIMIT =
+        new GosDoubleProperty(false, "Arm/WristLowerLimit", 30);
+    public static final GosDoubleProperty WRIST_UPPER_LIMIT =
+        new GosDoubleProperty(false, "Arm/WristUpperLimit", 30);
+
+    public static final GosDoubleProperty ARM_LOWER_LIMIT =
+        new GosDoubleProperty(false, "Arm/ArmLowerLimit", 30);
+    public static final GosDoubleProperty ARM_UPPER_LIMIT =
+        new GosDoubleProperty(false, "Arm/WristUpperLimit", 30);
+
+    public static final GosDoubleProperty WRIST_ARM_GAP =
+        new GosDoubleProperty(false, "Arm/Wrist Gap", 20);
   }
 
   public static class ShooterConstants {

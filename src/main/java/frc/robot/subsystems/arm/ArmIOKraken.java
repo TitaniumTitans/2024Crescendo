@@ -11,6 +11,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
+import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ArmConstants;
@@ -52,9 +53,9 @@ public class ArmIOKraken implements ArmIO {
 
   public ArmIOKraken() {
     final String CANBUS = "canivore";
-    m_armMaster = new TalonFX(ArmConstants.SHOULDER_MASTER_ID, CANBUS);
-    m_armFollower = new TalonFX(ArmConstants.SHOULDER_FOLLOWER_ID, CANBUS);
-    m_armEncoder = new CANcoder(ArmConstants.SHOULDER_ENCODER_ID, CANBUS);
+    m_armMaster = new TalonFX(ArmConstants.ARM_MASTER_ID, CANBUS);
+    m_armFollower = new TalonFX(ArmConstants.ARM_FOLLOWER_ID, CANBUS);
+    m_armEncoder = new CANcoder(ArmConstants.ARM_ENCODER_ID, CANBUS);
 
     m_wristMaster = new TalonFX(ArmConstants.WRIST_MASTER_ID, CANBUS);
     m_wristFollower = new TalonFX(ArmConstants.WRIST_FOLLOWER_ID, CANBUS);
@@ -70,8 +71,8 @@ public class ArmIOKraken implements ArmIO {
     armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     armConfig.Feedback.FeedbackRemoteSensorID = m_armEncoder.getDeviceID();
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    armConfig.Feedback.RotorToSensorRatio = 202.80;
-    armConfig.Feedback.SensorToMechanismRatio = 1.0;
+    armConfig.Feedback.RotorToSensorRatio = ArmConstants.ARM_ROTOR_SENSOR_RATIO;
+    armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
     m_armMaster.getConfigurator().apply(armConfig);
     m_armFollower.getConfigurator().apply(armConfig);
@@ -86,8 +87,8 @@ public class ArmIOKraken implements ArmIO {
     wristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     wristConfig.Feedback.FeedbackRemoteSensorID = m_wristEncoder.getDeviceID();
     wristConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    wristConfig.Feedback.RotorToSensorRatio = 152.10;
-    wristConfig.Feedback.SensorToMechanismRatio = 1.0;
+    wristConfig.Feedback.RotorToSensorRatio = ArmConstants.WRIST_ROTOR_SENSOR_RATIO;
+    wristConfig.Feedback.SensorToMechanismRatio = ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
     m_wristMaster.getConfigurator().apply(wristConfig);
     m_wristFollower.getConfigurator().apply(wristConfig);
@@ -172,11 +173,11 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void updateInputs(ArmIOInputsAutoLogged inputs) {
-    inputs.armPositionRots = m_armPositionSignal.getValueAsDouble();
-    inputs.wristPositionRots = m_wristPositionSignal.getValueAsDouble();
+    inputs.armPositionDegs = Units.rotationsToDegrees(m_armPositionSignal.getValueAsDouble());
+    inputs.wristPositionDegs = Units.rotationsToDegrees(m_wristPositionSignal.getValueAsDouble());
 
-    inputs.armVelocityRotsPerSecond = m_armVelocitySignal.getValueAsDouble();
-    inputs.wristVelocityRotsPerSecond = m_wristVelocitySignal.getValueAsDouble();
+    inputs.armVelocityDegsPerSecond = Units.rotationsToDegrees(m_armVelocitySignal.getValueAsDouble());
+    inputs.wristVelocityDegsPerSecond = Units.rotationsToDegrees(m_wristVelocitySignal.getValueAsDouble());
 
     inputs.armAppliedOutput = m_armOutputSignal.getValueAsDouble();
     inputs.wristAppliedOutput = m_wristOutputSignal.getValueAsDouble();
@@ -184,8 +185,8 @@ public class ArmIOKraken implements ArmIO {
     inputs.armClosedLoopOutput = m_armClosedOutputSignal.getValueAsDouble();
     inputs.wristClosedLoopOutput = m_wristClosedOutputSignal.getValueAsDouble();
 
-    inputs.armDesiredSetpoint = m_armSetpointSignal.getValueAsDouble();
-    inputs.wristDesiredSetpoint = m_wristSetpointSignal.getValueAsDouble();
+    inputs.armDesiredSetpoint = Units.rotationsToDegrees(m_armSetpointSignal.getValueAsDouble());
+    inputs.wristDesiredSetpoint = Units.rotationsToDegrees(m_wristSetpointSignal.getValueAsDouble());
 
     inputs.armCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
