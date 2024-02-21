@@ -137,8 +137,8 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    inputs.tlVelocityRots = m_leftVelSignal.getValueAsDouble();
-    inputs.trVelocityRots = m_rightVelSignal.getValueAsDouble();
+    inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() / 60.0;
+    inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() / 60.0;
 
     inputs.tlAppliedVolts = m_leftVoltOutSignal.getValueAsDouble();
     inputs.trAppliedVolts = m_rightVoltOutSignal.getValueAsDouble();
@@ -151,6 +151,7 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.kickerCurrentDraw = m_kickerCurrentDrawSignal.getValueAsDouble();
     inputs.intakeCurrentDraw = m_intakeCurrentDrawSignal.getValueAsDouble();
     inputs.indexerCurrentDraw = m_indexerCurrentDrawSignal.getValueAsDouble();
+    inputs.kickerCurrentDraw = m_kickerCurrentDrawSignal.getValueAsDouble();
 
     inputs.tlTemperature = m_leftTemperatureSignal.getValueAsDouble();
     inputs.trTemperature = m_rightTemperatureSignal.getValueAsDouble();

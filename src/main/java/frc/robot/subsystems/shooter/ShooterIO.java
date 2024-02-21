@@ -5,10 +5,10 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
   @AutoLog
   class ShooterIOInputs {
-    protected double tlVelocityRots = 0.0;
-    protected double trVelocityRots = 0.0;
-    protected double blVelocityRots = 0.0;
-    protected double brVelocityRots = 0.0;
+    protected double tlVelocityRPM = 0.0;
+    protected double trVelocityRPM = 0.0;
+    protected double blVelocityRPM = 0.0;
+    protected double brVelocityRPM = 0.0;
 
     protected double tlAppliedVolts = 0.0;
     protected double trAppliedVolts = 0.0;
@@ -34,36 +34,36 @@ public interface ShooterIO {
     protected double intakeTemperature = 0.0;
 
 
-    public double getTlVelocityRots() {
-      return tlVelocityRots;
+    public double getTlVelocityRPM() {
+      return tlVelocityRPM;
     }
 
-    public void setTlVelocityRots(double tlVelocityRots) {
-      this.tlVelocityRots = tlVelocityRots;
+    public void setTlVelocityRPM(double tlVelocityRPM) {
+      this.tlVelocityRPM = tlVelocityRPM;
     }
 
-    public double getTrVelocityRots() {
-      return trVelocityRots;
+    public double getTrVelocityRPM() {
+      return trVelocityRPM;
     }
 
-    public void setTrVelocityRots(double trVelocityRots) {
-      this.trVelocityRots = trVelocityRots;
+    public void setTrVelocityRPM(double trVelocityRPM) {
+      this.trVelocityRPM = trVelocityRPM;
     }
 
-    public double getBlVelocityRots() {
-      return blVelocityRots;
+    public double getBlVelocityRPM() {
+      return blVelocityRPM;
     }
 
-    public void setBlVelocityRots(double blVelocityRots) {
-      this.blVelocityRots = blVelocityRots;
+    public void setBlVelocityRPM(double blVelocityRPM) {
+      this.blVelocityRPM = blVelocityRPM;
     }
 
-    public double getBrVelocityRots() {
-      return brVelocityRots;
+    public double getBrVelocityRPM() {
+      return brVelocityRPM;
     }
 
-    public void setBrVelocityRots(double brVelocityRots) {
-      this.brVelocityRots = brVelocityRots;
+    public void setBrVelocityRPM(double brVelocityRPM) {
+      this.brVelocityRPM = brVelocityRPM;
     }
 
     public double getTlAppliedVolts() {
