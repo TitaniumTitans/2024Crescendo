@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
+import java.util.function.BooleanSupplier;
+
 import static edu.wpi.first.units.BaseUnits.Voltage;
 import static edu.wpi.first.units.MutableMeasure.mutable;
 import static edu.wpi.first.units.Units.*;
@@ -108,6 +110,22 @@ public class ShooterSubsystem extends SubsystemBase {
       setKickerPower(left == 0.0 ? 0.0 : 1.0);
       setIntakePower(left == 0.0 ? 0.0 : 0.35);
     });
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction, BooleanSupplier isLeft) {
+    if (isLeft.getAsBoolean()) {
+      return m_sysIdLeft.quasistatic(direction);
+    } else {
+      return m_sysIdRight.quasistatic(direction);
+    }
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction, BooleanSupplier isLeft) {
+    if (isLeft.getAsBoolean()) {
+      return m_sysIdLeft.dynamic(direction);
+    } else {
+      return m_sysIdRight.dynamic(direction);
+    }
   }
 }
 

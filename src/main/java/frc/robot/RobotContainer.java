@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.arm.ArmIO;
@@ -98,7 +99,7 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {},
             new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
@@ -158,21 +159,22 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.a().whileTrue(m_armSubsystem.setArmPowerFactory(armPower.get()))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-    controller.y().whileTrue(m_armSubsystem.setArmPowerFactory(-armPower.get()))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.leftBumper().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
 
-    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(armPosition.get()))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.a().whileTrue(
+        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumperPressed))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.b().whileTrue(
+        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumperPressed))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
 
-    controller.leftBumper().whileTrue(m_armSubsystem.setWristPowerFactory(wristPower.get()))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.rightBumper().whileTrue(m_armSubsystem.setWristPowerFactory(-wristPower.get()))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-
-    controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(wristPosition.get()))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.x().whileTrue(
+            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumperPressed))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.y().whileTrue(
+            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumperPressed))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
