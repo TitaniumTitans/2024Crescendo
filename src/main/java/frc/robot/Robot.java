@@ -16,6 +16,7 @@ package frc.robot;
 import com.gos.lib.properties.PropertyManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import lib.factories.TalonFXFactory;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -62,10 +63,9 @@ public class Robot extends LoggedRobot {
 
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
-      case PROTO_ARM:
-      case REAL, PROTO_SHOOTER:
+      case REAL, PROTO_SHOOTER, PROTO_ARM:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new WPILOGWriter("/media/sda1/aoede"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -103,6 +103,7 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    TalonFXFactory.handleFaults();
   }
 
   /** This function is called once when the robot is disabled. */
