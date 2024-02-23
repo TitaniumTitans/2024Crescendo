@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ArmConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class ArmIOKraken implements ArmIO {
   // Physical devices
@@ -161,7 +162,9 @@ public class ArmIOKraken implements ArmIO {
         m_armSetpointSignal,
         m_wristSetpointSignal,
         m_armCurrentDrawSignal,
-        m_wristCurrentDrawSignal);
+        m_wristCurrentDrawSignal,
+        m_armEncoder.getAbsolutePosition(),
+        m_wristEncoder.getAbsolutePosition());
 
     m_armMaster.optimizeBusUtilization();
     m_armFollower.optimizeBusUtilization();
@@ -190,6 +193,9 @@ public class ArmIOKraken implements ArmIO {
 
     inputs.armCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
+
+    Logger.recordOutput("Arm Absolute Position", m_armEncoder.getAbsolutePosition().getValueAsDouble());
+    Logger.recordOutput("Wrist Absolute Position", m_wristEncoder.getAbsolutePosition().getValueAsDouble());
 
     m_wristProperty.updateIfChanged();
     m_armProperty.updateIfChanged();
