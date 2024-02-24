@@ -68,7 +68,7 @@ public class ArmIOKraken implements ArmIO {
     armConfig.MotionMagic.MotionMagicAcceleration = 5;
     armConfig.CurrentLimits.SupplyCurrentLimit = 40;
     armConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    armConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    armConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     armConfig.Feedback.FeedbackRemoteSensorID = m_armEncoder.getDeviceID();
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
@@ -97,11 +97,13 @@ public class ArmIOKraken implements ArmIO {
     // Encoder Configuration
     CANcoderConfiguration armEncoderConfig = new CANcoderConfiguration();
     armEncoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-    armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    armEncoderConfig.MagnetSensor.MagnetOffset = ArmConstants.ARM_OFFSET;
 
     CANcoderConfiguration wristEncoderConfig = new CANcoderConfiguration();
     wristEncoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-    wristEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    wristEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    wristEncoderConfig.MagnetSensor.MagnetOffset = ArmConstants.WRIST_OFFSET;
 
     m_armEncoder.getConfigurator().apply(armEncoderConfig);
     m_wristEncoder.getConfigurator().apply(wristEncoderConfig);
@@ -136,8 +138,8 @@ public class ArmIOKraken implements ArmIO {
     m_wristFollowerRequest = new Follower(m_wristFollower.getDeviceID(), false);
     m_stopRequest = new NeutralOut();
 
-    m_armPositionSignal = m_armEncoder.getAbsolutePosition();
-    m_wristPositionSignal = m_wristEncoder.getAbsolutePosition();
+    m_armPositionSignal = m_armEncoder.getPosition();
+    m_wristPositionSignal = m_wristEncoder.getPosition();
     m_armVelocitySignal = m_armEncoder.getVelocity();
     m_wristVelocitySignal = m_wristEncoder.getVelocity();
     m_armOutputSignal = m_armMaster.getDutyCycle();
@@ -176,8 +178,23 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void updateInputs(ArmIOInputsAutoLogged inputs) {
-    inputs.armPositionDegs = Units.rotationsToDegrees(m_armPositionSignal.getValueAsDouble());
-    inputs.wristPositionDegs = Units.rotationsToDegrees(m_wristPositionSignal.getValueAsDouble());
+    BaseStatusSignal.refreshAll(
+            m_armPositionSignal,
+            m_wristPositionSignal,
+            m_armVelocitySignal,
+            m_wristVelocitySignal,
+            m_armOutputSignal,
+            m_wristOutputSignal,
+            m_armClosedOutputSignal,
+            m_wristClosedOutputSignal,
+            m_armSetpointSignal,
+            m_wristSetpointSignal,
+            m_armCurrentDrawSignal,
+            m_wristCurrentDrawSignal
+    );
+
+    inputs.armPositionDegs = Units.rotationsToDegrees(m_armPositionSignal.getValueAsDouble() * ArmConstants.ARM_SENSOR_MECHANISM_RATIO);
+    inputs.wristPositionDegs = Units.rotationsToDegrees(m_wristPositionSignal.getValueAsDouble() * ArmConstants.WRIST_SENSOR_MECHANISM_RATIO);
 
     inputs.armVelocityDegsPerSecond = Units.rotationsToDegrees(m_armVelocitySignal.getValueAsDouble());
     inputs.wristVelocityDegsPerSecond = Units.rotationsToDegrees(m_wristVelocitySignal.getValueAsDouble());
@@ -235,8 +252,8 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void resetPosition() {
-    m_wristEncoder.setPosition(0.0);
-    m_armEncoder.setPosition(0.0);
+//    m_wristEncoder.setPosition(m_wristEncoder.get);
+//    m_armEncoder.setPosition(m_armPositionSignal.refresh().getValueAsDouble() * ArmConstants.ARM_SENSOR_MECHANISM_RATIO);
   }
 
   @Override

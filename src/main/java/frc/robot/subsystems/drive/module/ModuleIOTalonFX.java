@@ -74,14 +74,15 @@ public class ModuleIOTalonFX implements ModuleIO {
   PositionVoltage m_posRequest;
 
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
-    m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID());
-    m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID());
+    String canbus = "canivore";
+    m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID(), canbus);
+    m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID(), canbus);
     
     /*
     * this is technically the proper way of using any class that
     * implements the "Closeable" or "AutoClosable", typically things
     * like files or network ports, but also robot hardware */
-    try (CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID())) {
+    try (CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID(), canbus)) {
       // run factory default on cancoder
       var encoderConfig = new CANcoderConfiguration();
       encoderConfig.MagnetSensor.SensorDirection =
