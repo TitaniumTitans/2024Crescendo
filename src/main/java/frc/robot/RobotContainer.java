@@ -16,7 +16,9 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -41,6 +43,7 @@ import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -70,6 +73,9 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+    Logger.recordOutput("Zero Pose3d", new Pose3d());
+
     switch (Constants.currentMode) {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
@@ -115,9 +121,9 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_shooter = new ShooterSubsystem(new ShooterIOSim());
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations

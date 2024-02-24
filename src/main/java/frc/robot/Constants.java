@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
 /**
@@ -35,7 +36,16 @@ public final class Constants {
   private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
-  public static final Mode currentMode = Mode.SIM;
+
+  public static final Mode currentMode;
+
+  static {
+    if (RobotBase.isSimulation()) {
+      currentMode = Mode.SIM;
+    } else {
+      currentMode = Mode.REAL;
+    }
+  }
 
   public enum Mode {
     /** Running on a real robot. */

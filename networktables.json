@@ -288,6 +288,182 @@
     }
   },
   {
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Left PID.mm.kp",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Left PID.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Left PID.mm.kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Right PID.mm.kp",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Right PID.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Right PID.mm.kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/Sim Turn PID.mm.kp",
     "type": "double",
     "value": 43.982,
