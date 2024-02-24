@@ -67,14 +67,14 @@ public class ShooterIOKraken implements ShooterIO {
 
     // right shooter isn't inverted
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    m_rightTalon.getConfigurator().apply(shooterConfig);
+    m_leftTalon.getConfigurator().apply(shooterConfig);
 
     // everything else is
     shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    m_leftTalon.getConfigurator().apply(shooterConfig);
+    m_rightTalon.getConfigurator().apply(shooterConfig);
     m_indexer.getConfigurator().apply(shooterConfig);
-    m_intake.getConfigurator().apply(shooterConfig);
     m_kicker.getConfigurator().apply(shooterConfig);
+    m_intake.getConfigurator().apply(shooterConfig);
 
     m_leftProperty = new Phoenix6PidPropertyBuilder("Shooter/Left PID", false, m_leftTalon, 0)
         .addP(ShooterConstants.SHOOTER_KP)

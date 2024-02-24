@@ -35,7 +35,7 @@ public final class Constants {
   private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.PROTO_SHOOTER;
 
   public enum Mode {
     /** Running on a real robot. */

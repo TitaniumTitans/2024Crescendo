@@ -57,7 +57,7 @@ public class Module {
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (m_turnRelativeOffset == null && m_inputs.getTurnAbsolutePosition().getRadians() != 0.0) {
+    if (m_turnRelativeOffset == null) {// && m_inputs.getTurnAbsolutePosition().getRadians() != 0.0) {
       m_turnRelativeOffset = m_inputs.getTurnAbsolutePosition().minus(m_inputs.getTurnPosition());
     }
 
