@@ -164,7 +164,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.leftBumper().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6))
+    controller.leftBumper().whileTrue(m_shooter.setShooterPowerFactory(0.25, 0.2))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+
+    controller.leftTrigger().whileTrue(Commands.runOnce(m_shooter::runShooterVelocity))
             .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
 
     controller.a().whileTrue(

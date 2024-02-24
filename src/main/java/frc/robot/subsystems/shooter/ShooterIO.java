@@ -33,6 +33,8 @@ public interface ShooterIO {
     protected double indexerTemperature = 0.0;
     protected double intakeTemperature = 0.0;
 
+    protected double tofDistanceIn = 0.0;
+
 
     public double getTlVelocityRPM() {
       return tlVelocityRPM;
@@ -228,6 +230,14 @@ public interface ShooterIO {
 
     public void setIntakeTemperature(double intakeTemperature) {
       this.intakeTemperature = intakeTemperature;
+    }
+
+    public double getTofDistanceIn() {
+      return tofDistanceIn;
+    }
+
+    public void setTofDistanceIn(double tofDistanceIn) {
+      this.tofDistanceIn = tofDistanceIn;
     }
   }
   default void setMotorVoltageTL(double voltage) {}
