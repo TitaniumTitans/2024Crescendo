@@ -161,13 +161,13 @@ public final class Constants {
     public static final int ARM_FOLLOWER_ID = 19;
     public static final int ARM_ENCODER_ID = 20;
     public static final double ARM_OFFSET = 0.698975;//0.707520;
-    public static final double WRIST_OFFSET = 0.101807;
-    public static final double ARM_ROTOR_SENSOR_RATIO = (12.0 / 56.0) * (18.0 / 66.0) * (18.0 / 80.0) * (26.0 / 36.0);
-    public static final double ARM_SENSOR_MECHANISM_RATIO = (36.0 / 26.0) * (24.0 / 64.0);
+    public static final double WRIST_OFFSET = -0.108643;
+    public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 36.0);
+    public static final double ARM_CANCODER_MECHANISM_RATIO = (36.0 / 26.0) * (24.0 / 64.0);
 
     // the pulley on the encoder is a 1:1
-    public static final double WRIST_ROTOR_SENSOR_RATIO = (12.0 / 56.0) * (18.0 / 66.0) * (18.0 / 80.0);
-    public static final double WRIST_SENSOR_MECHANISM_RATIO = (24.0 / 48.0);
+    public static final double WRIST_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
+    public static final double WRIST_CANCODER_MECHANISM_RATIO = (48.0 / 24.0);
 
     public static final double WRIST_KP = 0.0;
     public static final double WRIST_KI = 0.0;
@@ -211,12 +211,12 @@ public final class Constants {
     public static final int INTAKE_ID = 14;
     public static final int INDEXER_ID = 15;
 
-    public static final double SHOOTER_KP = 0.000061;
+    public static final double SHOOTER_KP = 0.19623;
     public static final double SHOOTER_KI = 0.0;
     public static final double SHOOTER_KD = 0.005;
     public static final double SHOOTER_KF = 0.000152;
-    public static final double SHOOTER_KS = 0.0;
-    public static final double SHOOTER_KV = 0.0;
+    public static final double SHOOTER_KS = 0.21963;
+    public static final double SHOOTER_KV = 0.13041;
 
     public static final boolean TOP_LEFT_INVERTED = false;
     public static final boolean TOP_RIGHT_INVERTED = true;

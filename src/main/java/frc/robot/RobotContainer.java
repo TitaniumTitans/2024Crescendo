@@ -13,14 +13,18 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
@@ -156,6 +160,7 @@ public class RobotContainer {
     configureButtonBindings();
     // configure named commands for auto
     configureNamedCommands();
+    configureDashboard();
   }
 
   /**
@@ -165,39 +170,46 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-//    controller.leftBumper().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6))
-//            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-//
-//    controller.leftTrigger().whileTrue(Commands.runOnce(m_shooter::runShooterVelocity))
-//            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-//
-//    controller.a().whileTrue(
-//        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumperPressed))
-//        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-//    controller.b().whileTrue(
-//        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumperPressed))
-//        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-//
-//    controller.x().whileTrue(
-//            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumperPressed))
-//        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-//    controller.y().whileTrue(
-//            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumperPressed))
-//        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+    controller.leftBumper().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6, 0.0))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
 
-    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.25))
-                    .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.25))
-            .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.leftTrigger().whileTrue(Commands.runOnce(m_shooter::runShooterVelocity))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
 
-    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.25))
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.25))
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.a().whileTrue(
+        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumper))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
+    controller.b().whileTrue(
+        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumper))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
 
-    controller.a().onTrue(m_armSubsystem.resetEncoderFactory());
-    controller.b().whileTrue(m_armSubsystem.setArmDesiredPose(90, 90))
-            .whileFalse(m_armSubsystem.setWristPowerFactory(0.0).andThen(m_armSubsystem.setArmPowerFactory(0.0)));
+    controller.x().whileTrue(
+            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumper))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
+    controller.y().whileTrue(
+            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumper))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
+
+    controller.rightTrigger().onTrue(Commands.runOnce(SignalLogger::stop));
+
+//    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.25))
+//                    .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.25))
+//            .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//
+//    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.25));
+//    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.25));
+//
+//    controller.b().whileTrue(m_armSubsystem.setWristPositionFactory(0));
+//    controller.y().whileTrue(m_armSubsystem.setWristPositionFactory(90));
+//
+//    controller.x().whileTrue(new ConditionalCommand(
+//                    m_shooter.setShooterPowerFactory(0.25, 0.25, 1),
+//                    m_shooter.setShooterPowerFactory(0.0, 0.0, 1.0),
+//                    () -> !m_shooter.hasPiece()))
+//            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 1));
+//    controller.a().whileTrue(m_shooter.setShooterPowerFactory(-0.2, -0.2, -1))
+//            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0 ,1));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -223,6 +235,13 @@ public class RobotContainer {
   private void configureNamedCommands() {
     NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
     NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+  }
+
+  private void configureDashboard() {
+    ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
+
+    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
+    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
   }
 
   /**

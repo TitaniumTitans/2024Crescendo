@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.PropertyManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -60,6 +61,8 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata(gitDirty, "Unknown");
         break;
     }
+
+    SignalLogger.start();
 
     // Set up data receivers & replay source
     switch (Constants.currentMode) {

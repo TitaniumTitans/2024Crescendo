@@ -63,7 +63,7 @@ public class ShooterIOKraken implements ShooterIO {
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     shooterConfig.CurrentLimits.SupplyCurrentLimit = 40;
-    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     // right shooter isn't inverted
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -143,6 +143,12 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
+    BaseStatusSignal.refreshAll(
+            m_leftVelSignal,
+            m_rightVelSignal,
+            m_leftVoltOutSignal
+    );
+
     inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() / 60.0;
     inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() / 60.0;
 

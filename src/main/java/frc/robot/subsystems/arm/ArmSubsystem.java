@@ -4,6 +4,7 @@ import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,7 +21,7 @@ public class ArmSubsystem extends SubsystemBase {
   private final ArmIOInputsAutoLogged m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_desiredWristPoseDegs;
-  private static final boolean USE_MM = false;
+  private static final boolean USE_MM = true;
 
   private final SysIdRoutine m_sysidArm;
   private final SysIdRoutine m_sysidWrist;
@@ -99,28 +100,37 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Arm", m_inputs);
 
+    Logger.recordOutput("Arm/Wrist Setpoint before clamp", m_desiredWristPoseDegs);
+
     // clamp values for PID inbetween acceptable ranges
-    m_desiredWristPoseDegs = m_desiredWristPoseDegs > 0 ?
+    m_desiredWristPoseDegs = m_desiredWristPoseDegs > -1 ?
         MathUtil.clamp(m_desiredWristPoseDegs, ArmConstants.WRIST_LOWER_LIMIT.getValue(),
             ArmConstants.WRIST_UPPER_LIMIT.getValue())
         : m_desiredWristPoseDegs;
 
-    m_desiredArmPoseDegs = m_desiredArmPoseDegs > 0 ?
+    m_desiredArmPoseDegs = m_desiredArmPoseDegs > -1 ?
         MathUtil.clamp(m_desiredArmPoseDegs, ArmConstants.ARM_LOWER_LIMIT.getValue(),
             ArmConstants.ARM_UPPER_LIMIT.getValue())
         : m_desiredArmPoseDegs;
 
+    Logger.recordOutput("Arm/Wrist Setpoint after Clamp", m_desiredWristPoseDegs);
+
     // check to make sure we're not in manual control
-    if (m_desiredWristPoseDegs > -1 && m_desiredArmPoseDegs > -1) {
+    if (m_desiredWristPoseDegs > -1 /*&& m_desiredArmPoseDegs > -1*/) {
       m_io.setArmAngle(m_desiredArmPoseDegs, USE_MM);
+      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
 
       // check to see if the wrist is currently too close to the rest of the arm
-      if (m_inputs.wristPositionDegs + m_inputs.armPositionDegs
-          < ArmConstants.WRIST_ARM_GAP.getValue()) {
-        m_io.setWristAngle(m_inputs.wristPositionDegs, USE_MM);
-      } else {
+//      if (m_inputs.wristPositionDegs + m_inputs.armPositionDegs
+//          < ArmConstants.WRIST_ARM_GAP.getValue()) {
+//        m_io.setWristAngle(m_inputs.wristPositionDegs, USE_MM);
+//        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
+//      } else {
         m_io.setWristAngle(m_desiredWristPoseDegs, USE_MM);
-      }
+        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
+//      }
+
+
 //    } else if (m_desiredWristPoseDegs != -2 && m_desiredArmPoseDegs != -2) {
 //       check for stopped motors, if not hold position (still in manual mode)
 //      m_io.setWristAngle(m_inputs.wristPositionDegs, USE_MM);
@@ -130,6 +140,7 @@ public class ArmSubsystem extends SubsystemBase {
 //       keep us in stop mode until told otherwise
 //      m_desiredArmPoseDegs = -2;
 //      m_desiredWristPoseDegs = -2;
+      Logger.recordOutput("Arm/In else", false);
     }
   }
 
@@ -146,7 +157,8 @@ public class ArmSubsystem extends SubsystemBase {
     // limiting code for arm
     if (m_inputs.armPositionDegs > ArmConstants.ARM_UPPER_LIMIT.getValue()) {
       power = MathUtil.clamp(power, -1.0, 0.0);
-    } else if (m_inputs.armPositionDegs < ArmConstants.ARM_LOWER_LIMIT.getValue()) {
+    }
+    if (m_inputs.armPositionDegs < ArmConstants.ARM_LOWER_LIMIT.getValue()) {
       power = MathUtil.clamp(power, 0.0, 1.0);
     }
     double finalPower = power;
@@ -158,22 +170,28 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command setWristPowerFactory(double power) {
-    // let wrist know it's in manual control mode
-    m_desiredWristPoseDegs = -1;
-    // limiting code for wrist
-    if (m_inputs.wristPositionDegs > ArmConstants.WRIST_UPPER_LIMIT.getValue()) {
-      power = MathUtil.clamp(power, -1.0, 0.0);
-    }
-    if (m_inputs.wristPositionDegs < ArmConstants.WRIST_LOWER_LIMIT.getValue()) {
+    return runEnd(() -> {
+          final double outPower;
+          // let wrist know it's in manual control mode
+          m_desiredWristPoseDegs = -1;
+          // limiting code for wrist
+          if (m_inputs.wristPositionDegs > ArmConstants.WRIST_UPPER_LIMIT.getValue()) {
+            outPower = MathUtil.clamp(power, -1.0, 0.0);
+          } else if (m_inputs.wristPositionDegs < ArmConstants.WRIST_LOWER_LIMIT.getValue()) {
 //        || m_inputs.wristPositionDegs + m_inputs.armPositionDegs < ArmConstants.WRIST_ARM_GAP.getValue()) {
-      power = MathUtil.clamp(power, 0.0, 1.0);
-    }
-    double finalPower = power;
-    return runOnce(() -> m_io.setWristVoltage(finalPower * 12.0));
+            outPower = MathUtil.clamp(power, 0.0, 1.0);
+          } else {
+            outPower = power;
+          }
+          m_io.setWristVoltage(outPower * 12.0);
+        },
+        () -> {
+          m_io.setWristVoltage(0.0);
+        });
   }
 
   public Command setWristPositionFactory(double degrees) {
-    return runOnce(() -> m_desiredWristPoseDegs = degrees);
+    return run(() -> m_desiredWristPoseDegs = degrees);
   }
 
   public Command stopArmFactory() {
@@ -208,7 +226,10 @@ public class ArmSubsystem extends SubsystemBase {
 
   public Command resetEncoderFactory() {
     return runOnce(m_io::resetPosition);
+  }
 
+  public Command enableBrakeMode(boolean enabled) {
+    return runOnce(() -> m_io.enableBrakeMode(enabled)).ignoringDisable(true);
   }
 }
 

@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -70,9 +71,7 @@ public class ArmIOKraken implements ArmIO {
     armConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     armConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     armConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    armConfig.Feedback.FeedbackRemoteSensorID = m_armEncoder.getDeviceID();
-    armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    armConfig.Feedback.RotorToSensorRatio = ArmConstants.ARM_ROTOR_SENSOR_RATIO;
+    armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
     m_armMaster.getConfigurator().apply(armConfig);
@@ -80,15 +79,12 @@ public class ArmIOKraken implements ArmIO {
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
-    wristConfig.MotionMagic.MotionMagicCruiseVelocity = 10;
-    wristConfig.MotionMagic.MotionMagicAcceleration = 5;
+    wristConfig.MotionMagic.MotionMagicCruiseVelocity = 3 * ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
+    wristConfig.MotionMagic.MotionMagicAcceleration = 6 * ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
     wristConfig.CurrentLimits.SupplyCurrentLimit = 40;
     wristConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     wristConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     wristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    wristConfig.Feedback.FeedbackRemoteSensorID = m_wristEncoder.getDeviceID();
-    wristConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    wristConfig.Feedback.RotorToSensorRatio = ArmConstants.WRIST_ROTOR_SENSOR_RATIO;
     wristConfig.Feedback.SensorToMechanismRatio = ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
     m_wristMaster.getConfigurator().apply(wristConfig);
@@ -135,13 +131,13 @@ public class ArmIOKraken implements ArmIO {
         .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
         .withSlot(0);
     m_armFollowerRequest = new Follower(m_armMaster.getDeviceID(), false);
-    m_wristFollowerRequest = new Follower(m_wristFollower.getDeviceID(), false);
+    m_wristFollowerRequest = new Follower(m_wristMaster.getDeviceID(), false);
     m_stopRequest = new NeutralOut();
 
-    m_armPositionSignal = m_armEncoder.getPosition();
-    m_wristPositionSignal = m_wristEncoder.getPosition();
-    m_armVelocitySignal = m_armEncoder.getVelocity();
-    m_wristVelocitySignal = m_wristEncoder.getVelocity();
+    m_armPositionSignal = m_armMaster.getPosition();
+    m_wristPositionSignal = m_wristMaster.getPosition();
+    m_armVelocitySignal = m_armMaster.getVelocity();
+    m_wristVelocitySignal = m_wristMaster.getVelocity();
     m_armOutputSignal = m_armMaster.getDutyCycle();
     m_wristOutputSignal = m_wristMaster.getDutyCycle();
     m_armClosedOutputSignal = m_armMaster.getClosedLoopOutput();
@@ -193,8 +189,8 @@ public class ArmIOKraken implements ArmIO {
             m_wristCurrentDrawSignal
     );
 
-    inputs.armPositionDegs = Units.rotationsToDegrees(m_armPositionSignal.getValueAsDouble() * ArmConstants.ARM_SENSOR_MECHANISM_RATIO);
-    inputs.wristPositionDegs = Units.rotationsToDegrees(m_wristPositionSignal.getValueAsDouble() * ArmConstants.WRIST_SENSOR_MECHANISM_RATIO);
+    inputs.armPositionDegs = Units.rotationsToDegrees(m_armPositionSignal.getValueAsDouble());
+    inputs.wristPositionDegs = Units.rotationsToDegrees(m_wristPositionSignal.getValueAsDouble());
 
     inputs.armVelocityDegsPerSecond = Units.rotationsToDegrees(m_armVelocitySignal.getValueAsDouble());
     inputs.wristVelocityDegsPerSecond = Units.rotationsToDegrees(m_wristVelocitySignal.getValueAsDouble());
@@ -205,14 +201,14 @@ public class ArmIOKraken implements ArmIO {
     inputs.armClosedLoopOutput = m_armClosedOutputSignal.getValueAsDouble();
     inputs.wristClosedLoopOutput = m_wristClosedOutputSignal.getValueAsDouble();
 
-    inputs.armDesiredSetpoint = Units.rotationsToDegrees(m_armSetpointSignal.getValueAsDouble());
-    inputs.wristDesiredSetpoint = Units.rotationsToDegrees(m_wristSetpointSignal.getValueAsDouble());
+    inputs.armDesiredSetpoint = Units.rotationsToDegrees(m_armSetpointSignal.getValueAsDouble()) / ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
+    inputs.wristDesiredSetpoint = Units.rotationsToDegrees(m_wristSetpointSignal.getValueAsDouble()) / ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
     inputs.armCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
 
     Logger.recordOutput("Arm Absolute Position", m_armEncoder.getAbsolutePosition().getValueAsDouble());
-    Logger.recordOutput("Wrist Absolute Position", m_wristEncoder.getAbsolutePosition().getValueAsDouble());
+    Logger.recordOutput("Wrist Absolute Position", Units.rotationsToDegrees(m_wristEncoder.getAbsolutePosition().getValueAsDouble() / 2));
 
     m_wristProperty.updateIfChanged();
     m_armProperty.updateIfChanged();
@@ -236,24 +232,25 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setWristVoltage(double voltage) {
-    m_wristMaster.setVoltage(voltage);
     m_wristFollower.setControl(m_wristFollowerRequest);
+    m_wristMaster.setVoltage(voltage);
   }
 
   @Override
   public void setWristAngle(double degrees, boolean useMM) {
+    m_wristFollower.setControl(m_wristFollowerRequest);
+
     if (useMM) {
       m_wristMaster.setControl(m_mmRequest.withPosition(degrees / 360));
     } else {
       m_wristMaster.setControl(m_pidRequest.withPosition(degrees / 360));
     }
-    m_wristFollower.setControl(m_wristFollowerRequest);
   }
 
   @Override
   public void resetPosition() {
-//    m_wristEncoder.setPosition(m_wristEncoder.get);
-//    m_armEncoder.setPosition(m_armPositionSignal.refresh().getValueAsDouble() * ArmConstants.ARM_SENSOR_MECHANISM_RATIO);
+    m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble() * ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
+    m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble() / 2);
   }
 
   @Override
@@ -262,5 +259,19 @@ public class ArmIOKraken implements ArmIO {
     m_wristMaster.setControl(m_stopRequest);
     m_armMaster.setControl(m_armFollowerRequest);
     m_wristMaster.setControl(m_wristFollowerRequest);
+  }
+
+  @Override
+  public void enableBrakeMode(boolean enabled) {
+    MotorOutputConfigs config = new MotorOutputConfigs();
+
+    config.NeutralMode = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    config.Inverted = InvertedValue.Clockwise_Positive;
+
+    m_wristMaster.getConfigurator().apply(config);
+    m_wristFollower.getConfigurator().apply(config);
+
+//    m_armMaster.getConfigurator().apply(config);
+//    m_armFollower.getConfigurator().apply(config);
   }
 }
