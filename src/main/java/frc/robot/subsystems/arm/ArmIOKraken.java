@@ -79,8 +79,8 @@ public class ArmIOKraken implements ArmIO {
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
-    wristConfig.MotionMagic.MotionMagicCruiseVelocity = 3 * ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
-    wristConfig.MotionMagic.MotionMagicAcceleration = 6 * ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
+    wristConfig.MotionMagic.MotionMagicCruiseVelocity = 450; // rotations/s
+    wristConfig.MotionMagic.MotionMagicAcceleration = 900; // rotations/s/s
     wristConfig.CurrentLimits.SupplyCurrentLimit = 40;
     wristConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     wristConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -201,14 +201,18 @@ public class ArmIOKraken implements ArmIO {
     inputs.armClosedLoopOutput = m_armClosedOutputSignal.getValueAsDouble();
     inputs.wristClosedLoopOutput = m_wristClosedOutputSignal.getValueAsDouble();
 
-    inputs.armDesiredSetpoint = Units.rotationsToDegrees(m_armSetpointSignal.getValueAsDouble()) / ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
-    inputs.wristDesiredSetpoint = Units.rotationsToDegrees(m_wristSetpointSignal.getValueAsDouble()) / ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
+    inputs.armDesiredSetpoint = Units.rotationsToDegrees(m_armSetpointSignal.getValueAsDouble())
+        / ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
+    inputs.wristDesiredSetpoint = Units.rotationsToDegrees(m_wristSetpointSignal.getValueAsDouble())
+        / ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
     inputs.armCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
 
-    Logger.recordOutput("Arm Absolute Position", m_armEncoder.getAbsolutePosition().getValueAsDouble());
-    Logger.recordOutput("Wrist Absolute Position", Units.rotationsToDegrees(m_wristEncoder.getAbsolutePosition().getValueAsDouble() / 2));
+    Logger.recordOutput("Arm Absolute Position", Units.rotationsToDegrees(
+        m_armEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.ARM_CANCODER_MECHANISM_RATIO));
+    Logger.recordOutput("Wrist Absolute Position", Units.rotationsToDegrees(
+        m_wristEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO));
 
     m_wristProperty.updateIfChanged();
     m_armProperty.updateIfChanged();
@@ -249,8 +253,10 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void resetPosition() {
-    m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble() * ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
-    m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble() / 2);
+    m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble()
+        / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
+    m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble()
+        / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
   }
 
   @Override

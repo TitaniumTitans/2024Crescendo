@@ -100,9 +100,7 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Arm", m_inputs);
 
-    Logger.recordOutput("Arm/Wrist Setpoint before clamp", m_desiredWristPoseDegs);
-
-    // clamp values for PID inbetween acceptable ranges
+    // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > -1 ?
         MathUtil.clamp(m_desiredWristPoseDegs, ArmConstants.WRIST_LOWER_LIMIT.getValue(),
             ArmConstants.WRIST_UPPER_LIMIT.getValue())
@@ -116,31 +114,19 @@ public class ArmSubsystem extends SubsystemBase {
     Logger.recordOutput("Arm/Wrist Setpoint after Clamp", m_desiredWristPoseDegs);
 
     // check to make sure we're not in manual control
-    if (m_desiredWristPoseDegs > -1 /*&& m_desiredArmPoseDegs > -1*/) {
+    if (m_desiredWristPoseDegs > -1 && m_desiredArmPoseDegs > -1) {
       m_io.setArmAngle(m_desiredArmPoseDegs, USE_MM);
       Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
 
       // check to see if the wrist is currently too close to the rest of the arm
-//      if (m_inputs.wristPositionDegs + m_inputs.armPositionDegs
-//          < ArmConstants.WRIST_ARM_GAP.getValue()) {
-//        m_io.setWristAngle(m_inputs.wristPositionDegs, USE_MM);
-//        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
-//      } else {
+      if (m_inputs.wristPositionDegs + m_inputs.armPositionDegs
+          < ArmConstants.WRIST_ARM_GAP.getValue()) {
+        m_io.setWristAngle(m_inputs.wristPositionDegs, USE_MM);
+        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
+      } else {
         m_io.setWristAngle(m_desiredWristPoseDegs, USE_MM);
         Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
-//      }
-
-
-//    } else if (m_desiredWristPoseDegs != -2 && m_desiredArmPoseDegs != -2) {
-//       check for stopped motors, if not hold position (still in manual mode)
-//      m_io.setWristAngle(m_inputs.wristPositionDegs, USE_MM);
-//      m_io.setArmAngle(m_inputs.armPositionDegs, USE_MM);
-//    } else {
-//      m_io.stop();
-//       keep us in stop mode until told otherwise
-//      m_desiredArmPoseDegs = -2;
-//      m_desiredWristPoseDegs = -2;
-      Logger.recordOutput("Arm/In else", false);
+      }
     }
   }
 
@@ -152,17 +138,20 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command setArmPowerFactory(double power) {
-    // let arm know it's in manual control
-    m_desiredArmPoseDegs = -1;
-    // limiting code for arm
-    if (m_inputs.armPositionDegs > ArmConstants.ARM_UPPER_LIMIT.getValue()) {
-      power = MathUtil.clamp(power, -1.0, 0.0);
-    }
-    if (m_inputs.armPositionDegs < ArmConstants.ARM_LOWER_LIMIT.getValue()) {
-      power = MathUtil.clamp(power, 0.0, 1.0);
-    }
-    double finalPower = power;
-    return runOnce(() -> m_io.setArmVoltage(finalPower * 12.0));
+    return runEnd(() -> {
+          // let arm know it's in manual control
+          m_desiredArmPoseDegs = -1;
+          double finalPower = power;
+          // limiting code for arm
+          if (m_inputs.armPositionDegs > ArmConstants.ARM_UPPER_LIMIT.getValue()) {
+            finalPower = MathUtil.clamp(power, -1.0, 0.0);
+          }
+          if (m_inputs.armPositionDegs < ArmConstants.ARM_LOWER_LIMIT.getValue()) {
+            finalPower = MathUtil.clamp(power, 0.0, 1.0);
+          }
+          m_io.setArmVoltage(finalPower * 12.0);
+        },
+        () -> m_io.setArmVoltage(0.0));
   }
 
   public Command setArmPositionFactory(double degrees) {
@@ -177,17 +166,15 @@ public class ArmSubsystem extends SubsystemBase {
           // limiting code for wrist
           if (m_inputs.wristPositionDegs > ArmConstants.WRIST_UPPER_LIMIT.getValue()) {
             outPower = MathUtil.clamp(power, -1.0, 0.0);
-          } else if (m_inputs.wristPositionDegs < ArmConstants.WRIST_LOWER_LIMIT.getValue()) {
-//        || m_inputs.wristPositionDegs + m_inputs.armPositionDegs < ArmConstants.WRIST_ARM_GAP.getValue()) {
+          } else if (m_inputs.wristPositionDegs < ArmConstants.WRIST_LOWER_LIMIT.getValue()
+              || m_inputs.wristPositionDegs + m_inputs.armPositionDegs < ArmConstants.WRIST_ARM_GAP.getValue()) {
             outPower = MathUtil.clamp(power, 0.0, 1.0);
           } else {
             outPower = power;
           }
           m_io.setWristVoltage(outPower * 12.0);
         },
-        () -> {
-          m_io.setWristVoltage(0.0);
-        });
+        () -> m_io.setWristVoltage(0.0));
   }
 
   public Command setWristPositionFactory(double degrees) {
@@ -196,8 +183,8 @@ public class ArmSubsystem extends SubsystemBase {
 
   public Command stopArmFactory() {
     // put wrist and arm into stop mode to keep PID from running
-    m_desiredWristPoseDegs = -2;
-    m_desiredArmPoseDegs = -2;
+    m_desiredWristPoseDegs = -1;
+    m_desiredArmPoseDegs = -1;
     return runOnce(() -> {
       m_io.setWristVoltage(0.0);
       m_io.setArmVoltage(0.0);
