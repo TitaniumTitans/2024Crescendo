@@ -65,8 +65,8 @@ public class ArmIOKraken implements ArmIO {
 
     // Arm Configuration
     TalonFXConfiguration armConfig = new TalonFXConfiguration();
-    armConfig.MotionMagic.MotionMagicCruiseVelocity = 10;
-    armConfig.MotionMagic.MotionMagicAcceleration = 5;
+    armConfig.MotionMagic.MotionMagicCruiseVelocity = Units.degreesToRotations(120); // rotations/s
+    armConfig.MotionMagic.MotionMagicAcceleration = Units.degreesToRotations(240); // rotations/s^2
     armConfig.CurrentLimits.SupplyCurrentLimit = 40;
     armConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     armConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -210,9 +210,9 @@ public class ArmIOKraken implements ArmIO {
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
 
     Logger.recordOutput("Arm Absolute Position", Units.rotationsToDegrees(
-        m_armEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.ARM_CANCODER_MECHANISM_RATIO));
+        m_armEncoder.getAbsolutePosition().getValueAsDouble()));
     Logger.recordOutput("Wrist Absolute Position", Units.rotationsToDegrees(
-        m_wristEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO));
+        m_wristEncoder.getAbsolutePosition().getValueAsDouble()));
 
     m_wristProperty.updateIfChanged();
     m_armProperty.updateIfChanged();
@@ -253,10 +253,17 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void resetPosition() {
-    m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble()
-        / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
-    m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble()
-        / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
+    if (m_armEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
+      m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble() - (1 / ArmConstants.ARM_CANCODER_MECHANISM_RATIO));
+    } else {
+      m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble());
+    }
+
+    if (m_wristEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
+      m_wristMaster.setPosition(1 - m_wristEncoder.getAbsolutePosition().getValueAsDouble());
+    } else {
+      m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble());
+    }
   }
 
   @Override

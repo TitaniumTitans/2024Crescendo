@@ -100,6 +100,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Arm", m_inputs);
 
+    Logger.recordOutput("Arm/Arm Setpoint bf Clamp", m_desiredArmPoseDegs);
+
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > -1 ?
         MathUtil.clamp(m_desiredWristPoseDegs, ArmConstants.WRIST_LOWER_LIMIT.getValue(),
@@ -114,10 +116,12 @@ public class ArmSubsystem extends SubsystemBase {
     Logger.recordOutput("Arm/Wrist Setpoint after Clamp", m_desiredWristPoseDegs);
 
     // check to make sure we're not in manual control
-    if (m_desiredWristPoseDegs > -1 && m_desiredArmPoseDegs > -1) {
+    if (m_desiredArmPoseDegs > -1) {
       m_io.setArmAngle(m_desiredArmPoseDegs, USE_MM);
       Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
+    }
 
+    if (m_desiredWristPoseDegs > -1) {
       // check to see if the wrist is currently too close to the rest of the arm
       if (m_inputs.wristPositionDegs + m_inputs.armPositionDegs
           < ArmConstants.WRIST_ARM_GAP.getValue()) {
@@ -128,6 +132,8 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
       }
     }
+
+    Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
   }
 
   public Command setArmDesiredPose(double armPose, double wristPose) {
@@ -155,7 +161,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command setArmPositionFactory(double degrees) {
-    return runOnce(() -> m_desiredArmPoseDegs = degrees);
+    return run(() -> m_desiredArmPoseDegs = degrees);
   }
 
   public Command setWristPowerFactory(double power) {
@@ -212,7 +218,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command resetEncoderFactory() {
-    return runOnce(m_io::resetPosition);
+    return runOnce(m_io::resetPosition).ignoringDisable(true);
   }
 
   public Command enableBrakeMode(boolean enabled) {

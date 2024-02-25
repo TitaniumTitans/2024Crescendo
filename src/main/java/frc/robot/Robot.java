@@ -15,6 +15,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.PropertyManager;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import lib.factories.TalonFXFactory;
@@ -34,6 +35,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  private PowerDistribution pdp;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -95,6 +97,8 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    pdp = new PowerDistribution();
   }
 
   /** This function is called periodically during all modes. */
@@ -107,6 +111,8 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
     TalonFXFactory.handleFaults();
+
+    Logger.recordOutput("Switchable On?", pdp.getSwitchableChannel());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -119,6 +125,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledPeriodic() {
     // Function is empty simply to overwrite the default, which throws an error
+    pdp.setSwitchableChannel(false);
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -136,6 +143,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousPeriodic() {
     // Function is empty simply to overwrite the default, which throws an error
+    pdp.setSwitchableChannel(true);
   }
 
   /** This function is called once when teleop is enabled. */
@@ -154,6 +162,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopPeriodic() {
     // Function is empty simply to overwrite the default, which throws an error
+    pdp.setSwitchableChannel(true);
   }
 
   /** This function is called once when test mode is enabled. */

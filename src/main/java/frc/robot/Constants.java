@@ -160,10 +160,10 @@ public final class Constants {
     public static final int ARM_MASTER_ID = 18;
     public static final int ARM_FOLLOWER_ID = 19;
     public static final int ARM_ENCODER_ID = 20;
-    public static final double ARM_OFFSET = 0.698975;//0.707520;
+    public static final double ARM_OFFSET = -0.604004;//0.707520;
     public static final double WRIST_OFFSET = -0.108643;
-    public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 26.0);
-    public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 26.0);
+    public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
+    public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
 
     // the pulley on the encoder is a 1:1
     public static final double WRIST_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
