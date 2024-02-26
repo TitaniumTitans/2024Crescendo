@@ -38,7 +38,7 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
-//    Logger.processInputs("Arm", m_inputs);
+    Logger.processInputs("Arm", m_inputs);
 
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY ?

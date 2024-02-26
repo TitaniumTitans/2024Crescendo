@@ -464,49 +464,41 @@
     }
   },
   {
-    "name": "/Preferences/Sim Turn PID.mm.kp",
+    "name": "/Preferences/Arm/WristLowerLimit",
     "type": "double",
-    "value": 43.982,
+    "value": 30.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Sim Turn PID.mm.ki",
+    "name": "/Preferences/Arm/WristUpperLimit",
     "type": "double",
-    "value": 0.0,
+    "value": 30.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Sim Turn PID.mm.kd",
+    "name": "/Preferences/Arm/ArmLowerLimit",
     "type": "double",
-    "value": 0.0,
+    "value": 30.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Sim Drive PID.mm.kp",
+    "name": "/Preferences/Arm/ArmUpperLimit",
     "type": "double",
-    "value": 0.314,
+    "value": 30.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Sim Drive PID.mm.ki",
+    "name": "/Preferences/Arm/Wrist Gap",
     "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Sim Drive PID.mm.kd",
-    "type": "double",
-    "value": 0.0,
+    "value": 20.0,
     "properties": {
       "persistent": true
     }

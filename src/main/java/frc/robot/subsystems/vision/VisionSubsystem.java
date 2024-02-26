@@ -61,7 +61,7 @@ public class VisionSubsystem {
     inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
 
     Logger.recordOutput("PhotonVision/" + m_name + "/Last Estimated Pose", m_lastEstimatedPose);
-//    Logger.processInputs("PhotonVision/" + m_name, inputs);
+    Logger.processInputs("PhotonVision/" + m_name, inputs);
   }
 
   public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {

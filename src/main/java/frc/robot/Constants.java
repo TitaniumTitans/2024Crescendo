@@ -37,15 +37,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode;
-
-  static {
-    if (RobotBase.isSimulation()) {
-      currentMode = Mode.SIM;
-    } else {
-      currentMode = Mode.REAL;
-    }
-  }
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -79,11 +71,11 @@ public final class Constants {
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
     // kV, kS, kA in order
-    protected static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
     // kP, kI, kD in order
-    protected static final double[] DRIVE_FB_GAINS = new double[]{0.314, 0.0, 0.0};
+    public static final double[] DRIVE_FB_GAINS = new double[]{0.314, 0.0, 0.0};
     // kP, kI, kD in order
-    protected static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
+    public static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
 
 //    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
 //        new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),

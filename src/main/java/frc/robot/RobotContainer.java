@@ -80,6 +80,7 @@ public class RobotContainer {
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
     Logger.recordOutput("Zero Pose3d", new Pose3d());
+    Logger.recordOutput("Zeroed Pose3d Array", new Pose3d(), new Pose3d());
 
     switch (Constants.currentMode) {
       case REAL -> {
@@ -189,22 +190,22 @@ public class RobotContainer {
 //
 //    controller.a().onTrue(m_armSubsystem.resetEncoderFactory());
 //
-//    m_driveSubsystem.setDefaultCommand(
-//        DriveCommands.joystickDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> -controller.getRightX()));
-//    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
-//    controller
-//        .start()
-//        .onTrue(
-//            Commands.runOnce(
-//                    () ->
-//                        m_driveSubsystem.setPose(
-//                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-//                    m_driveSubsystem)
-//                .ignoringDisable(true));
+    m_driveSubsystem.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
+    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
+    controller
+        .start()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        m_driveSubsystem.setPose(
+                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+                    m_driveSubsystem)
+                .ignoringDisable(true));
 
     controller.x().whileTrue(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.75))
         .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
