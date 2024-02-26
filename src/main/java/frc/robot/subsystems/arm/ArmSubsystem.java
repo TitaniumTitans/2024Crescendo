@@ -23,72 +23,12 @@ public class ArmSubsystem extends SubsystemBase {
   private double m_desiredWristPoseDegs;
   private static final boolean USE_MM = true;
 
-  private final SysIdRoutine m_sysidArm;
-  private final SysIdRoutine m_sysidWrist;
-
   public ArmSubsystem(ArmIO io) {
     m_io = io;
     m_inputs = new ArmIOInputsAutoLogged();
 
     m_desiredWristPoseDegs = -1;
     m_desiredArmPoseDegs = -1;
-
-    if (io.getClass() == ArmIOKraken.class) { // when using a talon drive
-      m_sysidArm = new SysIdRoutine(
-          new SysIdRoutine.Config(
-              null, // ramp rate
-              Volts.of(6),
-              null, // timeout for safety
-              // log state with phoenix logger
-              (SysIdRoutineLog.State state) -> SignalLogger.writeString("arm-state", state.toString())
-          ),
-          new SysIdRoutine.Mechanism(
-              (Measure<Voltage> volts) -> m_io.setArmVoltage(volts.in(Volts)),
-              null,
-              this));
-
-      m_sysidWrist = new SysIdRoutine(
-          new SysIdRoutine.Config(
-              null, // ramp rate
-              Volts.of(6),
-              null, // timeout for safety
-              // log state with phoenix logger
-              (SysIdRoutineLog.State state) -> SignalLogger.writeString("wrist-state", state.toString())
-          ),
-          new SysIdRoutine.Mechanism(
-              (Measure<Voltage> volts) -> m_io.setWristVoltage(volts.in(Volts)),
-              null,
-              this));
-
-    } else { // if not using a talon drive for some reason
-      m_sysidArm = new SysIdRoutine(
-          new SysIdRoutine.Config(
-              null,
-              Volts.of(6),
-              null
-          ),
-          new SysIdRoutine.Mechanism(
-              (Measure<Voltage> volts) -> m_io.setArmVoltage(volts.in(Volts)),
-              (SysIdRoutineLog log) -> log.motor("arm-pivot")
-                  .voltage(mutable(Volts.of(m_inputs.armAppliedOutput * RobotController.getBatteryVoltage())))
-                  .angularPosition(mutable(Degrees.of(m_inputs.armPositionDegs)))
-                  .angularVelocity(mutable(DegreesPerSecond.of(m_inputs.armVelocityDegsPerSecond))),
-              this));
-
-      m_sysidWrist = new SysIdRoutine(
-          new SysIdRoutine.Config(
-              null,
-              Volts.of(6),
-              null
-          ),
-          new SysIdRoutine.Mechanism(
-              (Measure<Voltage> volts) -> m_io.setWristVoltage(volts.in(Volts)),
-              (SysIdRoutineLog log) -> log.motor("wrist-pivot")
-                  .voltage(mutable(Volts.of(m_inputs.wristAppliedOutput * RobotController.getBatteryVoltage())))
-                  .angularPosition(mutable(Degrees.of(m_inputs.wristPositionDegs)))
-                  .angularVelocity(mutable(DegreesPerSecond.of(m_inputs.wristVelocityDegsPerSecond))),
-              this));
-    }
 
     m_io.resetPosition();
   }
@@ -195,26 +135,6 @@ public class ArmSubsystem extends SubsystemBase {
       m_io.setWristVoltage(0.0);
       m_io.setArmVoltage(0.0);
     });
-  }
-
-  public Command sysIdArmDynamic(SysIdRoutine.Direction direction) {
-    return m_sysidArm.dynamic(direction)
-        .andThen(stopArmFactory());
-  }
-
-  public Command sysIdArmQuasistatic(SysIdRoutine.Direction direction) {
-    return m_sysidArm.quasistatic(direction)
-        .andThen(stopArmFactory());
-  }
-
-  public Command sysIdWristDynamic(SysIdRoutine.Direction direction) {
-    return m_sysidWrist.dynamic(direction)
-        .andThen(stopArmFactory());
-  }
-
-  public Command sysIdWristQuasistatic(SysIdRoutine.Direction direction) {
-    return m_sysidWrist.quasistatic(direction)
-        .andThen(stopArmFactory());
   }
 
   public Command resetEncoderFactory() {
