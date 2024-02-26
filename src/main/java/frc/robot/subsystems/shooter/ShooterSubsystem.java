@@ -34,7 +34,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_leftSetpoint = new LoggedDashboardNumber("Shooter/Left Flywheel Setpoint RPM");
     m_rightSetpoint = new LoggedDashboardNumber("Shooter/Right Flywheel Setpoint RPM");
 
-    if (m_io.getClass() == ShooterIOKraken.class) {
+    if (m_io.getClass() == ShooterIOKraken.class || true) {
       m_sysIdLeft = new SysIdRoutine(
           new SysIdRoutine.Config(null,
               Voltage.of(9),
@@ -100,15 +100,19 @@ public class ShooterSubsystem extends SubsystemBase {
   public void runShooterVelocity() {
     m_io.setLeftVelocityRpm(m_leftSetpoint.get());
     m_io.setRightVelocityRpm(m_rightSetpoint.get());
-//    m_io.setKickerVoltage(9.0);
+    m_io.setKickerVoltage(9.0);
   }
 
-  public Command setShooterPowerFactory(double left, double right) {
+  public boolean hasPiece() {
+    return m_inputs.tofDistanceIn < 60;
+  }
+
+  public Command setShooterPowerFactory(double left, double right, double intake) {
     return run(() -> {
       setShooterPowerLeft(left);
       setShooterPowerRight(right);
-      setKickerPower(left == 0.0 ? 0.0 : 1.0);
-      setIntakePower(left == 0.0 ? 0.0 : 0.35);
+      setKickerPower(intake);
+      setIntakePower(intake);
     });
   }
 

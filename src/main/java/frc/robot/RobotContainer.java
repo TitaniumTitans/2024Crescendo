@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,8 +22,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
@@ -38,6 +42,7 @@ import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
@@ -80,7 +85,7 @@ public class RobotContainer {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
         m_driveSubsystem = new DriveSubsystem(
-            new GyroIOPigeon1(12),
+            new GyroIOPigeon2(true),
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
@@ -161,6 +166,7 @@ public class RobotContainer {
     configureButtonBindings();
     // configure named commands for auto
     configureNamedCommands();
+    configureDashboard();
   }
 
   /**
@@ -170,39 +176,40 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.leftBumper().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6))
-            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
+//    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
+//    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
+//
+//    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
+//    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
+//
+//    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
+//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//    controller.y().whileTrue(m_armSubsystem.setArmPositionFactory(90))
+//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//
+//    controller.a().onTrue(m_armSubsystem.resetEncoderFactory());
+//
+//    m_driveSubsystem.setDefaultCommand(
+//        DriveCommands.joystickDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> -controller.getRightX()));
+//    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
+//    controller
+//        .start()
+//        .onTrue(
+//            Commands.runOnce(
+//                    () ->
+//                        m_driveSubsystem.setPose(
+//                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+//                    m_driveSubsystem)
+//                .ignoringDisable(true));
 
-    controller.a().whileTrue(
-        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumperPressed))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.b().whileTrue(
-        m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumperPressed))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-
-    controller.x().whileTrue(
-            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward, controller.getHID()::getRightBumperPressed))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-    controller.y().whileTrue(
-            m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse, controller.getHID()::getRightBumperPressed))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0));
-
-    m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
-    controller
-        .start()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        m_driveSubsystem.setPose(
-                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-                    m_driveSubsystem)
-                .ignoringDisable(true));
+    controller.x().whileTrue(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.75))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
+    controller.y().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6, 0.75))
+        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
   }
 
   /**
@@ -211,6 +218,13 @@ public class RobotContainer {
   private void configureNamedCommands() {
     NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
     NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+  }
+
+  private void configureDashboard() {
+    ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
+
+    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
+    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
   }
 
   /**

@@ -36,4 +36,5 @@ public interface ArmIO {
 
   default void resetPosition() {}
   default void stop() {}
+  default void enableBrakeMode(boolean enabled) {}
 }

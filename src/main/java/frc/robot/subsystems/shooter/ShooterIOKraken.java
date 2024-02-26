@@ -8,6 +8,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.playingwithfusion.TimeOfFlight;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ShooterConstants;
@@ -18,6 +19,8 @@ public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_kicker;
   private final TalonFX m_intake;
   private final TalonFX m_indexer;
+
+  private final TimeOfFlight m_tof;
 
   private final PidPropertyPublic m_leftProperty;
   private final PidPropertyPublic m_rightProperty;
@@ -53,22 +56,25 @@ public class ShooterIOKraken implements ShooterIO {
     m_intake = new TalonFX(ShooterConstants.INTAKE_ID, canbus);
     m_indexer = new TalonFX(ShooterConstants.INDEXER_ID, canbus);
 
+    m_tof = new TimeOfFlight(28);
+    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 10);
+
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     shooterConfig.CurrentLimits.SupplyCurrentLimit = 40;
-    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     // right shooter isn't inverted
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    m_rightTalon.getConfigurator().apply(shooterConfig);
+    m_leftTalon.getConfigurator().apply(shooterConfig);
 
     // everything else is
     shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    m_leftTalon.getConfigurator().apply(shooterConfig);
+    m_rightTalon.getConfigurator().apply(shooterConfig);
     m_indexer.getConfigurator().apply(shooterConfig);
-    m_intake.getConfigurator().apply(shooterConfig);
     m_kicker.getConfigurator().apply(shooterConfig);
+    m_intake.getConfigurator().apply(shooterConfig);
 
     m_leftProperty = new Phoenix6PidPropertyBuilder("Shooter/Left PID", false, m_leftTalon, 0)
         .addP(ShooterConstants.SHOOTER_KP)
@@ -137,6 +143,12 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
+    BaseStatusSignal.refreshAll(
+            m_leftVelSignal,
+            m_rightVelSignal,
+            m_leftVoltOutSignal
+    );
+
     inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() / 60.0;
     inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() / 60.0;
 
@@ -157,6 +169,8 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.trTemperature = m_rightTemperatureSignal.getValueAsDouble();
     inputs.intakeTemperature = m_intakeTemperatureSignal.getValueAsDouble();
     inputs.indexerTemperature = m_indexerTemperatureSignal.getValueAsDouble();
+
+    inputs.tofDistanceIn = m_tof.getRange();
 
     m_leftProperty.updateIfChanged();
     m_rightProperty.updateIfChanged();
