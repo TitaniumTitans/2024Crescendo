@@ -107,12 +107,12 @@ public class ShooterSubsystem extends SubsystemBase {
     return m_inputs.tofDistanceIn < 60;
   }
 
-  public Command setShooterPowerFactory(double left, double right, double direction) {
+  public Command setShooterPowerFactory(double left, double right, double intake) {
     return run(() -> {
       setShooterPowerLeft(left);
       setShooterPowerRight(right);
-      setKickerPower(left == 0.0 ? 0.0 : Math.copySign(0.8, direction));
-      setIntakePower(left == 0.0 ? 0.0 : Math.copySign(0.55, direction));
+      setKickerPower(intake);
+      setIntakePower(intake);
     });
   }
 
