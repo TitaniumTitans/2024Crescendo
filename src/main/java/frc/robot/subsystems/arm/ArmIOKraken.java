@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -12,6 +13,8 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
+import com.gos.lib.properties.GosDoubleProperty;
+import com.gos.lib.properties.HeavyDoubleProperty;
 import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
@@ -31,6 +34,13 @@ public class ArmIOKraken implements ArmIO {
   // PID configs
   private final PidPropertyPublic m_armProperty;
   private final PidPropertyPublic m_wristProperty;
+
+  private final HeavyDoubleProperty m_armMaxVelDegS;
+  private final HeavyDoubleProperty m_wristMaxVelDegS;
+  private final HeavyDoubleProperty m_accelTimeSecs;
+
+  private MotionMagicConfigs m_armMMConfigs;
+  private MotionMagicConfigs m_wristMMConfigs;
 
   // Control outputs
   private final PositionVoltage m_pidRequest;
@@ -65,8 +75,6 @@ public class ArmIOKraken implements ArmIO {
 
     // Arm Configuration
     TalonFXConfiguration armConfig = new TalonFXConfiguration();
-    armConfig.MotionMagic.MotionMagicCruiseVelocity = Units.degreesToRotations(120); // rotations/s
-    armConfig.MotionMagic.MotionMagicAcceleration = Units.degreesToRotations(240); // rotations/s^2
     armConfig.CurrentLimits.SupplyCurrentLimit = 40;
     armConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     armConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -74,21 +82,19 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
-    m_armMaster.getConfigurator().apply(armConfig);
-    m_armFollower.getConfigurator().apply(armConfig);
+    m_armMaster.getConfigurator().apply(armConfig.withMotionMagic(m_armMMConfigs));
+    m_armFollower.getConfigurator().apply(armConfig.withMotionMagic(m_armMMConfigs));
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
-    wristConfig.MotionMagic.MotionMagicCruiseVelocity = 450; // rotations/s
-    wristConfig.MotionMagic.MotionMagicAcceleration = 900; // rotations/s/s
     wristConfig.CurrentLimits.SupplyCurrentLimit = 40;
     wristConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     wristConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     wristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     wristConfig.Feedback.SensorToMechanismRatio = ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
-    m_wristMaster.getConfigurator().apply(wristConfig);
-    m_wristFollower.getConfigurator().apply(wristConfig);
+    m_wristMaster.getConfigurator().apply(wristConfig.withMotionMagic(m_wristMMConfigs));
+    m_wristFollower.getConfigurator().apply(wristConfig.withMotionMagic(m_wristMMConfigs));
 
     // Encoder Configuration
     CANcoderConfiguration armEncoderConfig = new CANcoderConfiguration();
@@ -104,7 +110,7 @@ public class ArmIOKraken implements ArmIO {
     m_armEncoder.getConfigurator().apply(armEncoderConfig);
     m_wristEncoder.getConfigurator().apply(wristEncoderConfig);
 
-    // config pid
+    // config pid and properties
     m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", false, m_armMaster, 0)
         .addP(ArmConstants.SHOULDER_KP)
         .addI(ArmConstants.SHOULDER_KI)
@@ -122,6 +128,32 @@ public class ArmIOKraken implements ArmIO {
         .addKV(ArmConstants.WRIST_KV)
         .addKG(ArmConstants.WRIST_KG, GravityTypeValue.Arm_Cosine)
         .build();
+
+    m_armMaxVelDegS = new HeavyDoubleProperty((double maxVel) -> {
+      m_armMMConfigs.MotionMagicCruiseVelocity = Units.degreesToRotations(maxVel);
+      m_armMaster.getConfigurator().apply(m_armMMConfigs);
+      m_armFollower.getConfigurator().apply(m_armMMConfigs);
+    }, new GosDoubleProperty(false, "Arm/Arm Max Vel Degs/S", 120));
+
+    m_wristMaxVelDegS = new HeavyDoubleProperty((double maxVel) -> {
+      m_wristMMConfigs.MotionMagicCruiseVelocity = Units.degreesToRotations(maxVel);
+      m_wristMaster.getConfigurator().apply(m_wristMMConfigs);
+      m_wristFollower.getConfigurator().apply(m_wristMMConfigs);
+    }, new GosDoubleProperty(false, "Arm/Wrist Max Vel Degs/S", 120));
+
+    m_accelTimeSecs = new HeavyDoubleProperty((double accel) -> {
+      m_armMMConfigs.MotionMagicAcceleration = m_armMMConfigs.MotionMagicCruiseVelocity / accel;
+      m_armMaster.getConfigurator().apply(m_armMMConfigs);
+      m_armFollower.getConfigurator().apply(m_armMMConfigs);
+
+      m_wristMMConfigs.MotionMagicAcceleration = m_wristMMConfigs.MotionMagicCruiseVelocity / accel;
+      m_wristMaster.getConfigurator().apply(m_wristMMConfigs);
+      m_wristFollower.getConfigurator().apply(m_wristMMConfigs);
+    }, new GosDoubleProperty(false, "Arm/Acceleration Time Secs", 1));
+
+    m_armMaxVelDegS.updateIfChanged(true);
+    m_wristMaxVelDegS.updateIfChanged(true);
+    m_accelTimeSecs.updateIfChanged(true);
 
     // config output requests
     m_pidRequest = new PositionVoltage(0)
@@ -214,8 +246,13 @@ public class ArmIOKraken implements ArmIO {
     Logger.recordOutput("Wrist Absolute Position", Units.rotationsToDegrees(
         m_wristEncoder.getAbsolutePosition().getValueAsDouble()));
 
+    // update any pid properties
     m_wristProperty.updateIfChanged();
     m_armProperty.updateIfChanged();
+
+    m_armMaxVelDegS.updateIfChanged();
+    m_wristMaxVelDegS.updateIfChanged();
+    m_accelTimeSecs.updateIfChanged();
   }
 
   @Override
@@ -254,15 +291,19 @@ public class ArmIOKraken implements ArmIO {
   @Override
   public void resetPosition() {
     if (m_armEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble() - (1 / ArmConstants.ARM_CANCODER_MECHANISM_RATIO));
+      m_armMaster.setPosition((m_armEncoder.getAbsolutePosition().getValueAsDouble() - 0.5)
+          / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
     } else {
-      m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble());
+      m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble()
+          / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
     }
 
     if (m_wristEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_wristMaster.setPosition(1 - m_wristEncoder.getAbsolutePosition().getValueAsDouble());
+      m_wristMaster.setPosition((m_wristEncoder.getAbsolutePosition().getValueAsDouble() - 0.5)
+          / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
     } else {
-      m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble());
+      m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble()
+          / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
     }
   }
 
@@ -284,7 +325,7 @@ public class ArmIOKraken implements ArmIO {
     m_wristMaster.getConfigurator().apply(config);
     m_wristFollower.getConfigurator().apply(config);
 
-//    m_armMaster.getConfigurator().apply(config);
-//    m_armFollower.getConfigurator().apply(config);
+    m_armMaster.getConfigurator().apply(config);
+    m_armFollower.getConfigurator().apply(config);
   }
 }
