@@ -1,27 +1,34 @@
 package frc.robot.subsystems.arm;
 
-import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.ArmSetpoints;
 import frc.robot.Constants.ArmConstants;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.MutableMeasure.mutable;
-import static edu.wpi.first.units.Units.*;
-
 public class ArmSubsystem extends SubsystemBase {
+
+  enum ArmState {
+    STOW,
+    INTAKE,
+    AUTO_AIM,
+    ANTI_DEFENSE,
+    AMP,
+    TRANSITION_AMP,
+    SOURCE,
+    TRANSITION_SOURCE,
+    DISABLED
+  }
+
   private final ArmIO m_io;
   private final ArmIOInputsAutoLogged m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_desiredWristPoseDegs;
   private static final boolean USE_MM = true;
+
+  private ArmState m_desiredState = ArmState.DISABLED;
+  private ArmState m_currentState = ArmState.DISABLED;
 
   public ArmSubsystem(ArmIO io) {
     m_io = io;
@@ -34,10 +41,6 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   //TODO: Finite state machine logic
-
-  public double getWristPosition() {
-    return m_inputs.wristPositionDegs;
-  }
 
   @Override
   public void periodic() {
@@ -81,6 +84,28 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
+  }
+
+  public void handleState() {
+    switch(m_currentState) {
+      case STOW -> {
+        m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armPoseDegs();
+        m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristPoseDegs();
+      }
+      case INTAKE -> {
+        m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armPoseDegs();
+        m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristPoseDegs();
+      }
+      case DISABLED, default -> {
+        m_desiredArmPoseDegs = m_inputs.armPositionDegs;
+        m_desiredWristPoseDegs = m_inputs.wristPositionDegs;
+      }
+    }
+  }
+
+
+  public Command setDesiredState(ArmState state) {
+    return runOnce(() -> m_desiredState = state);
   }
 
   public Command setArmDesiredPose(double armPose, double wristPose) {

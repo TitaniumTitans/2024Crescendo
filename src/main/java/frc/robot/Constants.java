@@ -197,6 +197,14 @@ public final class Constants {
         new GosDoubleProperty(false, "Arm/Wrist Gap", 20);
   }
 
+  public static class ArmSetpoints {
+    public record ArmSetpoint(double armPoseDegs, double wristPoseDegs) {}
+
+    public static final ArmSetpoint STOW_SETPOINT = new ArmSetpoint(0.0, 45.0);
+    public static final ArmSetpoint INTAKE_SETPOINT = new ArmSetpoint(0.0, 45.0);
+    public static final ArmSetpoint AMP_SETPOINT = new ArmSetpoint(0.0, 45.0);
+  }
+
   public static class ShooterConstants {
     private ShooterConstants() {
       throw new IllegalStateException("Static classes should not be constructed");

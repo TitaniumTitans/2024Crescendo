@@ -68,11 +68,6 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final LoggedDashboardNumber wristPower;
-  private final LoggedDashboardNumber wristPosition;
-  private final LoggedDashboardNumber armPower;
-  private final LoggedDashboardNumber armPosition;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -142,12 +137,6 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-
-    armPower = new LoggedDashboardNumber("Arm Power", 0.0);
-    armPosition = new LoggedDashboardNumber("Arm Position", 0.0);
-    wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
-    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0);
-
     // Set up feedforward characterization
 //    autoChooser.addOption(
 //        "Drive FF Characterization",
@@ -193,13 +182,6 @@ public class RobotContainer {
     controller.pov(180).whileTrue(m_armSubsystem.setWristPositionFactory(90))
         .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
-    controller.a().whileTrue(Commands.repeatingSequence(
-        m_armSubsystem.setWristPositionFactory(0)
-            .withTimeout(1),
-        m_armSubsystem.setWristPositionFactory(90)
-            .withTimeout(1)
-        )
-    );
 //
 //    m_driveSubsystem.setDefaultCommand(
 //        DriveCommands.joystickDrive(
