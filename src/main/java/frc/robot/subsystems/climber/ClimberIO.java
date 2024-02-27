@@ -106,4 +106,5 @@ public interface ClimberIO {
   default void setRightPosition(double degrees) {}
   default void setLeftPosition(double degrees) {}
   default void updateInputs(ClimberIOInputsAutoLogged inputs) {}
+  default void stop() {}
 }

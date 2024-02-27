@@ -13,20 +13,34 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOKraken;
+import frc.robot.subsystems.arm.ArmIOPrototype;
+import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOKraken;
+import frc.robot.subsystems.climber.ClimberIOPrototype;
+import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon1;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
@@ -45,8 +59,8 @@ public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
   private final ShooterSubsystem m_shooter;
-//  public final ArmSubsystem m_armSubsystem;
-//  private final ClimberSubsystem m_climber;
+  public final ArmSubsystem m_armSubsystem;
+  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -63,22 +77,17 @@ public class RobotContainer {
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL -> {
-          // Real robot, instantiate hardware IO implementations
-          m_driveSubsystem = new DriveSubsystem(
-            new GyroIOPigeon1(12),
+        // Real robot, instantiate hardware IO implementations
+        m_driveSubsystem = new DriveSubsystem(
+            new GyroIOPigeon2(true),
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
-              new VisionSubsystem[]{
-                  new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
-                  new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
-              });
-//          );
-          m_shooter = new ShooterSubsystem(new ShooterIntakeIOPrototype());
-//          m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-//          m_climber = new ClimberSubsystem(new ClimberIO() {});
-        }
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken());
+        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
+      }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
             new GyroIO() {},
@@ -87,8 +96,8 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
-//        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -98,9 +107,9 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {},
             new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
-//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
       case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
@@ -111,9 +120,9 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOSim());
-//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-//        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -125,8 +134,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
-//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
@@ -151,6 +160,7 @@ public class RobotContainer {
     configureButtonBindings();
     // configure named commands for auto
     configureNamedCommands();
+    configureDashboard();
   }
 
   /**
@@ -160,22 +170,53 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        m_driveSubsystem.setPose(
-                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-                    m_driveSubsystem)
-                .ignoringDisable(true));
+    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
+    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
+
+    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
+    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
+
+    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(90))
+//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+
+    controller.x().whileTrue(m_armSubsystem.setArmDesiredPose(90, 0))
+        .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
+    controller.y().whileTrue(m_armSubsystem.setArmDesiredPose(180, 90))
+        .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
+
+    controller.pov(0).onTrue(m_armSubsystem.resetEncoderFactory());
+
+    controller.pov(90).whileTrue(m_armSubsystem.setWristPositionFactory(0))
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.pov(180).whileTrue(m_armSubsystem.setWristPositionFactory(90))
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+
+    controller.a().whileTrue(Commands.repeatingSequence(
+        m_armSubsystem.setWristPositionFactory(0)
+            .withTimeout(1),
+        m_armSubsystem.setWristPositionFactory(90)
+            .withTimeout(1)
+        )
+    );
+//
+//    m_driveSubsystem.setDefaultCommand(
+//        DriveCommands.joystickDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> -controller.getRightX()));
+//    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
+//    controller
+//        .start()
+//        .onTrue(
+//            Commands.runOnce(
+//                    () ->
+//                        m_driveSubsystem.setPose(
+//                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+//                    m_driveSubsystem)
+//                .ignoringDisable(true));
   }
 
   /**
@@ -184,6 +225,13 @@ public class RobotContainer {
   private void configureNamedCommands() {
     NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
     NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+  }
+
+  private void configureDashboard() {
+    ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
+
+    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
+    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
   }
 
   /**
