@@ -6,10 +6,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
@@ -43,11 +40,13 @@ public class ArmIOKraken implements ArmIO {
   private final MotionMagicConfigs m_wristMMConfigs = new MotionMagicConfigs();
 
   // Control outputs
-  private final PositionVoltage m_pidRequest;
+  private final DynamicMotionMagicVoltage m_dynMMRequest;
   private final MotionMagicVoltage m_mmRequest;
   private final Follower m_armFollowerRequest;
   private final Follower m_wristFollowerRequest;
   private final NeutralOut m_stopRequest;
+
+  private boolean m_tracking = false;
 
   // Status signals
   private final StatusSignal<Double> m_armPositionSignal;
@@ -110,6 +109,15 @@ public class ArmIOKraken implements ArmIO {
     m_armEncoder.getConfigurator().apply(armEncoderConfig);
     m_wristEncoder.getConfigurator().apply(wristEncoderConfig);
 
+    // config output requests
+    m_dynMMRequest = new DynamicMotionMagicVoltage(0, 0, 0, 0)
+        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
+        .withSlot(0);
+
+    m_mmRequest = new MotionMagicVoltage(0)
+        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
+        .withSlot(0);
+
     // config pid and properties
     m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", false, m_armMaster, 0)
         .addP(ArmConstants.SHOULDER_KP)
@@ -136,9 +144,7 @@ public class ArmIOKraken implements ArmIO {
     }, new GosDoubleProperty(false, "Arm/Arm Max Vel DegsS", 120));
 
     m_wristMaxVelDegS = new HeavyDoubleProperty((double maxVel) -> {
-      m_wristMMConfigs.MotionMagicCruiseVelocity = Units.degreesToRotations(maxVel);
-      m_wristMaster.getConfigurator().apply(m_wristMMConfigs);
-      m_wristFollower.getConfigurator().apply(m_wristMMConfigs);
+      m_dynMMRequest.Velocity = Units.degreesToRotations(maxVel);
     }, new GosDoubleProperty(false, "Arm/Wrist Max Vel DegsS", 120));
 
     m_accelTimeSecs = new HeavyDoubleProperty((double accel) -> {
@@ -146,22 +152,13 @@ public class ArmIOKraken implements ArmIO {
       m_armMaster.getConfigurator().apply(m_armMMConfigs);
       m_armFollower.getConfigurator().apply(m_armMMConfigs);
 
-      m_wristMMConfigs.MotionMagicAcceleration = m_wristMMConfigs.MotionMagicCruiseVelocity / accel;
-      m_wristMaster.getConfigurator().apply(m_wristMMConfigs);
-      m_wristFollower.getConfigurator().apply(m_wristMMConfigs);
+      m_dynMMRequest.Acceleration = m_dynMMRequest.Velocity / accel;
     }, new GosDoubleProperty(false, "Arm/Acceleration Time Secs", 1));
 
     m_armMaxVelDegS.updateIfChanged(true);
     m_wristMaxVelDegS.updateIfChanged(true);
     m_accelTimeSecs.updateIfChanged(true);
 
-    // config output requests
-    m_pidRequest = new PositionVoltage(0)
-        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
-        .withSlot(0);
-    m_mmRequest = new MotionMagicVoltage(0)
-        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
-        .withSlot(0);
     m_armFollowerRequest = new Follower(m_armMaster.getDeviceID(), false);
     m_wristFollowerRequest = new Follower(m_wristMaster.getDeviceID(), false);
     m_stopRequest = new NeutralOut();
@@ -262,12 +259,8 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setArmAngle(double degrees, boolean useMM) {
-    if (useMM) {
-      m_armMaster.setControl(m_mmRequest.withPosition(degrees / 360));
-    } else {
-      m_armMaster.setControl(m_pidRequest.withPosition(degrees / 360));
-    }
+  public void setArmAngle(double degrees) {
+    m_armMaster.setControl(m_mmRequest.withPosition(degrees / 360));
     m_armFollower.setControl(m_armFollowerRequest);
   }
 
@@ -278,14 +271,19 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setWristAngle(double degrees, boolean useMM) {
-    m_wristFollower.setControl(m_wristFollowerRequest);
-
-    if (useMM) {
-      m_wristMaster.setControl(m_mmRequest.withPosition(degrees / 360));
-    } else {
-      m_wristMaster.setControl(m_pidRequest.withPosition(degrees / 360));
+  public void setWristAngle(double degrees, boolean track) {
+    if (track && !m_tracking) {
+      m_tracking = true;
+      m_dynMMRequest.Acceleration = Double.MAX_VALUE;
+      Logger.recordOutput("Arm/Wrist Accel", m_dynMMRequest.Acceleration);
+    } else if (!track && !m_tracking) {
+      m_tracking = false;
+      m_accelTimeSecs.updateIfChanged(true);
+      Logger.recordOutput("Arm/Wrist Accel", m_dynMMRequest.Acceleration);
     }
+
+    m_wristMaster.setControl(m_dynMMRequest.withPosition(degrees / 360));
+    m_wristFollower.setControl(m_wristFollowerRequest);
   }
 
   @Override
@@ -299,8 +297,8 @@ public class ArmIOKraken implements ArmIO {
     }
 
     if (m_wristEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_wristMaster.setPosition(0.5
-          - (m_wristEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO));
+      m_wristMaster.setPosition((m_wristEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO)
+          - 1.0 / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
     } else {
       m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble()
           / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);

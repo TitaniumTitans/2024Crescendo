@@ -35,6 +35,10 @@ public class ArmSubsystem extends SubsystemBase {
 
   //TODO: Finite state machine logic
 
+  public double getWristPosition() {
+    return m_inputs.wristPositionDegs;
+  }
+
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
@@ -59,7 +63,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY) {
-      m_io.setArmAngle(m_desiredArmPoseDegs, USE_MM);
+      m_io.setArmAngle(m_desiredArmPoseDegs);
       Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
     }
 
@@ -68,10 +72,10 @@ public class ArmSubsystem extends SubsystemBase {
       double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
       if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
         double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
-        m_io.setWristAngle(m_inputs.wristPositionDegs + underGap, USE_MM);
-        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
+        m_io.setWristAngle(m_inputs.wristPositionDegs + underGap, true);
+        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs + underGap);
       } else {
-        m_io.setWristAngle(m_desiredWristPoseDegs, USE_MM);
+        m_io.setWristAngle(m_desiredWristPoseDegs, false);
         Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
       }
     }
@@ -80,9 +84,16 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command setArmDesiredPose(double armPose, double wristPose) {
-    return runOnce(() -> {
+    return run(() -> {
       m_desiredArmPoseDegs = armPose;
-      m_desiredWristPoseDegs = wristPose;
+
+      double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
+      if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
+        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
+        m_desiredWristPoseDegs = m_inputs.wristPositionDegs + underGap;
+      } else {
+        m_desiredWristPoseDegs = wristPose;
+      }
     });
   }
 

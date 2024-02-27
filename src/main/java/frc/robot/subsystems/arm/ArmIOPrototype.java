@@ -116,12 +116,8 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void setArmAngle(double degrees, boolean useMM) {
-    if (useMM) {
-      m_shoulder.setControl(m_shoulderReqMM.withPosition(degrees / 360.0));
-    } else {
-      m_shoulder.setControl(m_shoulderReqPID.withPosition(degrees / 360.0));
-    }
+  public void setArmAngle(double degrees) {
+    m_shoulder.setControl(m_shoulderReqMM.withPosition(degrees / 360.0));
   }
 
   @Override

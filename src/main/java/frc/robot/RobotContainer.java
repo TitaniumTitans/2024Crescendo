@@ -178,8 +178,8 @@ public class RobotContainer {
 
     controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
         .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(90))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(90))
+//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
 
     controller.x().whileTrue(m_armSubsystem.setArmDesiredPose(90, 0))
         .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
@@ -192,6 +192,14 @@ public class RobotContainer {
         .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
     controller.pov(180).whileTrue(m_armSubsystem.setWristPositionFactory(90))
         .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+
+    controller.a().whileTrue(Commands.repeatingSequence(
+        m_armSubsystem.setWristPositionFactory(0)
+            .withTimeout(1),
+        m_armSubsystem.setWristPositionFactory(90)
+            .withTimeout(1)
+        )
+    );
 //
 //    m_driveSubsystem.setDefaultCommand(
 //        DriveCommands.joystickDrive(
