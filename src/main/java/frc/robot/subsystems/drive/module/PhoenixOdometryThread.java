@@ -58,7 +58,7 @@ public class PhoenixOdometryThread extends Thread {
   }
 
   public Queue<Double> registerSignal(ParentDevice device, StatusSignal<Double> signal) {
-    Queue<Double> queue = new ArrayBlockingQueue<>(100);
+    Queue<Double> queue = new ArrayBlockingQueue<>(20);
     signalsLock.lock();
     DriveSubsystem.odometryLock.lock();
     try {

@@ -187,6 +187,11 @@ public class RobotContainer {
         .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
 
     controller.pov(0).onTrue(m_armSubsystem.resetEncoderFactory());
+
+    controller.pov(90).whileTrue(m_armSubsystem.setWristPositionFactory(0))
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.pov(180).whileTrue(m_armSubsystem.setWristPositionFactory(90))
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 //
 //    m_driveSubsystem.setDefaultCommand(
 //        DriveCommands.joystickDrive(
