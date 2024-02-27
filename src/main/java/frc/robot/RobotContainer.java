@@ -170,18 +170,23 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-//    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
-//    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
-//
-//    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
-//    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
-//
-//    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
-//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-//    controller.y().whileTrue(m_armSubsystem.setArmPositionFactory(90))
-//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-//
-//    controller.a().onTrue(m_armSubsystem.resetEncoderFactory());
+    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
+    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
+
+    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
+    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
+
+    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(90))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+
+    controller.x().whileTrue(m_armSubsystem.setArmDesiredPose(90, 0))
+        .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
+    controller.y().whileTrue(m_armSubsystem.setArmDesiredPose(180, 90))
+        .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
+
+    controller.pov(0).onTrue(m_armSubsystem.resetEncoderFactory());
 //
 //    m_driveSubsystem.setDefaultCommand(
 //        DriveCommands.joystickDrive(
@@ -199,11 +204,6 @@ public class RobotContainer {
 //                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
 //                    m_driveSubsystem)
 //                .ignoringDisable(true));
-
-    controller.x().whileTrue(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.75))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
-    controller.y().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6, 0.75))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
   }
 
   /**

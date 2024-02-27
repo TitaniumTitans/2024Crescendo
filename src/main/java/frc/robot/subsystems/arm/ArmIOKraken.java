@@ -39,8 +39,8 @@ public class ArmIOKraken implements ArmIO {
   private final HeavyDoubleProperty m_wristMaxVelDegS;
   private final HeavyDoubleProperty m_accelTimeSecs;
 
-  private MotionMagicConfigs m_armMMConfigs;
-  private MotionMagicConfigs m_wristMMConfigs;
+  private final MotionMagicConfigs m_armMMConfigs = new MotionMagicConfigs();
+  private final MotionMagicConfigs m_wristMMConfigs = new MotionMagicConfigs();
 
   // Control outputs
   private final PositionVoltage m_pidRequest;
@@ -82,8 +82,8 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
-    m_armMaster.getConfigurator().apply(armConfig.withMotionMagic(m_armMMConfigs));
-    m_armFollower.getConfigurator().apply(armConfig.withMotionMagic(m_armMMConfigs));
+    m_armMaster.getConfigurator().apply(armConfig);
+    m_armFollower.getConfigurator().apply(armConfig);
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
@@ -93,8 +93,8 @@ public class ArmIOKraken implements ArmIO {
     wristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     wristConfig.Feedback.SensorToMechanismRatio = ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
-    m_wristMaster.getConfigurator().apply(wristConfig.withMotionMagic(m_wristMMConfigs));
-    m_wristFollower.getConfigurator().apply(wristConfig.withMotionMagic(m_wristMMConfigs));
+    m_wristMaster.getConfigurator().apply(wristConfig);
+    m_wristFollower.getConfigurator().apply(wristConfig);
 
     // Encoder Configuration
     CANcoderConfiguration armEncoderConfig = new CANcoderConfiguration();
@@ -133,13 +133,13 @@ public class ArmIOKraken implements ArmIO {
       m_armMMConfigs.MotionMagicCruiseVelocity = Units.degreesToRotations(maxVel);
       m_armMaster.getConfigurator().apply(m_armMMConfigs);
       m_armFollower.getConfigurator().apply(m_armMMConfigs);
-    }, new GosDoubleProperty(false, "Arm/Arm Max Vel Degs/S", 120));
+    }, new GosDoubleProperty(false, "Arm/Arm Max Vel DegsS", 120));
 
     m_wristMaxVelDegS = new HeavyDoubleProperty((double maxVel) -> {
       m_wristMMConfigs.MotionMagicCruiseVelocity = Units.degreesToRotations(maxVel);
       m_wristMaster.getConfigurator().apply(m_wristMMConfigs);
       m_wristFollower.getConfigurator().apply(m_wristMMConfigs);
-    }, new GosDoubleProperty(false, "Arm/Wrist Max Vel Degs/S", 120));
+    }, new GosDoubleProperty(false, "Arm/Wrist Max Vel DegsS", 120));
 
     m_accelTimeSecs = new HeavyDoubleProperty((double accel) -> {
       m_armMMConfigs.MotionMagicAcceleration = m_armMMConfigs.MotionMagicCruiseVelocity / accel;
@@ -291,16 +291,16 @@ public class ArmIOKraken implements ArmIO {
   @Override
   public void resetPosition() {
     if (m_armEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_armMaster.setPosition((m_armEncoder.getAbsolutePosition().getValueAsDouble() - 0.5)
-          / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
+      m_armMaster.setPosition((m_armEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.ARM_CANCODER_MECHANISM_RATIO)
+      - 1.0 / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
     } else {
       m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble()
           / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
     }
 
     if (m_wristEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_wristMaster.setPosition((m_wristEncoder.getAbsolutePosition().getValueAsDouble() - 0.5)
-          / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
+      m_wristMaster.setPosition(0.5
+          - (m_wristEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO));
     } else {
       m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble()
           / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);

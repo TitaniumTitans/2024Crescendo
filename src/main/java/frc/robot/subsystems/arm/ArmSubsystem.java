@@ -27,8 +27,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_io = io;
     m_inputs = new ArmIOInputsAutoLogged();
 
-    m_desiredWristPoseDegs = -1;
-    m_desiredArmPoseDegs = -1;
+    m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
+    m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
 
     m_io.resetPosition();
   }
@@ -54,6 +54,8 @@ public class ArmSubsystem extends SubsystemBase {
     // check to make sure we're not in manual control
     if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY && m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY) {
       m_io.enableBrakeMode(false);
+    } else {
+      m_io.enableBrakeMode(true);
     }
 
     if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY) {
