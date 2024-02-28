@@ -120,12 +120,12 @@ public class ArmIOKraken implements ArmIO {
 
     // config pid and properties
     m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", false, m_armMaster, 0)
-        .addP(ArmConstants.SHOULDER_KP)
-        .addI(ArmConstants.SHOULDER_KI)
-        .addD(ArmConstants.SHOULDER_KD)
-        .addKS(ArmConstants.SHOULDER_KS)
-        .addKV(ArmConstants.SHOULDER_KV)
-        .addKG(ArmConstants.SHOULDER_KG, GravityTypeValue.Arm_Cosine)
+        .addP(ArmConstants.ARM_KP)
+        .addI(ArmConstants.ARM_KI)
+        .addD(ArmConstants.ARM_KD)
+        .addKS(ArmConstants.ARM_KS)
+        .addKV(ArmConstants.ARM_KV)
+        .addKG(ArmConstants.ARM_KG, GravityTypeValue.Arm_Cosine)
         .build();
 
     m_wristProperty = new Phoenix6PidPropertyBuilder("Arm/Wrist PID", false, m_wristMaster, 0)

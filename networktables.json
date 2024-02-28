@@ -106,9 +106,10 @@
   {
     "name": "/Preferences/Drive/Module3/Turn Pid Property.mm.kp",
     "type": "double",
-    "value": 7.0,
+    "value": 43.982,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
@@ -466,39 +467,67 @@
   {
     "name": "/Preferences/Arm/WristLowerLimit",
     "type": "double",
-    "value": 30.0,
+    "value": 0.0,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
     "name": "/Preferences/Arm/WristUpperLimit",
     "type": "double",
-    "value": 30.0,
+    "value": 180.0,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
     "name": "/Preferences/Arm/ArmLowerLimit",
     "type": "double",
-    "value": 30.0,
+    "value": 0.0,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
     "name": "/Preferences/Arm/ArmUpperLimit",
     "type": "double",
-    "value": 30.0,
+    "value": 180.0,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
     "name": "/Preferences/Arm/Wrist Gap",
     "type": "double",
     "value": 20.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.kp",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.kd",
+    "type": "double",
+    "value": 0.0,
     "properties": {
       "persistent": true
     }

@@ -160,11 +160,17 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightTrigger().whileTrue(Commands.run(m_shooter::runShooterVelocity))
-            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
+    controller.rightTrigger().whileTrue(m_armSubsystem.resetEncoderFactory());
 
+    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(0))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
     controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
         .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+
+    controller.y().whileTrue(m_armSubsystem.setWristPositionFactory(45))
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(180))
+        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -181,11 +187,6 @@ public class RobotContainer {
                             new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
                     m_driveSubsystem)
                 .ignoringDisable(true));
-
-    controller.x().whileTrue(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.75))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
-    controller.y().whileTrue(m_shooter.setShooterPowerFactory(0.65, 0.6, 0.75))
-        .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
   }
 
   /**

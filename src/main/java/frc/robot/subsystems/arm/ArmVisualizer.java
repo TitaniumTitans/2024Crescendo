@@ -20,7 +20,9 @@ public class ArmVisualizer {
   public ArmVisualizer(String key, Color color) {
     this.key = key;
     mechanism = new Mechanism2d(3.0, 3.0, new Color8Bit(Color.kWhite));
-    MechanismRoot2d root = mechanism.getRoot("pivot", 1.0, 0.4);
+    MechanismRoot2d root = mechanism.getRoot("pivot",
+        0.0,
+        0.0);
     arm = new MechanismLigament2d("arm", ArmConstants.ARM_LENGTH_METERS, 0.0, 6, new Color8Bit(color));
     wrist = new MechanismLigament2d("wrist", ArmConstants.WRIST_LENGTH_METERS, 45.0, 5, new Color8Bit(color));
     root.append(arm);

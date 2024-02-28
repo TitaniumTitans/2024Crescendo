@@ -32,8 +32,8 @@ import frc.robot.Constants;
 public class ModuleIOSim implements ModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60Foc(1), ModuleConstants.GearRatios.L3.ratio, 0.025);
-  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getNEO(1), ModuleConstants.GearRatios.TURN.ratio, 0.004);
+  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), ModuleConstants.GearRatios.L3.ratio, 0.025);
+  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500Foc(1), ModuleConstants.GearRatios.TURN.ratio, 0.004);
 
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
@@ -48,6 +48,8 @@ public class ModuleIOSim implements ModuleIO {
 
   public ModuleIOSim(ModuleConstants constants) {
     m_moduleConstants = constants;
+
+    m_turnController.enableContinuousInput(0.0, 1.0);
   }
 
   @Override
@@ -79,8 +81,9 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public void setTurnPositionRots(double degrees) {
-    turnAppliedVolts = m_turnController.calculate(turnSim.getAngularPositionRotations() * 360, degrees);
+  public void setTurnPositionRots(double rotations) {
+    turnAppliedVolts = m_turnController.calculate(
+        turnSim.getAngularPositionRotations(), rotations);
     turnSim.setInputVoltage(turnAppliedVolts);
   }
 

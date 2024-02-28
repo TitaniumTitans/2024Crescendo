@@ -102,8 +102,8 @@ public class ArmSubsystem extends SubsystemBase {
     Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
 
     // Update arm visualizers
-    m_poseVisualizer.update(m_inputs.armPositionDegs);
-    m_setpointVisualizer.update(m_desiredArmPoseDegs);
+    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
+    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
   }
 
   public void handleState() {

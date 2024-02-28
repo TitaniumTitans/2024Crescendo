@@ -129,7 +129,7 @@ public interface ModuleIO {
   default void setDriveVelocityMPS(double mps) {}
 
   /** Run the turn motor at the specified voltage. */
-  default void setTurnPositionRots(double degrees) {}
+  default void setTurnPositionRots(double rotations) {}
 
   /** Enable or disable brake mode on the drive motor. */
   default void setDriveBrakeMode(boolean enable) {}
