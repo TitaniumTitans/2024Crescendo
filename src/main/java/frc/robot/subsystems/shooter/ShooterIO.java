@@ -248,7 +248,7 @@ public interface ShooterIO {
   default void setIntakeVoltage(double voltage) {}
   default void setLeftVelocityRpm(double rpm) {}
   default void setRightVelocityRpm(double rpm) {}
-  default void updateInputs(ShooterIOInputs inputs) {}
+  default void updateInputs(ShooterIOInputsAutoLogged inputs) {}
   default void stop() {}
 
 }

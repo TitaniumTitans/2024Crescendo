@@ -286,23 +286,16 @@ public class ArmIOKraken implements ArmIO {
     m_wristFollower.setControl(m_wristFollowerRequest);
   }
 
+  // We have to nudge our "zero" value because of the gear ratio
   @Override
   public void resetPosition() {
-    if (m_armEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_armMaster.setPosition((m_armEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.ARM_CANCODER_MECHANISM_RATIO)
-      - 1.0 / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
-    } else {
-      m_armMaster.setPosition(m_armEncoder.getAbsolutePosition().getValueAsDouble()
-          / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
-    }
+    m_armMaster.setPosition(
+        (m_armEncoder.getAbsolutePosition().getValueAsDouble() - Units.degreesToRotations(ArmConstants.OFFSET_NUDGE))
+            / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
 
-    if (m_wristEncoder.getAbsolutePosition().getValueAsDouble() > 0.5) {
-      m_wristMaster.setPosition((m_wristEncoder.getAbsolutePosition().getValueAsDouble() / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO)
-          - 1.0 / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
-    } else {
-      m_wristMaster.setPosition(m_wristEncoder.getAbsolutePosition().getValueAsDouble()
-          / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
-    }
+    m_wristMaster.setPosition(
+        (m_wristEncoder.getAbsolutePosition().getValueAsDouble() - Units.degreesToRotations(ArmConstants.OFFSET_NUDGE))
+            / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
   }
 
   @Override

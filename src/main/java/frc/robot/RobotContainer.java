@@ -159,11 +159,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
-    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
-
-    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
-    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
+    controller.rightTrigger().whileTrue(Commands.run(m_shooter::runShooterVelocity))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
 
     controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
         .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
@@ -172,7 +169,7 @@ public class RobotContainer {
 
     controller.x().whileTrue(m_armSubsystem.setArmDesiredPose(90, 0))
         .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
-    controller.y().whileTrue(m_armSubsystem.setArmDesiredPose(180, 90))
+    controller.y().whileTrue(m_armSubsystem.setArmDesiredPose(0, 30))
         .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
 
     controller.pov(0).onTrue(m_armSubsystem.resetEncoderFactory());

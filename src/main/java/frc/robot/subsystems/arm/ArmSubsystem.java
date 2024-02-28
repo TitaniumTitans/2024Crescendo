@@ -1,6 +1,8 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmSetpoints;
@@ -96,13 +98,21 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armPoseDegs();
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristPoseDegs();
       }
-      case DISABLED, default -> {
+      default -> {
         m_desiredArmPoseDegs = m_inputs.armPositionDegs;
         m_desiredWristPoseDegs = m_inputs.wristPositionDegs;
       }
     }
   }
 
+  public Translation2d calculateArmPosition(double armAngle, double wristAngle) {
+    return ArmConstants.PIVOT_JOINT_TRANSLATION
+        .plus(new Translation2d(ArmConstants.ARM_LENGTH_METERS,
+            Rotation2d.fromDegrees(armAngle))) // translate the length + direction of the arm
+        .plus(new Translation2d(ArmConstants.WRIST_LENGTH_METERS,
+            Rotation2d.fromDegrees(360)
+                .minus(Rotation2d.fromDegrees(wristAngle))));
+  }
 
   public Command setDesiredState(ArmState state) {
     return runOnce(() -> m_desiredState = state);

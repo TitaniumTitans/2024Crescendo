@@ -101,6 +101,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_io.setLeftVelocityRpm(m_leftSetpoint.get());
     m_io.setRightVelocityRpm(m_rightSetpoint.get());
     m_io.setKickerVoltage(9.0);
+    m_io.setIntakeVoltage(7.5);
   }
 
   public boolean hasPiece() {
