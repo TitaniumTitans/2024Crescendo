@@ -66,7 +66,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final VisionSubsystem[] m_cameras;
 
-  public DriveSubsystem (
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
 

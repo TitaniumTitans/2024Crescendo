@@ -240,7 +240,6 @@ public interface ShooterIO {
       this.tofDistanceIn = tofDistanceIn;
     }
   }
-  }
   default void setMotorVoltageTL(double voltage) {}
   default void setMotorVoltageTR(double voltage) {}
   default void setMotorVoltageBL(double voltage) {}

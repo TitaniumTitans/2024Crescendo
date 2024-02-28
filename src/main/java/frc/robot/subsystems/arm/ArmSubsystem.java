@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -108,6 +109,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
   }
 
+  /** Gets the top point of the shooter for checking limits*/
   public Translation2d calculateArmPosition(double armAngle, double wristAngle) {
     return ArmConstants.PIVOT_JOINT_TRANSLATION
         // translate the length + direction of the arm
@@ -119,8 +121,25 @@ public class ArmSubsystem extends SubsystemBase {
                 .minus(Rotation2d.fromDegrees(wristAngle))));
   }
 
-  public ArmSetpoints.ArmSetpoint aimbot(Pose2d robotPose) {
+  /** Gets the transformation of the shooter relative to the drive base */
+  public Transform3d getShooterTransformation() {
+    return Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
+            // Add the movement of the arm
+            GeomUtils.translationToTransform(new Translation3d(
+                    ArmConstants.ARM_LENGTH_METERS,
+                    new Rotation3d(0.0, Units.degreesToRadians(m_inputs.armPositionDegs), 0.0)
+            ))
+    );
+  }
 
+  public double aimbotCalculate(Pose3d robotPose) {
+    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+    Pose3d shooterPivotPose = robotPose.plus(getShooterTransformation());
+    Transform3d robotToSpeaker = new Transform3d(shooterPivotPose.plus(getShooterTransformation()), speakerPose);
+
+    double groundDistance =
+            Math.sqrt(Math.pow(robotToSpeaker.getX(), 2) + Math.pow(robotToSpeaker.getY(), 2));
+    return Math.atan2(groundDistance, robotToSpeaker.getZ());
   }
 
   /* Command Factories */
@@ -204,24 +223,6 @@ public class ArmSubsystem extends SubsystemBase {
         () -> m_io.setWristVoltage(0.0));
   }
 
-  public Transform3d getShooterTransformation() {
-    return new Transform3d(new Pose3d(),
-        Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
-            GeomUtils.translationToTransform(new Translation3d(
-                Constants.ArmConstants.SHOULDER_BAR_LENGTH_METERS,
-                new Rotation3d(0.0, m_inputs.shoulderPositionRots * Math.PI * 2, 0.0)
-            ))
-        ));
-  }
 
-  public double calcShooterAngle(Pose3d robotPose) {
-    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
-    Pose3d shooterPivotPose = robotPose.plus(getShooterTransformation());
-    Transform3d robotToSpeaker = new Transform3d(shooterPivotPose.plus(getShooterTransformation()), speakerPose);
-
-    double groundDistance =
-        Math.sqrt(Math.pow(robotToSpeaker.getX(), 2) + Math.pow(robotToSpeaker.getY(), 2));
-    return Math.atan2(groundDistance, robotToSpeaker.getZ());
-  }
 }
 
