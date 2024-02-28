@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import lib.GeomUtil;
 
 public class PoseEstimator {
   private static final double HISTORY_LENGTH_SECS = 0.3;

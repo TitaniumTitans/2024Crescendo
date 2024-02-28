@@ -2,20 +2,15 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj2.command.Command;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import lib.utils.AllianceFlipUtil;
-import lib.utils.FieldConstants;
-import lib.utils.GeomUtils;
-import frc.robot.Constants.ArmSetpoints;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ArmSetpoints;
+import lib.utils.AimbotUtils;
 import org.littletonrobotics.junction.Logger;
-import frc.robot.Constants;
+
+import java.util.function.Supplier;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -39,7 +34,13 @@ public class ArmSubsystem extends SubsystemBase {
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
 
+  private final Supplier<Pose2d> m_poseSupplier;
+
   public ArmSubsystem(ArmIO io) {
+    this(io, Pose2d::new);
+  }
+
+  public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
     m_io = io;
     m_inputs = new ArmIOInputsAutoLogged();
 
@@ -47,6 +48,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
 
     m_io.resetPosition();
+
+    m_poseSupplier = supplier;
   }
 
   //TODO: Finite state machine logic
@@ -98,6 +101,13 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armPoseDegs();
         m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristPoseDegs();
       }
+      case AUTO_AIM -> {
+        ArmSetpoints.ArmSetpoint aimSetpoint = AimbotUtils.aimbotCalculate(
+                new Pose3d(m_poseSupplier.get()), m_inputs.armPositionDegs);
+
+        m_desiredArmPoseDegs = aimSetpoint.armPoseDegs();
+        m_desiredWristPoseDegs = aimSetpoint.wristPoseDegs();
+      }
       case INTAKE -> {
         m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armPoseDegs();
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristPoseDegs();
@@ -109,38 +119,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
   }
 
-  /** Gets the top point of the shooter for checking limits*/
-  public Translation2d calculateArmPosition(double armAngle, double wristAngle) {
-    return ArmConstants.PIVOT_JOINT_TRANSLATION
-        // translate the length + direction of the arm
-        .plus(new Translation2d(ArmConstants.ARM_LENGTH_METERS,
-            Rotation2d.fromDegrees(armAngle)))
-        // translate the length + direction of the wrist
-        .plus(new Translation2d(ArmConstants.WRIST_LENGTH_METERS,
-            Rotation2d.fromDegrees(360)
-                .minus(Rotation2d.fromDegrees(wristAngle))));
-  }
 
-  /** Gets the transformation of the shooter relative to the drive base */
-  public Transform3d getShooterTransformation() {
-    return Constants.ArmConstants.PIVOT_TRANSLATION_METERS.plus(
-            // Add the movement of the arm
-            GeomUtils.translationToTransform(new Translation3d(
-                    ArmConstants.ARM_LENGTH_METERS,
-                    new Rotation3d(0.0, Units.degreesToRadians(m_inputs.armPositionDegs), 0.0)
-            ))
-    );
-  }
-
-  public double aimbotCalculate(Pose3d robotPose) {
-    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
-    Pose3d shooterPivotPose = robotPose.plus(getShooterTransformation());
-    Transform3d robotToSpeaker = new Transform3d(shooterPivotPose.plus(getShooterTransformation()), speakerPose);
-
-    double groundDistance =
-            Math.sqrt(Math.pow(robotToSpeaker.getX(), 2) + Math.pow(robotToSpeaker.getY(), 2));
-    return Math.atan2(groundDistance, robotToSpeaker.getZ());
-  }
 
   /* Command Factories */
 
