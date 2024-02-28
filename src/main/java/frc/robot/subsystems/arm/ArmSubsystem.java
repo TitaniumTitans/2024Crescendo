@@ -1,6 +1,7 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class ArmSubsystem extends SubsystemBase {
 
-  enum ArmState {
+  public enum ArmState {
     STOW,
     INTAKE,
     AUTO_AIM,
@@ -27,7 +28,6 @@ public class ArmSubsystem extends SubsystemBase {
   private final ArmIOInputsAutoLogged m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_desiredWristPoseDegs;
-  private static final boolean USE_MM = true;
 
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
@@ -61,11 +61,8 @@ public class ArmSubsystem extends SubsystemBase {
         : m_desiredArmPoseDegs;
 
     // check to make sure we're not in manual control
-    if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY && m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY) {
-      m_io.enableBrakeMode(false);
-    } else {
-      m_io.enableBrakeMode(true);
-    }
+    m_io.enableBrakeMode(m_desiredArmPoseDegs <= Double.NEGATIVE_INFINITY
+            || m_desiredWristPoseDegs <= Double.NEGATIVE_INFINITY);
 
     if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY) {
       m_io.setArmAngle(m_desiredArmPoseDegs);
@@ -107,12 +104,20 @@ public class ArmSubsystem extends SubsystemBase {
 
   public Translation2d calculateArmPosition(double armAngle, double wristAngle) {
     return ArmConstants.PIVOT_JOINT_TRANSLATION
+        // translate the length + direction of the arm
         .plus(new Translation2d(ArmConstants.ARM_LENGTH_METERS,
-            Rotation2d.fromDegrees(armAngle))) // translate the length + direction of the arm
+            Rotation2d.fromDegrees(armAngle)))
+        // translate the length + direction of the wrist
         .plus(new Translation2d(ArmConstants.WRIST_LENGTH_METERS,
             Rotation2d.fromDegrees(360)
                 .minus(Rotation2d.fromDegrees(wristAngle))));
   }
+
+  public ArmSetpoints.ArmSetpoint aimbot(Pose2d robotPose) {
+    
+  }
+
+  /* Command Factories */
 
   public Command setDesiredState(ArmState state) {
     return runOnce(() -> m_desiredState = state);
