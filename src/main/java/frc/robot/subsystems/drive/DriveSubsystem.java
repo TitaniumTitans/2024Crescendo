@@ -13,11 +13,13 @@
 
 package frc.robot.subsystems.drive;
 
+import com.gos.lib.properties.pid.PidProperty;
+import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,14 +39,14 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.util.LocalADStarAK;
+import lib.utils.LocalADStarAK;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import frc.robot.util.PoseEstimator;
+import lib.utils.PoseEstimator;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -62,7 +64,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final VisionSubsystem[] m_cameras;
 
-  public DriveSubsystem (
+  private final PIDController m_thetaPid;
+  private final PidProperty m_thetaPidProperty;
+
+  public DriveSubsystem(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
@@ -88,6 +93,14 @@ public class DriveSubsystem extends SubsystemBase {
     modules[1] = new Module(frModuleIO);
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
+
+    m_thetaPid = new PIDController(0.0, 0.0, 0.0);
+    m_thetaPid.enableContinuousInput(-Math.PI, Math.PI);
+    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
+        .addP(0.5)
+        .addI(0.0)
+        .addD(0.0)
+        .build();
 
     m_cameras = cameras;
     m_poseEstimator =
@@ -204,6 +217,17 @@ public class DriveSubsystem extends SubsystemBase {
     // Log setpoint states
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
+  }
+
+  /**
+   * Calculates theta output to align to an arbitrary point
+   *
+   * @param point the desired point to align to
+   */
+  public double alignToPoint(Pose3d point) {
+    Transform3d robotToPoint = new Transform3d(new Pose3d(pose), point);
+    double desiredRotation = Math.atan2(robotToPoint.getX(), robotToPoint.getY());
+    return m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
   }
 
   /** Stops the drive. */

@@ -20,6 +20,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -49,6 +51,7 @@ import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import org.littletonrobotics.junction.Logger;
+import lib.utils.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -71,11 +74,6 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final LoggedDashboardNumber wristPower;
-  private final LoggedDashboardNumber wristPosition;
-  private final LoggedDashboardNumber armPower;
-  private final LoggedDashboardNumber armPosition;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -92,7 +90,7 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_armSubsystem = new ArmSubsystem(new ArmIOKraken());
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case PROTO_ARM -> {
@@ -149,12 +147,6 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-
-    armPower = new LoggedDashboardNumber("Arm Power", 0.0);
-    armPosition = new LoggedDashboardNumber("Arm Position", 0.0);
-    wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
-    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0);
-
     // Set up feedforward characterization
 //    autoChooser.addOption(
 //        "Drive FF Characterization",
@@ -177,15 +169,12 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-//    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
-//    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
-//
-//    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
-//    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
-//
-//    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
-//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-//    controller.y().whileTrue(m_armSubsystem.setArmPositionFactory(90))
+    controller.rightTrigger().whileTrue(Commands.run(m_shooter::runShooterVelocity))
+            .whileFalse(m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0));
+
+    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
+        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+//    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(90))
 //        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
 //
 //    controller.a().onTrue(m_armSubsystem.resetEncoderFactory());

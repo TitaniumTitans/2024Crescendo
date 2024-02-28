@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file at
 // the root directory of this project.
 
-package frc.robot.util;
+package lib.utils;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import lib.GeomUtil;
 
 public class PoseEstimator {
   private static final double HISTORY_LENGTH_SECS = 0.3;

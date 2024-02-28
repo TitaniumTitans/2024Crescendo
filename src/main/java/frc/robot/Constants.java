@@ -12,6 +12,9 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -19,9 +22,11 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.units.Unit;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
 /**
@@ -42,9 +47,8 @@ public final class Constants {
   public enum Mode {
     /** Running on a real robot. */
     REAL,
-    PROTO_ARM,
-
     PROTO_SHOOTER,
+    PROTO_ARM,
 
     /** Running a physics simulator. */
     SIM,
@@ -162,8 +166,12 @@ public final class Constants {
     public static final int ARM_MASTER_ID = 18;
     public static final int ARM_FOLLOWER_ID = 19;
     public static final int ARM_ENCODER_ID = 20;
-    public static final double ARM_OFFSET = -0.604004;//0.707520;
-    public static final double WRIST_OFFSET = -0.108643;
+
+    /* Because the absolute encoders are on a 2/1 ratio, we have to move our offset down a little into a rotation lower
+    * than the lowest point the arm and wrist will move to , and then compensate for that in our encoder reset code */
+    public static final double OFFSET_NUDGE = 45;
+    public static final double ARM_OFFSET = -0.604004 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double WRIST_OFFSET = -0.108643 + Units.degreesToRotations(OFFSET_NUDGE);
     public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
     public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
 
@@ -197,6 +205,27 @@ public final class Constants {
 
     public static final GosDoubleProperty WRIST_ARM_GAP =
         new GosDoubleProperty(false, "Arm/Wrist Gap", 20);
+
+    public static final Translation2d PIVOT_JOINT_TRANSLATION =
+        new Translation2d(Units.inchesToMeters(9.27),
+            Units.inchesToMeters(12.56));
+
+    public static final Transform3d PIVOT_TRANSLATION_METERS =
+            new Transform3d(Units.inchesToMeters(9.27),
+                    0.0,
+                    Units.inchesToMeters(12.56),
+                    new Rotation3d());
+
+    public static final double ARM_LENGTH_METERS = Units.inchesToMeters(22.01);
+    public static final double WRIST_LENGTH_METERS = Units.inchesToMeters(14.5);
+  }
+
+  public static class ArmSetpoints {
+    public record ArmSetpoint(double armPoseDegs, double wristPoseDegs) {}
+
+    public static final ArmSetpoint STOW_SETPOINT = new ArmSetpoint(0.0, 45.0);
+    public static final ArmSetpoint INTAKE_SETPOINT = new ArmSetpoint(0.0, 35.0);
+    public static final ArmSetpoint AMP_SETPOINT = new ArmSetpoint(0.0, 45.0);
   }
 
   public static class ShooterConstants {
