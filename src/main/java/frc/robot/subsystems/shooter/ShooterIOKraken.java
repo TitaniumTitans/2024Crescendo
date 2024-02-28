@@ -59,7 +59,7 @@ public class ShooterIOKraken implements ShooterIO {
     m_indexer = new TalonFX(ShooterConstants.INDEXER_ID, canbus);
 
     m_tof = new TimeOfFlight(28);
-    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 10);
+    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
 
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();

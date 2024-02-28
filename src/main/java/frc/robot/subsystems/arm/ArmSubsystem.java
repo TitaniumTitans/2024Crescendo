@@ -122,10 +122,10 @@ public class ArmSubsystem extends SubsystemBase {
     return run(() -> {
       m_desiredArmPoseDegs = armPose;
 
-      double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
-      if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
-        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
-        m_desiredWristPoseDegs = m_inputs.wristPositionDegs + underGap;
+      double estWristGap = armPose + wristPose;
+      if (estWristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
+        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - estWristGap;
+        m_desiredWristPoseDegs = wristPose + underGap;
       } else {
         m_desiredWristPoseDegs = wristPose;
       }
