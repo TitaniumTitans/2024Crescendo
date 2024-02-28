@@ -1,0 +1,70 @@
+{
+  "name": "4467 Aoide",
+  "sourceUrl": "https://cad.onshape.com/documents/4b0536849837463bc8dd6d70/w/77936c82651fbbd110c9dcf7/e/f9b38b3d9c12aa37272b3f60",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 0
+    },
+    {
+      "axis" : "y",
+      "degrees": 180
+    },
+    {
+      "axis": "z",
+      "degrees": -90
+    }
+  ],
+  "position": [
+    0.375, 
+    -0.125, 
+    -0.085
+  ],
+  "cameras": [],
+  "components": [
+	{
+	  "zeroedRotations": [
+		{
+		  "axis": "x",
+		  "degrees": 0
+		},
+		{
+		  "axis": "y",
+		  "degrees": 0
+		},
+		{
+		  "axis": "z",
+		  "degrees": 180
+		}
+	  ],
+	  
+	  "zeroedPosition": [
+		0.295,
+		-0.01,
+		0.325
+	  ]
+	},
+	{
+	  "zeroedRotations": [
+		{
+		  "axis": "y",
+		  "degrees": 180
+		},
+		{
+		  "axis": "x",
+		  "degrees": 0
+		},
+		{
+		  "axis": "z",
+		  "degrees": 90
+		}
+	  ],
+	  
+	  "zeroedPosition": [
+		-0.265,
+		0,
+		0.325
+	  ]
+	}
+  ]
+}
