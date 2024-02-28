@@ -17,9 +17,7 @@ import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.VecBuilder;
@@ -41,14 +39,14 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import frc.robot.util.LocalADStarAK;
+import lib.utils.LocalADStarAK;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import frc.robot.util.PoseEstimator;
+import lib.utils.PoseEstimator;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
