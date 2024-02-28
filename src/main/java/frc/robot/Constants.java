@@ -179,19 +179,19 @@ public final class Constants {
     public static final double WRIST_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
     public static final double WRIST_CANCODER_MECHANISM_RATIO = (48.0 / 24.0);
 
-    public static final double WRIST_KP = 0.0;
-    public static final double WRIST_KI = 0.0;
-    public static final double WRIST_KD = 0.0;
-    public static final double WRIST_KS = 0.0;
+    public static final double WRIST_KP = 108.0;
+    public static final double WRIST_KI = 3.0;
+    public static final double WRIST_KD = 3.0;
+    public static final double WRIST_KS = 0.375;
     public static final double WRIST_KV = 0.0;
-    public static final double WRIST_KG = 0.0;
+    public static final double WRIST_KG = 0.35;
 
-    public static final double SHOULDER_KP = 0.0;
-    public static final double SHOULDER_KI = 0.0;
-    public static final double SHOULDER_KD = 0.0;
-    public static final double SHOULDER_KS = 0.0;
-    public static final double SHOULDER_KV = 0.0;
-    public static final double SHOULDER_KG = 0.0;
+    public static final double ARM_KP = 72.0;
+    public static final double ARM_KI = 6.0;
+    public static final double ARM_KD = 3.0;
+    public static final double ARM_KS = 0.375;
+    public static final double ARM_KV = 0.0;
+    public static final double ARM_KG = 0.375;
 
     public static final GosDoubleProperty WRIST_LOWER_LIMIT =
         new GosDoubleProperty(false, "Arm/WristLowerLimit", 30);

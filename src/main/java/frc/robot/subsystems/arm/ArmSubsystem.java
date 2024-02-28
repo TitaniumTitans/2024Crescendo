@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
@@ -34,6 +35,9 @@ public class ArmSubsystem extends SubsystemBase {
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
 
+  private final ArmVisualizer m_setpointVisualizer;
+  private final ArmVisualizer m_poseVisualizer;
+
   private final Supplier<Pose2d> m_poseSupplier;
 
   public ArmSubsystem(ArmIO io) {
@@ -50,6 +54,9 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.resetPosition();
 
     m_poseSupplier = supplier;
+
+    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
+    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
 
   //TODO: Finite state machine logic
@@ -93,6 +100,10 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
+
+    // Update arm visualizers
+    m_poseVisualizer.update(m_inputs.armPositionDegs);
+    m_setpointVisualizer.update(m_desiredArmPoseDegs);
   }
 
   public void handleState() {
