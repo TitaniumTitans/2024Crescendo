@@ -22,6 +22,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import org.opencv.core.Mat;
+
 import java.util.function.DoubleSupplier;
 
 public class DriveCommands {
@@ -39,13 +41,17 @@ public class DriveCommands {
       DoubleSupplier omegaSupplier) {
     return Commands.run(
         () -> {
+            double xInput = setSensitivity(xSupplier.getAsDouble(), 0.5);
+            double yInput = setSensitivity(ySupplier.getAsDouble(), 0.5);
+            double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.5);
+
           // Apply deadband
           double linearMagnitude =
               MathUtil.applyDeadband(
-                  Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), DEADBAND);
+                  Math.hypot(xInput, yInput), DEADBAND);
           Rotation2d linearDirection =
-              new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+              new Rotation2d(xInput, yInput);
+          double omega = MathUtil.applyDeadband(omegaInput, DEADBAND);
 
           // Square values
           linearMagnitude = linearMagnitude * linearMagnitude;
@@ -66,5 +72,8 @@ public class DriveCommands {
                   driveSubsystem.getRotation()));
         },
             driveSubsystem);
+  }
+  public static double setSensitivity(double x, double sensitivity) {
+    return sensitivity * x + ((1.0 - sensitivity) * Math.pow(x, 3.0));
   }
 }

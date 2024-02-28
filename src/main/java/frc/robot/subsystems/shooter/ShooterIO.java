@@ -5,56 +5,67 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
   @AutoLog
   class ShooterIOInputs {
-    protected double tlVelocityRots = 0.0;
-    protected double trVelocityRots = 0.0;
-    protected double blVelocityRots = 0.0;
-    protected double brVelocityRots = 0.0;
+    protected double tlVelocityRPM = 0.0;
+    protected double trVelocityRPM = 0.0;
+    protected double blVelocityRPM = 0.0;
+    protected double brVelocityRPM = 0.0;
+
     protected double tlAppliedVolts = 0.0;
     protected double trAppliedVolts = 0.0;
     protected double blAppliedVolts = 0.0;
     protected double brAppliedVolts = 0.0;
     protected double kickerAppliedVolts = 0.0;
+    protected double indexerAppliedVolts = 0.0;
+    protected double intakeAppliedVolts = 0.0;
+
     protected double tlCurrentDraw = 0.0;
     protected double trCurrentDraw = 0.0;
     protected double blCurrentDraw = 0.0;
     protected double brCurrentDraw = 0.0;
     protected double kickerCurrentDraw = 0.0;
+    protected double intakeCurrentDraw = 0.0;
+    protected double indexerCurrentDraw = 0.0;
+
     protected double tlTemperature = 0.0;
     protected double trTemperature = 0.0;
     protected double blTemperature = 0.0;
     protected double brTemperature = 0.0;
+    protected double indexerTemperature = 0.0;
+    protected double intakeTemperature = 0.0;
+
+    protected double tofDistanceIn = 0.0;
 
 
-    public double getTlVelocityRots() {
-      return tlVelocityRots;
+    public double getTlVelocityRPM() {
+      return tlVelocityRPM;
     }
 
-    public void setTlVelocityRots(double tlVelocityRots) {
-      this.tlVelocityRots = tlVelocityRots;
+    public void setTlVelocityRPM(double tlVelocityRPM) {
+      this.tlVelocityRPM = tlVelocityRPM;
     }
 
-    public double getTrVelocityRots() {
-      return trVelocityRots;
+    public double getTrVelocityRPM() {
+      return trVelocityRPM;
     }
 
-    public void setTrVelocityRots(double trVelocityRots) {
-      this.trVelocityRots = trVelocityRots;
+    public void setTrVelocityRPM(double trVelocityRPM) {
+      this.trVelocityRPM = trVelocityRPM;
     }
 
-    public double getBlVelocityRots() {
-      return blVelocityRots;
+    public double getBlVelocityRPM() {
+      return blVelocityRPM;
     }
 
-    public void setBlVelocityRots(double blVelocityRots) {
-      this.blVelocityRots = blVelocityRots;
+    public void setBlVelocityRPM(double blVelocityRPM) {
+      this.blVelocityRPM = blVelocityRPM;
     }
 
-    public double getBrVelocityRots() {
-      return brVelocityRots;
+    public double getBrVelocityRPM() {
+      return brVelocityRPM;
     }
 
-    public void setBrVelocityRots(double brVelocityRots) {
-      this.brVelocityRots = brVelocityRots;
+    public void setBrVelocityRPM(double brVelocityRPM) {
+      this.brVelocityRPM = brVelocityRPM;
     }
 
     public double getTlAppliedVolts() {
@@ -95,6 +106,14 @@ public interface ShooterIO {
 
     public void setKickerAppliedVolts(double kickerAppliedVolts) {
       this.kickerAppliedVolts = kickerAppliedVolts;
+    }
+
+    public void setIndexerAppliedVolts(double indexerAppliedVolts) {
+      this.indexerAppliedVolts = indexerAppliedVolts;
+    }
+
+    public double getIndexerAppliedVolts(double indexerAppliedVolts) {
+      return this.indexerAppliedVolts;
     }
 
     public double getTlCurrentDraw() {
@@ -168,6 +187,59 @@ public interface ShooterIO {
     public void setBrTemperature(double brTemperature) {
       this.brTemperature = brTemperature;
     }
+
+    public double getIndexerAppliedVolts() {
+      return indexerAppliedVolts;
+    }
+
+    public double getIntakeAppliedVolts() {
+      return intakeAppliedVolts;
+    }
+
+    public void setIntakeAppliedVolts(double intakeAppliedVolts) {
+      this.intakeAppliedVolts = intakeAppliedVolts;
+    }
+
+    public double getIntakeCurrentDraw() {
+      return intakeCurrentDraw;
+    }
+
+    public void setIntakeCurrentDraw(double intakeCurrentDraw) {
+      this.intakeCurrentDraw = intakeCurrentDraw;
+    }
+
+    public double getIndexerCurrentDraw() {
+      return indexerCurrentDraw;
+    }
+
+    public void setIndexerCurrentDraw(double indexerCurrentDraw) {
+      this.indexerCurrentDraw = indexerCurrentDraw;
+    }
+
+    public double getIndexerTemperature() {
+      return indexerTemperature;
+    }
+
+    public void setIndexerTemperature(double indexerTemperature) {
+      this.indexerTemperature = indexerTemperature;
+    }
+
+    public double getIntakeTemperature() {
+      return intakeTemperature;
+    }
+
+    public void setIntakeTemperature(double intakeTemperature) {
+      this.intakeTemperature = intakeTemperature;
+    }
+
+    public double getTofDistanceIn() {
+      return tofDistanceIn;
+    }
+
+    public void setTofDistanceIn(double tofDistanceIn) {
+      this.tofDistanceIn = tofDistanceIn;
+    }
+  }
   }
   default void setMotorVoltageTL(double voltage) {}
   default void setMotorVoltageTR(double voltage) {}
@@ -177,6 +249,7 @@ public interface ShooterIO {
   default void setIntakeVoltage(double voltage) {}
   default void setLeftVelocityRpm(double rpm) {}
   default void setRightVelocityRpm(double rpm) {}
-  default void updateInputs(ShooterIOInputs inputs) {}
+  default void updateInputs(ShooterIOInputsAutoLogged inputs) {}
+  default void stop() {}
 
 }

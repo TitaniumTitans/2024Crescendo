@@ -104,7 +104,7 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public void setTurnPositionDegs(double degrees) {
+  public void setTurnPositionRots(double degrees) {
     double rots = degrees / 360;
     double volts = m_turnPid.calculate(m_turnSim.getAngularPositionRotations(), rots);
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);

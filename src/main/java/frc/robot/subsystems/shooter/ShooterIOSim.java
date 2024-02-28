@@ -18,14 +18,14 @@ public class ShooterIOSim implements ShooterIO {
   private double kickerAppliedVolts = 0.0;
 
   @Override
-  public void updateInputs(ShooterIOInputs inputs) {
+  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
     m_simLeft.update(LOOP_PERIOD_SECS);
     m_simRight.update(LOOP_PERIOD_SECS);
 
-    inputs.setTlVelocityRots(m_simLeft.getAngularVelocityRadPerSec());
-    inputs.setTrVelocityRots(m_simRight.getAngularVelocityRadPerSec());
-    inputs.setBlVelocityRots(m_simLeft.getAngularVelocityRadPerSec());
-    inputs.setBrVelocityRots(m_simRight.getAngularVelocityRadPerSec());
+    inputs.setTlVelocityRPM(m_simLeft.getAngularVelocityRadPerSec());
+    inputs.setTrVelocityRPM(m_simRight.getAngularVelocityRadPerSec());
+    inputs.setBlVelocityRPM(m_simLeft.getAngularVelocityRadPerSec());
+    inputs.setBrVelocityRPM(m_simRight.getAngularVelocityRadPerSec());
 
     inputs.setTlAppliedVolts(leftAppliedVolts);
     inputs.setTrAppliedVolts(rightAppliedVolts);

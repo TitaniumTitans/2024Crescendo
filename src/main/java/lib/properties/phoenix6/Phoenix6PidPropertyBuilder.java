@@ -6,7 +6,6 @@ import com.ctre.phoenix6.configs.Slot2Configs;
 import com.ctre.phoenix6.configs.SlotConfigs;
 import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.gos.lib.properties.BaseHeavyProperty;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
 
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 public final class Phoenix6PidPropertyBuilder {
-   private final CoreTalonFX m_motor;
+  private final CoreTalonFX m_motor;
   private final SlotConfigs m_slot;
   private final boolean m_isConstant;
   private final String m_baseName;
@@ -42,7 +41,9 @@ public final class Phoenix6PidPropertyBuilder {
     }
 }
 
-  private HeavyDoubleProperty createDoubleProperty(String propertyNameSuffix, double defaultValue, DoubleConsumer setter) {
+  private HeavyDoubleProperty createDoubleProperty(String propertyNameSuffix,
+                                                   double defaultValue,
+                                                   DoubleConsumer setter) {
     String propertyName = m_baseName + ".mm." + propertyNameSuffix;
     GosDoubleProperty prop = new GosDoubleProperty(m_isConstant, propertyName, defaultValue);
 

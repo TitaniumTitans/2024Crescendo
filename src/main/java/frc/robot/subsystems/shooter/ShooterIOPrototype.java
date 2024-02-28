@@ -123,16 +123,16 @@ public class ShooterIOPrototype implements ShooterIO {
   }
 
   @Override
-  public void updateInputs(ShooterIOInputs inputs) {
+  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
     m_topLeftPidProperty.updateIfChanged();
     m_topRightPidProperty.updateIfChanged();
     m_bottomLeftPidProperty.updateIfChanged();
     m_bottomRightPidProperty.updateIfChanged();
 
-    inputs.setTlVelocityRots(m_topLeftMotor.getEncoder().getVelocity());
-    inputs.setTrVelocityRots(m_topRightMotor.getEncoder().getVelocity());
-    inputs.setBlVelocityRots(m_bottomLeftMotor.getEncoder().getVelocity());
-    inputs.setBrVelocityRots(m_bottomRightMotor.getEncoder().getVelocity());
+    inputs.setTlVelocityRPM(m_topLeftMotor.getEncoder().getVelocity() / 60.0);
+    inputs.setTrVelocityRPM(m_topRightMotor.getEncoder().getVelocity() / 60.0);
+    inputs.setBlVelocityRPM(m_bottomLeftMotor.getEncoder().getVelocity() / 60.0);
+    inputs.setBrVelocityRPM(m_bottomRightMotor.getEncoder().getVelocity() / 60.0);
 
     inputs.setTlAppliedVolts(m_topLeftMotor.getAppliedOutput() * m_topLeftMotor.getBusVoltage());
     inputs.setTrAppliedVolts(m_topRightMotor.getAppliedOutput() * m_topRightMotor.getBusVoltage());
