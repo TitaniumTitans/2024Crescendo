@@ -27,6 +27,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.units.Unit;
+import frc.robot.subsystems.arm.ArmPose;
+import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
 /**
@@ -221,11 +223,16 @@ public final class Constants {
   }
 
   public static class ArmSetpoints {
-    public record ArmSetpoint(double armPoseDegs, double wristPoseDegs) {}
+    private ArmSetpoints() {
+      throw new IllegalStateException("Static classes should not be constructed");
+    }
 
-    public static final ArmSetpoint STOW_SETPOINT = new ArmSetpoint(0.0, 45.0);
-    public static final ArmSetpoint INTAKE_SETPOINT = new ArmSetpoint(0.0, 35.0);
-    public static final ArmSetpoint AMP_SETPOINT = new ArmSetpoint(90.0, 135.0);
+    public static final ArmPose STOW_SETPOINT = new
+        ArmPose("ArmPoses/Stow", false, 0.0, 45.0);
+    public static final ArmPose INTAKE_SETPOINT =
+        new ArmPose("ArmPoses/Intake", false, 0.0, 35.0);
+    public static final ArmPose AMP_SETPOINT =
+        new ArmPose("ArmPoses/Amp", false, 90.0, 135.0);
   }
 
   public static class ShooterConstants {

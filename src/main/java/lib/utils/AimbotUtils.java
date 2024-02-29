@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
+import frc.robot.subsystems.arm.ArmPose;
 import org.littletonrobotics.junction.Logger;
 
 public class AimbotUtils {
@@ -30,7 +31,7 @@ public class AimbotUtils {
     );
   }
 
-  public static ArmSetpoints.ArmSetpoint aimbotCalculate(Pose3d robotPose, double armAngle) {
+  public static ArmPose aimbotCalculate(Pose3d robotPose, double armAngle) {
     // the position to target
     Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
     Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
@@ -50,6 +51,6 @@ public class AimbotUtils {
     double desiredWristAngle = Units.radiansToDegrees(Math.atan(robotToSpeaker.getZ()/groundDistance));
     Logger.recordOutput("Arm/ Wrist Aimbot Raw", desiredWristAngle);
     double safeArmAngle = ArmConstants.WRIST_ARM_GAP.getValue() - desiredWristAngle;
-    return new ArmSetpoints.ArmSetpoint(safeArmAngle, desiredWristAngle);
+    return new ArmPose(safeArmAngle, desiredWristAngle);
   }
 }
