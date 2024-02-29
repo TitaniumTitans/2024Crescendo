@@ -13,41 +13,40 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.arm.ArmIO;
-import frc.robot.subsystems.arm.ArmIOKraken;
-import frc.robot.subsystems.arm.ArmIOPrototype;
-import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
-import frc.robot.subsystems.climber.ClimberIOPrototype;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon1;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.ModuleIOSim;
 import frc.robot.subsystems.drive.module.ModuleIOTalonFX;
-import frc.robot.subsystems.shooter.*;
-import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOKraken;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
+import lib.utils.AllianceFlipUtil;
+import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -68,13 +67,12 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final LoggedDashboardNumber wristPower;
-  private final LoggedDashboardNumber wristPosition;
-  private final LoggedDashboardNumber armPower;
-  private final LoggedDashboardNumber armPosition;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    DriverStation.silenceJoystickConnectionWarning(true);
+    Logger.recordOutput("Zero Pose3d", new Pose3d());
+    Logger.recordOutput("Zeroed Pose3d Array", new Pose3d(), new Pose3d());
+
     switch (Constants.currentMode) {
       case REAL -> {
         // Real robot, instantiate hardware IO implementations
@@ -85,7 +83,7 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_armSubsystem = new ArmSubsystem(new ArmIOKraken());
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case PROTO_ARM -> {
@@ -120,9 +118,9 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-        m_climber = new ClimberSubsystem(new ClimberIOPrototype());
+        m_shooter = new ShooterSubsystem(new ShooterIOSim());
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getPose);
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -142,19 +140,13 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
-
-    armPower = new LoggedDashboardNumber("Arm Power", 0.0);
-    armPosition = new LoggedDashboardNumber("Arm Position", 0.0);
-    wristPower = new LoggedDashboardNumber("Wrist Power", 0.0);
-    wristPosition = new LoggedDashboardNumber("Wrist Position", 0.0);
-
     // Set up feedforward characterization
-//    autoChooser.addOption(
-//        "Drive FF Characterization",
-//        new FeedForwardCharacterization(
-//                m_driveSubsystem,
-//                m_driveSubsystem::runCharacterizationVolts,
-//                m_driveSubsystem::getCharacterizationVelocity));
+    autoChooser.addOption(
+        "Drive FF Characterization",
+        new FeedForwardCharacterization(
+                m_driveSubsystem,
+                m_driveSubsystem::runCharacterizationVolts,
+                m_driveSubsystem::getCharacterizationVelocity));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -170,53 +162,34 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightBumper().whileTrue(m_armSubsystem.setArmPowerFactory(0.15));
-    controller.leftBumper().whileTrue(m_armSubsystem.setArmPowerFactory(-0.15));
+    controller.a().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE));
+    controller.b().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW));
 
-    controller.rightTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(0.15));
-    controller.leftTrigger().whileTrue(m_armSubsystem.setWristPowerFactory(-0.15));
+    controller.x().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
 
-    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-//    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(90))
-//        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.rightTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
+        .whileTrue(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        ));
 
-    controller.x().whileTrue(m_armSubsystem.setArmDesiredPose(90, 0))
-        .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
-    controller.y().whileTrue(m_armSubsystem.setArmDesiredPose(180, 90))
-        .onFalse(m_armSubsystem.setArmPowerFactory(0.0).andThen(m_armSubsystem.setWristPowerFactory(0.0)));
-
-    controller.pov(0).onTrue(m_armSubsystem.resetEncoderFactory());
-
-    controller.pov(90).whileTrue(m_armSubsystem.setWristPositionFactory(0))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.pov(180).whileTrue(m_armSubsystem.setWristPositionFactory(90))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-
-    controller.a().whileTrue(Commands.repeatingSequence(
-        m_armSubsystem.setWristPositionFactory(0)
-            .withTimeout(1),
-        m_armSubsystem.setWristPositionFactory(90)
-            .withTimeout(1)
-        )
-    );
-//
-//    m_driveSubsystem.setDefaultCommand(
-//        DriveCommands.joystickDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> -controller.getRightX()));
-//    controller.x().onTrue(Commands.runOnce(m_driveSubsystem::stopWithX, m_driveSubsystem));
-//    controller
-//        .start()
-//        .onTrue(
-//            Commands.runOnce(
-//                    () ->
-//                        m_driveSubsystem.setPose(
-//                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
-//                    m_driveSubsystem)
-//                .ignoringDisable(true));
+    m_driveSubsystem.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
+    controller
+        .start()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        m_driveSubsystem.setPose(
+                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+                    m_driveSubsystem)
+                .ignoringDisable(true));
   }
 
   /**

@@ -6,12 +6,14 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_leftTalon;
@@ -57,13 +59,15 @@ public class ShooterIOKraken implements ShooterIO {
     m_indexer = new TalonFX(ShooterConstants.INDEXER_ID, canbus);
 
     m_tof = new TimeOfFlight(28);
-    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 10);
+    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
 
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     shooterConfig.CurrentLimits.SupplyCurrentLimit = 40;
     shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    shooterConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    shooterConfig.Feedback.SensorToMechanismRatio = 1;
 
     // right shooter isn't inverted
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -91,7 +95,7 @@ public class ShooterIOKraken implements ShooterIO {
         .build();
 
     m_velRequest = new VelocityVoltage(0)
-        .withEnableFOC(m_leftTalon.getIsProLicensed().getValue() && m_rightTalon.getIsProLicensed().getValue())
+        .withEnableFOC(false)
         .withSlot(0);
     m_stopRequest = new NeutralOut();
 
@@ -142,15 +146,15 @@ public class ShooterIOKraken implements ShooterIO {
   }
 
   @Override
-  public void updateInputs(ShooterIOInputs inputs) {
+  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
             m_leftVelSignal,
             m_rightVelSignal,
             m_leftVoltOutSignal
     );
 
-    inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() / 60.0;
-    inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() / 60.0;
+    inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() * 60.0;
+    inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() * 60.0;
 
     inputs.tlAppliedVolts = m_leftVoltOutSignal.getValueAsDouble();
     inputs.trAppliedVolts = m_rightVoltOutSignal.getValueAsDouble();
@@ -199,12 +203,12 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public void setLeftVelocityRpm(double rpm) {
-    m_leftTalon.setControl(m_velRequest.withVelocity(rpm * 60));
+    m_leftTalon.setControl(m_velRequest.withVelocity(rpm / 60));
   }
 
   @Override
   public void setRightVelocityRpm(double rpm) {
-    m_rightTalon.setControl(m_velRequest.withVelocity(rpm * 60));
+    m_rightTalon.setControl(m_velRequest.withVelocity(rpm / 60));
   }
 
   @Override

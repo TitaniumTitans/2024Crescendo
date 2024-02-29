@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.util.PolynomialRegression;
+import lib.utils.PolynomialRegression;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;

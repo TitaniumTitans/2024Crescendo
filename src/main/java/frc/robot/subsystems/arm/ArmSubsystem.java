@@ -1,29 +1,49 @@
 package frc.robot.subsystems.arm;
 
-import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ArmSetpoints;
+import lib.utils.AimbotUtils;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.MutableMeasure.mutable;
-import static edu.wpi.first.units.Units.*;
+import java.util.function.Supplier;
 
 public class ArmSubsystem extends SubsystemBase {
+
+  public enum ArmState {
+    STOW,
+    INTAKE,
+    AUTO_AIM,
+    ANTI_DEFENSE,
+    AMP,
+    TRANSITION_AMP,
+    SOURCE,
+    TRANSITION_SOURCE,
+    DISABLED
+  }
+
   private final ArmIO m_io;
   private final ArmIOInputsAutoLogged m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_desiredWristPoseDegs;
-  private static final boolean USE_MM = true;
+
+  private ArmState m_desiredState = ArmState.DISABLED;
+
+  private final ArmVisualizer m_setpointVisualizer;
+  private final ArmVisualizer m_poseVisualizer;
+
+  private final Supplier<Pose2d> m_poseSupplier;
 
   public ArmSubsystem(ArmIO io) {
+    this(io, Pose2d::new);
+  }
+
+  public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
     m_io = io;
     m_inputs = new ArmIOInputsAutoLogged();
 
@@ -31,18 +51,20 @@ public class ArmSubsystem extends SubsystemBase {
     m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
 
     m_io.resetPosition();
-  }
 
-  //TODO: Finite state machine logic
+    m_poseSupplier = supplier;
 
-  public double getWristPosition() {
-    return m_inputs.wristPositionDegs;
+    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
+    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
 
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Arm", m_inputs);
+
+    handleState();
+    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
 
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY ?
@@ -56,11 +78,8 @@ public class ArmSubsystem extends SubsystemBase {
         : m_desiredArmPoseDegs;
 
     // check to make sure we're not in manual control
-    if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY && m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY) {
-      m_io.enableBrakeMode(false);
-    } else {
-      m_io.enableBrakeMode(true);
-    }
+    m_io.enableBrakeMode(m_desiredArmPoseDegs <= Double.NEGATIVE_INFINITY
+            || m_desiredWristPoseDegs <= Double.NEGATIVE_INFINITY);
 
     if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY) {
       m_io.setArmAngle(m_desiredArmPoseDegs);
@@ -81,16 +100,56 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
+
+    // Update arm visualizers
+    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
+    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
+  }
+
+  public void handleState() {
+    switch(m_desiredState) {
+      case STOW -> {
+        m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armPoseDegs();
+        m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristPoseDegs();
+      }
+      case AUTO_AIM -> {
+        ArmSetpoints.ArmSetpoint aimSetpoint = AimbotUtils.aimbotCalculate(
+                new Pose3d(m_poseSupplier.get()), m_inputs.armPositionDegs);
+
+        m_desiredArmPoseDegs = aimSetpoint.armPoseDegs();
+        m_desiredWristPoseDegs = aimSetpoint.wristPoseDegs();
+      }
+      case INTAKE -> {
+        m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armPoseDegs();
+        m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristPoseDegs();
+      }
+      case AMP -> {
+        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armPoseDegs();
+        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristPoseDegs();
+      }
+      default -> {
+        m_desiredArmPoseDegs = m_inputs.armPositionDegs;
+        m_desiredWristPoseDegs = m_inputs.wristPositionDegs;
+      }
+    }
+  }
+
+
+
+  /* Command Factories */
+
+  public Command setDesiredState(ArmState state) {
+    return runOnce(() -> m_desiredState = state);
   }
 
   public Command setArmDesiredPose(double armPose, double wristPose) {
     return run(() -> {
       m_desiredArmPoseDegs = armPose;
 
-      double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
-      if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
-        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
-        m_desiredWristPoseDegs = m_inputs.wristPositionDegs + underGap;
+      double estWristGap = armPose + wristPose;
+      if (estWristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
+        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - estWristGap;
+        m_desiredWristPoseDegs = wristPose + underGap;
       } else {
         m_desiredWristPoseDegs = wristPose;
       }
@@ -157,5 +216,7 @@ public class ArmSubsystem extends SubsystemBase {
         },
         () -> m_io.setWristVoltage(0.0));
   }
+
+
 }
 

@@ -106,9 +106,10 @@
   {
     "name": "/Preferences/Drive/Module3/Turn Pid Property.mm.kp",
     "type": "double",
-    "value": 7.0,
+    "value": 43.982,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
@@ -288,23 +289,15 @@
     }
   },
   {
-    "name": "/Preferences/Sim Turn PID.mm.kp",
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.kp",
     "type": "double",
-    "value": 43.982,
+    "value": 6.1e-05,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Sim Turn PID.mm.ki",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Sim Turn PID.mm.kd",
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.ki",
     "type": "double",
     "value": 0.0,
     "properties": {
@@ -312,15 +305,31 @@
     }
   },
   {
-    "name": "/Preferences/Sim Drive PID.mm.kp",
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.kd",
     "type": "double",
-    "value": 0.314,
+    "value": 0.005,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Sim Drive PID.mm.ki",
+    "name": "/Preferences/Shooter/Top Left Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.ki",
     "type": "double",
     "value": 0.0,
     "properties": {
@@ -328,7 +337,195 @@
     }
   },
   {
-    "name": "/Preferences/Sim Drive PID.mm.kd",
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Top Right Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Left Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.kp",
+    "type": "double",
+    "value": 6.1e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.kd",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shooter/Bottom Right Shooter.mm.kff",
+    "type": "double",
+    "value": 0.000152,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Left PID.mm.kp",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Left PID.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Left PID.mm.kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Right PID.mm.kp",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Right PID.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Climber/Right PID.mm.kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Arm/WristLowerLimit",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true,
+      "retained": true
+    }
+  },
+  {
+    "name": "/Preferences/Arm/WristUpperLimit",
+    "type": "double",
+    "value": 180.0,
+    "properties": {
+      "persistent": true,
+      "retained": true
+    }
+  },
+  {
+    "name": "/Preferences/Arm/ArmLowerLimit",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true,
+      "retained": true
+    }
+  },
+  {
+    "name": "/Preferences/Arm/ArmUpperLimit",
+    "type": "double",
+    "value": 180.0,
+    "properties": {
+      "persistent": true,
+      "retained": true
+    }
+  },
+  {
+    "name": "/Preferences/Arm/Wrist Gap",
+    "type": "double",
+    "value": 20.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.kp",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.kd",
     "type": "double",
     "value": 0.0,
     "properties": {

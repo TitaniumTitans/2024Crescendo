@@ -13,13 +13,15 @@
 
 package frc.robot.subsystems.drive.module;
 
-import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Physics sim implementation of module IO.
@@ -31,88 +33,65 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ModuleIOSim implements ModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private final DCMotorSim m_driveSim;
-  private final DCMotorSim m_turnSim;
-
-  private final ModuleConstants m_moduleConstants; // use this mainly for module id
-
-  private final PIDController m_turnPid = new PIDController(0.0, 0.0, 0.0);
-  private final PIDController m_drivePid = new PIDController(0.0, 0.0, 0.0);
-
-  private final PidProperty m_turnProperty;
-  private final PidProperty m_driveProperty;
+  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getKrakenX60(1), ModuleConstants.GearRatios.L3.ratio, 0.025);
+  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getFalcon500Foc(1), ModuleConstants.GearRatios.TURN.ratio, 0.004);
 
   private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
-  public ModuleIOSim(ModuleConstants moduleConstants) {
-    m_moduleConstants = moduleConstants;
-    // create sims for motors
-    m_driveSim = new DCMotorSim(DCMotor.getFalcon500(1), m_moduleConstants.DRIVE_GEAR_RATIO(), 0.025);
-    m_turnSim = new DCMotorSim(DCMotor.getFalcon500(1), m_moduleConstants.TURNING_GEAR_RATIO(), 0.004);
+  private final PIDController m_driveController =
+      new PIDController(Constants.DriveConstants.DRIVE_FB_GAINS[0], 0.0, 0.0);
+  private final PIDController m_turnController =
+      new PIDController(Constants.DriveConstants.TURN_FB_GAINS[0], 0.0, 0.0);
 
-    // setup default PID values for "onboard" controllers
-    m_turnProperty = new WpiPidPropertyBuilder("Sim Turn PID", false, m_turnPid)
-            .addP(m_moduleConstants.TURN_KP())
-            .addI(m_moduleConstants.TURN_KI())
-            .addD(m_moduleConstants.TURN_KD())
-            .build();
+  private final ModuleConstants m_moduleConstants;
 
-    m_driveProperty = new WpiPidPropertyBuilder("Sim Drive PID", false, m_drivePid)
-            .addP(m_moduleConstants.DRIVE_KP())
-            .addI(m_moduleConstants.DRIVE_KI())
-            .addD(m_moduleConstants.DRIVE_KD())
-            .build();
+  public ModuleIOSim(ModuleConstants constants) {
+    m_moduleConstants = constants;
 
-    // force update the values
-    m_turnProperty.updateIfChanged(true);
-    m_driveProperty.updateIfChanged(true);
+    m_turnController.enableContinuousInput(0.0, 1.0);
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    // update the simulation
-    m_driveSim.update(LOOP_PERIOD_SECS);
-    m_turnSim.update(LOOP_PERIOD_SECS);
+    driveSim.update(LOOP_PERIOD_SECS);
+    turnSim.update(LOOP_PERIOD_SECS);
 
-    // update pid controllers
-    m_turnProperty.updateIfChanged();
-    m_driveProperty.updateIfChanged();
-
-    inputs.drivePositionRad = m_driveSim.getAngularPositionRad();
-    inputs.driveVelocityRadPerSec = m_driveSim.getAngularVelocityRadPerSec();
+    inputs.drivePositionRad = driveSim.getAngularPositionRad();
+    inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
-    inputs.driveCurrentAmps = new double[] {Math.abs(m_driveSim.getCurrentDrawAmps())};
+    inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
 
-    inputs.setTurnAbsolutePosition(new Rotation2d(m_turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition));
-    inputs.setTurnPosition(new Rotation2d(m_turnSim.getAngularPositionRad()));
-    inputs.setTurnVelocityRadPerSec(m_turnSim.getAngularVelocityRadPerSec());
-    inputs.setTurnAppliedVolts(turnAppliedVolts);
-    inputs.setTurnCurrentAmps(new double[] {Math.abs(m_turnSim.getCurrentDrawAmps())});
+    inputs.turnAbsolutePosition =
+        new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
+    inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
+    inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
+    inputs.turnAppliedVolts = turnAppliedVolts;
+    inputs.turnCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
 
-    inputs.setOdometryDrivePositionsRad(new double[] {inputs.getDrivePositionRad()});
-    inputs.setOdometryTurnPositions(new Rotation2d[] {inputs.getTurnPosition()});
+    inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
+    inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
   }
 
   @Override
   public void setDriveVelocityMPS(double mps) {
     double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
-    double volts = m_drivePid.calculate(m_driveSim.getAngularVelocityRPM() / 60, rps);
-    driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    m_driveSim.setInputVoltage(driveAppliedVolts);
+    driveAppliedVolts = m_driveController.calculate(driveSim.getAngularVelocityRPM() / 60.0, rps);
+    driveAppliedVolts = MathUtil.clamp(driveAppliedVolts, -12.0, 12.0);
+    driveSim.setInputVoltage(driveAppliedVolts);
   }
 
   @Override
-  public void setTurnPositionRots(double degrees) {
-    double rots = degrees / 360;
-    double volts = m_turnPid.calculate(m_turnSim.getAngularPositionRotations(), rots);
-    turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    m_turnSim.setInputVoltage(turnAppliedVolts);
+  public void setTurnPositionRots(double rotations) {
+    turnAppliedVolts = m_turnController.calculate(
+        turnSim.getAngularPositionRotations(), rotations);
+    turnAppliedVolts = MathUtil.clamp(turnAppliedVolts, -12.0, 12.0);
+    turnSim.setInputVoltage(turnAppliedVolts);
   }
 
   @Override
   public ModuleConstants getModuleConstants() {
-    return  m_moduleConstants;
+    return m_moduleConstants;
   }
 }

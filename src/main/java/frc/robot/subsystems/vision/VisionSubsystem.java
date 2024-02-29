@@ -12,8 +12,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
-import frc.robot.util.PoseEstimator;
+import lib.utils.PoseEstimator;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -61,7 +60,7 @@ public class VisionSubsystem {
     inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
 
     Logger.recordOutput("PhotonVision/" + m_name + "/Last Estimated Pose", m_lastEstimatedPose);
-//    Logger.processInputs("PhotonVision/" + m_name, inputs);
+    Logger.processInputs("PhotonVision/" + m_name, inputs);
   }
 
   public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
