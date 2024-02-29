@@ -33,7 +33,6 @@ public class ArmSubsystem extends SubsystemBase {
   private double m_desiredWristPoseDegs;
 
   private ArmState m_desiredState = ArmState.DISABLED;
-  private ArmState m_currentState = ArmState.DISABLED;
 
   private final ArmVisualizer m_setpointVisualizer;
   private final ArmVisualizer m_poseVisualizer;
@@ -59,12 +58,13 @@ public class ArmSubsystem extends SubsystemBase {
     m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
 
-  //TODO: Finite state machine logic
-
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Arm", m_inputs);
+
+    handleState();
+    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
 
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY ?
@@ -107,7 +107,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void handleState() {
-    switch(m_currentState) {
+    switch(m_desiredState) {
       case STOW -> {
         m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armPoseDegs();
         m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristPoseDegs();
@@ -122,6 +122,10 @@ public class ArmSubsystem extends SubsystemBase {
       case INTAKE -> {
         m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armPoseDegs();
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristPoseDegs();
+      }
+      case AMP -> {
+        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armPoseDegs();
+        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristPoseDegs();
       }
       default -> {
         m_desiredArmPoseDegs = m_inputs.armPositionDegs;

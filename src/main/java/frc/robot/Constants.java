@@ -225,7 +225,7 @@ public final class Constants {
 
     public static final ArmSetpoint STOW_SETPOINT = new ArmSetpoint(0.0, 45.0);
     public static final ArmSetpoint INTAKE_SETPOINT = new ArmSetpoint(0.0, 35.0);
-    public static final ArmSetpoint AMP_SETPOINT = new ArmSetpoint(0.0, 45.0);
+    public static final ArmSetpoint AMP_SETPOINT = new ArmSetpoint(90.0, 135.0);
   }
 
   public static class ShooterConstants {

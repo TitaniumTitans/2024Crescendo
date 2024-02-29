@@ -43,6 +43,8 @@ import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOKraken;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
+import lib.utils.AllianceFlipUtil;
+import lib.utils.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -117,7 +119,7 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
-        m_armSubsystem = new ArmSubsystem(new ArmIOSim() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getPose);
         m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       default -> {
@@ -160,17 +162,18 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.rightTrigger().whileTrue(m_armSubsystem.resetEncoderFactory());
+    controller.a().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE));
+    controller.b().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW));
 
-    controller.a().whileTrue(m_armSubsystem.setArmPositionFactory(0))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
-    controller.b().whileTrue(m_armSubsystem.setArmPositionFactory(180))
-        .whileFalse(m_armSubsystem.setArmPowerFactory(0.0));
+    controller.x().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
 
-    controller.y().whileTrue(m_armSubsystem.setWristPositionFactory(45))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
-    controller.x().whileTrue(m_armSubsystem.setWristPositionFactory(180))
-        .whileFalse(m_armSubsystem.setWristPowerFactory(0.0));
+    controller.rightTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
+        .whileTrue(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        ));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(

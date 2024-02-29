@@ -14,10 +14,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,6 +22,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import org.opencv.core.Mat;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -41,9 +39,9 @@ public class DriveCommands {
       DoubleSupplier omegaSupplier) {
     return Commands.run(
         () -> {
-            double xInput = setSensitivity(xSupplier.getAsDouble(), 0.5);
-            double yInput = setSensitivity(ySupplier.getAsDouble(), 0.5);
-            double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.5);
+            double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
+            double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
+            double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.15);
 
           // Apply deadband
           double linearMagnitude =
@@ -52,10 +50,6 @@ public class DriveCommands {
           Rotation2d linearDirection =
               new Rotation2d(xInput, yInput);
           double omega = MathUtil.applyDeadband(omegaInput, DEADBAND);
-
-          // Square values
-          linearMagnitude = linearMagnitude * linearMagnitude;
-          omega = Math.copySign(omega * omega, omega);
 
           // Calcaulate new linear velocity
           Translation2d linearVelocity =
@@ -73,6 +67,47 @@ public class DriveCommands {
         },
             driveSubsystem);
   }
+
+  public static Command alignmentDrive(
+      DriveSubsystem driveSubsystem,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      Supplier<Translation3d> point) {
+    return Commands.run(() -> {
+      double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
+      double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
+
+      // Apply deadband
+      double linearMagnitude =
+          MathUtil.applyDeadband(
+              Math.hypot(xInput, yInput), DEADBAND);
+      Rotation2d linearDirection =
+          new Rotation2d(xInput, yInput);
+
+      // Calculate omega
+      double omega = driveSubsystem.alignToPoint(new Pose3d(point.get(), new Rotation3d()));
+
+      // Calcaulate new linear velocity
+      Translation2d linearVelocity =
+          new Pose2d(new Translation2d(), linearDirection)
+              .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+              .getTranslation();
+
+      if (linearVelocity.getNorm() > 0.1) {
+        omega = omega * 4;
+      }
+
+      // Convert to field relative speeds & send command
+      driveSubsystem.runVelocity(
+          ChassisSpeeds.fromFieldRelativeSpeeds(
+              linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+              linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+              omega * driveSubsystem.getMaxAngularSpeedRadPerSec(),
+              driveSubsystem.getRotation()));
+
+    }, driveSubsystem);
+  }
+
   public static double setSensitivity(double x, double sensitivity) {
     return sensitivity * x + ((1.0 - sensitivity) * Math.pow(x, 3.0));
   }

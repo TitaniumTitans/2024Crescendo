@@ -194,6 +194,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
 //    m_poseEstimator.addVisionData(visionUpdates);
+
+    m_thetaPidProperty.updateIfChanged();
   }
 
   /**
@@ -225,9 +227,17 @@ public class DriveSubsystem extends SubsystemBase {
    * @param point the desired point to align to
    */
   public double alignToPoint(Pose3d point) {
-    Transform3d robotToPoint = new Transform3d(new Pose3d(pose), point);
-    double desiredRotation = Math.atan2(robotToPoint.getX(), robotToPoint.getY());
-    return m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
+
+    Transform3d robotToPoint = new Transform3d(new Pose3d(
+        new Pose2d(pose.getTranslation(), new Rotation2d())), point);
+
+    double desiredRotation = Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY())
+        + Units.degreesToRadians(270));
+
+    double output =  m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
+    Logger.recordOutput("Drive/Alignment output", output);
+    Logger.recordOutput("Drive/Desired Alignment", desiredRotation);
+    return output;
   }
 
   /** Stops the drive. */

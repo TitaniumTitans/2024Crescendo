@@ -21,6 +21,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Physics sim implementation of module IO.
@@ -75,8 +76,9 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void setDriveVelocityMPS(double mps) {
-    driveAppliedVolts = m_driveController.calculate((driveSim.getAngularVelocityRPM() / 60.0)
-        * ModuleConstants.DEFAULT_WHEEL_RADIUS_METERS, mps);
+    double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
+    driveAppliedVolts = m_driveController.calculate(driveSim.getAngularVelocityRPM() / 60.0, rps);
+    driveAppliedVolts = MathUtil.clamp(driveAppliedVolts, -12.0, 12.0);
     driveSim.setInputVoltage(driveAppliedVolts);
   }
 
@@ -84,6 +86,7 @@ public class ModuleIOSim implements ModuleIO {
   public void setTurnPositionRots(double rotations) {
     turnAppliedVolts = m_turnController.calculate(
         turnSim.getAngularPositionRotations(), rotations);
+    turnAppliedVolts = MathUtil.clamp(turnAppliedVolts, -12.0, 12.0);
     turnSim.setInputVoltage(turnAppliedVolts);
   }
 
