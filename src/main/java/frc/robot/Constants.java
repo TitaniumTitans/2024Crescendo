@@ -68,8 +68,8 @@ public final class Constants {
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
     public static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.0);
-    public static final double TRACK_WIDTH_X = Units.inchesToMeters(20.733);
-    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(20.733);
+    public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.6);
+    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(18.6);
     public static final double DRIVE_BASE_RADIUS =
         Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
