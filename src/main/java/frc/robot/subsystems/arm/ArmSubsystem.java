@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -77,16 +78,19 @@ public class ArmSubsystem extends SubsystemBase {
             ArmConstants.ARM_UPPER_LIMIT.getValue())
         : m_desiredArmPoseDegs;
 
-    // check to make sure we're not in manual control
-    m_io.enableBrakeMode(m_desiredArmPoseDegs <= Double.NEGATIVE_INFINITY
-            || m_desiredWristPoseDegs <= Double.NEGATIVE_INFINITY);
-
-    if (m_desiredArmPoseDegs > Double.NEGATIVE_INFINITY) {
-      m_io.setArmAngle(m_desiredArmPoseDegs);
-      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
+    // if we're disabled go back to hold pose
+    if (DriverStation.isDisabled()) {
+      m_desiredState = ArmState.DISABLED;
     }
 
-    if (m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY) {
+    // check to make sure we're not in manual control
+    m_io.enableBrakeMode(m_desiredState != ArmState.DISABLED);
+
+    if (m_desiredState != ArmState.DISABLED) {
+      // set the arms angle
+      m_io.setArmAngle(m_desiredArmPoseDegs);
+      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
+
       // check to see if the wrist is currently too close to the rest of the arm
       double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
       if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
@@ -109,23 +113,23 @@ public class ArmSubsystem extends SubsystemBase {
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armPoseDegs();
-        m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristPoseDegs();
+        m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
       }
       case AUTO_AIM -> {
-        ArmSetpoints.ArmSetpoint aimSetpoint = AimbotUtils.aimbotCalculate(
+        ArmPose aimSetpoint = AimbotUtils.aimbotCalculate(
                 new Pose3d(m_poseSupplier.get()), m_inputs.armPositionDegs);
 
-        m_desiredArmPoseDegs = aimSetpoint.armPoseDegs();
-        m_desiredWristPoseDegs = aimSetpoint.wristPoseDegs();
+        m_desiredArmPoseDegs = aimSetpoint.armAngle();
+        m_desiredWristPoseDegs = aimSetpoint.wristAngle();
       }
       case INTAKE -> {
-        m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armPoseDegs();
-        m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristPoseDegs();
+        m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristAngle();
       }
       case AMP -> {
-        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armPoseDegs();
-        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristPoseDegs();
+        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
       default -> {
         m_desiredArmPoseDegs = m_inputs.armPositionDegs;
@@ -134,34 +138,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
   }
 
-
-
   /* Command Factories */
 
   public Command setDesiredState(ArmState state) {
-    return runOnce(() -> m_desiredState = state);
-  }
-
-  public Command setArmDesiredPose(double armPose, double wristPose) {
-    return run(() -> {
-      m_desiredArmPoseDegs = armPose;
-
-      double estWristGap = armPose + wristPose;
-      if (estWristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
-        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - estWristGap;
-        m_desiredWristPoseDegs = wristPose + underGap;
-      } else {
-        m_desiredWristPoseDegs = wristPose;
-      }
-    });
-  }
-
-  public Command setArmPositionFactory(double degrees) {
-    return run(() -> m_desiredArmPoseDegs = degrees);
-  }
-
-  public Command setWristPositionFactory(double degrees) {
-    return run(() -> m_desiredWristPoseDegs = degrees);
+    return runEnd(() -> m_desiredState = state,
+        () -> m_desiredState = ArmState.STOW);
   }
 
   public Command enableBrakeMode(boolean enabled) {
