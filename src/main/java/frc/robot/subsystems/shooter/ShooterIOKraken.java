@@ -13,7 +13,6 @@ import com.playingwithfusion.TimeOfFlight;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ShooterConstants;
-import org.littletonrobotics.junction.Logger;
 
 public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_leftTalon;
@@ -148,9 +147,22 @@ public class ShooterIOKraken implements ShooterIO {
   @Override
   public void updateInputs(ShooterIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
-            m_leftVelSignal,
-            m_rightVelSignal,
-            m_leftVoltOutSignal
+        m_leftVelSignal,
+        m_rightVelSignal,
+        m_leftVoltOutSignal,
+        m_rightVoltOutSignal,
+        m_kickerVoltOutSignal,
+        m_intakeVoltOutSignal,
+        m_indexerVoltOutSignal,
+        m_leftCurrentDrawSignal,
+        m_rightCurrentDrawSignal,
+        m_kickerCurrentDrawSignal,
+        m_intakeCurrentDrawSignal,
+        m_indexerCurrentDrawSignal,
+        m_leftTemperatureSignal,
+        m_rightTemperatureSignal,
+        m_intakeTemperatureSignal,
+        m_indexerTemperatureSignal
     );
 
     inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() * 60.0;
