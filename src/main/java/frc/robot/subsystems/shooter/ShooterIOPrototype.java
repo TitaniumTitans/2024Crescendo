@@ -123,7 +123,7 @@ public class ShooterIOPrototype implements ShooterIO {
   }
 
   @Override
-  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
+  public void updateInputs(ShooterIOInputs inputs) {
     m_topLeftPidProperty.updateIfChanged();
     m_topRightPidProperty.updateIfChanged();
     m_bottomLeftPidProperty.updateIfChanged();

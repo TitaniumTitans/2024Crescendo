@@ -14,10 +14,8 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface GyroIO {
-  @AutoLog
   class GyroIOInputs {
     protected boolean connected = false;
     protected Rotation2d yawPosition = new Rotation2d();
@@ -57,7 +55,7 @@ public interface GyroIO {
     }
   }
 
-  default void updateInputs(GyroIOInputsAutoLogged inputs) {}
+  default void updateInputs(GyroIOInputs inputs) {}
 
   default void resetGyro(double degrees) {}
 }

@@ -2,15 +2,11 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
-import lib.utils.AimbotUtils;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -29,7 +25,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   private final ArmIO m_io;
-  private final ArmIOInputsAutoLogged m_inputs;
+  private final ArmIO.ArmIOInputs m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_desiredWristPoseDegs;
 
@@ -47,7 +43,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
     m_io = io;
-    m_inputs = new ArmIOInputsAutoLogged();
+    m_inputs = new ArmIO.ArmIOInputs();
 
     m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
     m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
@@ -63,7 +59,6 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
-    Logger.processInputs("Arm", m_inputs);
 
     handleState();
 //    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
@@ -96,15 +91,12 @@ public class ArmSubsystem extends SubsystemBase {
         double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
         m_desiredArmPoseDegs += underGap;
         m_io.setWristAngle(m_desiredWristPoseDegs + underGap, true);
-        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
       } else {
         m_io.setWristAngle(m_desiredWristPoseDegs, false);
-        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
       }
 
       // set the arms angle
       m_io.setArmAngle(m_desiredArmPoseDegs);
-      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
     }
 
 //    Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);

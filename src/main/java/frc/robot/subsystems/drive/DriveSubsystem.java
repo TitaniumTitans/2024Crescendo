@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.controller.PIDController;
@@ -37,22 +38,18 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import lib.utils.LocalADStarAK;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import lib.utils.PoseEstimator;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 public class DriveSubsystem extends SubsystemBase {
 
   public static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
-  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  private final GyroIO.GyroIOInputs gyroInputs = new GyroIO.GyroIOInputs();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
@@ -129,12 +126,7 @@ public class DriveSubsystem extends SubsystemBase {
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
         this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
-    PathPlannerLogging.setLogActivePathCallback(
-        (List<Pose2d> activePath) -> Logger.recordOutput(
-            "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
-    PathPlannerLogging.setLogTargetPoseCallback(
-        (Pose2d targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
+    Pathfinding.setPathfinder(new LocalADStar());
   }
 
   @Override

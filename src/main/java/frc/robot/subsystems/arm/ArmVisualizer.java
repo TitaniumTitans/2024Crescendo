@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.Constants.ArmConstants;
 import lib.utils.AimbotUtils;
-import org.littletonrobotics.junction.Logger;
 
 public class ArmVisualizer {
   private final Mechanism2d mechanism;
@@ -36,7 +35,6 @@ public class ArmVisualizer {
     // Log Mechanism2d
     arm.setAngle(Rotation2d.fromDegrees(armAngleDegs));
     wrist.setAngle(Rotation2d.fromDegrees(wristAngleDegs));
-    Logger.recordOutput("Arm/Mechanism2d/" + key, mechanism);
 
     // Log 3D poses
     Pose3d pivotArm =
@@ -46,6 +44,5 @@ public class ArmVisualizer {
 
     Pose3d pivotWrist = new Pose3d(AimbotUtils.getShooterTransformation(armAngleDegs).getTranslation(),
         new Rotation3d(0.0, Units.degreesToRadians(-wristAngleDegs), 0.0));
-    Logger.recordOutput("Arm/Mechanism3d/" + key, pivotArm, pivotWrist);
   }
 }

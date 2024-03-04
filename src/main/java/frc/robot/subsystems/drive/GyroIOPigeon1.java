@@ -21,7 +21,7 @@ public class GyroIOPigeon1 implements GyroIO {
   }
 
   @Override
-  public void updateInputs(GyroIOInputsAutoLogged inputs) {
+  public void updateInputs(GyroIOInputs inputs) {
     inputs.setConnected(m_pigeon.getState() == PigeonIMU.PigeonState.Ready);
     inputs.setYawPosition(Rotation2d.fromDegrees(m_pigeon.getYaw()));
     inputs.setYawVelocityRadPerSec((m_pigeon.getYaw() - prevYaw) / Units.millisecondsToSeconds(20));

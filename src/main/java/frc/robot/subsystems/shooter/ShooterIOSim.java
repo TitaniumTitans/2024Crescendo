@@ -18,7 +18,7 @@ public class ShooterIOSim implements ShooterIO {
   private double kickerAppliedVolts = 0.0;
 
   @Override
-  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
+  public void updateInputs(ShooterIOInputs inputs) {
     m_simLeft.update(LOOP_PERIOD_SECS);
     m_simRight.update(LOOP_PERIOD_SECS);
 

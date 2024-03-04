@@ -3,14 +3,13 @@ package frc.robot.subsystems.climber;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
 
 public class ClimberSubsystem extends SubsystemBase {
   private final ClimberIO m_io;
-  private final ClimberIOInputsAutoLogged m_inputs;
+  private final ClimberIO.ClimberIOInputs m_inputs;
   public ClimberSubsystem(ClimberIO io) {
     m_io = io;
-    m_inputs = new ClimberIOInputsAutoLogged();
+    m_inputs = new ClimberIO.ClimberIOInputs();
   }
 
   @Override

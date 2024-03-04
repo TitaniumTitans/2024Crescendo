@@ -14,10 +14,8 @@
 package frc.robot.subsystems.drive.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
-  @AutoLog
   class ModuleIOInputs {
     protected double drivePositionRad = 0.0;
     protected double driveVelocityRadPerSec = 0.0;

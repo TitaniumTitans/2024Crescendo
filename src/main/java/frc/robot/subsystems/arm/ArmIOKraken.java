@@ -16,7 +16,6 @@ import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ArmConstants;
-import org.littletonrobotics.junction.Logger;
 
 public class ArmIOKraken implements ArmIO {
   // Physical devices
@@ -202,7 +201,7 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void updateInputs(ArmIOInputsAutoLogged inputs) {
+  public void updateInputs(ArmIOInputs inputs) {
     BaseStatusSignal.refreshAll(
             m_armPositionSignal,
             m_wristPositionSignal,
@@ -238,11 +237,6 @@ public class ArmIOKraken implements ArmIO {
     inputs.armCurrentDraw = m_armCurrentDrawSignal.getValueAsDouble();
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
 
-    Logger.recordOutput("Arm Absolute Position", Units.rotationsToDegrees(
-        m_armEncoder.getAbsolutePosition().getValueAsDouble()));
-    Logger.recordOutput("Wrist Absolute Position", Units.rotationsToDegrees(
-        m_wristEncoder.getAbsolutePosition().getValueAsDouble()));
-
     // update any pid properties
     m_wristProperty.updateIfChanged();
     m_armProperty.updateIfChanged();
@@ -275,11 +269,9 @@ public class ArmIOKraken implements ArmIO {
     if (track && !m_tracking) {
       m_tracking = true;
       m_dynMMRequest.Acceleration = Double.MAX_VALUE;
-      Logger.recordOutput("Arm/Wrist Accel", m_dynMMRequest.Acceleration);
     } else if (!track && !m_tracking) {
       m_tracking = false;
       m_accelTimeSecs.updateIfChanged(true);
-      Logger.recordOutput("Arm/Wrist Accel", m_dynMMRequest.Acceleration);
     }
 
     m_wristMaster.setControl(m_dynMMRequest.withPosition(degrees / 360));
