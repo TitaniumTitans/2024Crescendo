@@ -169,13 +169,18 @@ public class RobotContainer {
     Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
     Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
 
-    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.25)
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.90, 0.5, 0.25)
         .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE)));
 
     spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
         .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
     shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
         .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+
+    controller.x().whileTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
+    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+        () -> m_shooter.setKickerPower(0.0),
+        m_shooter));
 
 //    controller.leftTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
 //        .whileTrue(DriveCommands.alignmentDrive(
@@ -188,7 +193,8 @@ public class RobotContainer {
 //    controller.rightTrigger().whileTrue(m_shooter.intakeCommand(0.75, 0.25, 0.1));
 //    controller.rightBumper().whileTrue(m_shooter.intakeCommand(0.0, -0.25, 0.1));
 
-    controller.leftBumper().whileTrue(m_shooter.runShooterVelocity(true));
+    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(0.55));
+    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(-0.55));
 
     double centerDistance = 1.34 - Units.inchesToMeters(3.0);
 

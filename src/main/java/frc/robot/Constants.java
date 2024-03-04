@@ -223,6 +223,8 @@ public final class Constants {
   }
 
   public static class ArmSetpoints {
+    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
+
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
     }

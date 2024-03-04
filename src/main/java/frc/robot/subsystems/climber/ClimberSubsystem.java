@@ -25,7 +25,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
 
   public Command setClimberPowerFactory(double power) {
-    return run(() -> setClimberPower(power));
+    return runEnd(() -> setClimberPower(power), () -> setClimberPower(0.0));
   }
 }
 
