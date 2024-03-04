@@ -18,6 +18,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -26,6 +28,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
@@ -162,18 +165,38 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    controller.a().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE));
-    controller.b().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW));
+    Trigger intakeTrigger = controller.rightTrigger().and(controller.leftTrigger().negate());
+    Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
+    Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
 
-    controller.x().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.90, 0.5, 0.25)
+        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE)));
 
-    controller.rightTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
-        .whileTrue(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        ));
+    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
+        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
+        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+
+    controller.x().whileTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
+    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+        () -> m_shooter.setKickerPower(0.0),
+        m_shooter));
+
+//    controller.leftTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
+//        .whileTrue(DriveCommands.alignmentDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+//        ));
+
+//    controller.rightTrigger().whileTrue(m_shooter.intakeCommand(0.75, 0.25, 0.1));
+//    controller.rightBumper().whileTrue(m_shooter.intakeCommand(0.0, -0.25, 0.1));
+
+    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(0.55));
+    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(-0.55));
+
+    double centerDistance = 1.34 - Units.inchesToMeters(3.0);
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -186,8 +209,9 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                     () ->
-                        m_driveSubsystem.setPose(
-                            new Pose2d(m_driveSubsystem.getPose().getTranslation(), new Rotation2d())),
+                        m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                            new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(240.25), 5.55),
+                            Rotation2d.fromDegrees(180.0)))),
                     m_driveSubsystem)
                 .ignoringDisable(true));
   }
@@ -197,7 +221,7 @@ public class RobotContainer {
    */
   private void configureNamedCommands() {
     NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
-    NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+//    NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
   }
 
   private void configureDashboard() {
@@ -205,6 +229,82 @@ public class RobotContainer {
 
     commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
     commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
+
+    commandTab.add("Center Robot Pose", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(
+                    new Pose2d(
+                        FieldConstants.FIELD_LENGTH / 2.0,
+                        FieldConstants.FIELD_WIDTH / 2.0,
+                        new Rotation2d())),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("CenterToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(1.34, 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    double centerDistance = 1.34 - Units.inchesToMeters(3.0);
+
+    commandTab.add("2InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(2.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("6InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(6.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("12InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(12.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("24InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(24.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("48InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(48.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("96InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(96.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
+
+    commandTab.add("192InchesToSpeaker", Commands.runOnce(
+            () ->
+                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(192.0), 5.55),
+                        Rotation2d.fromDegrees(180.0)))),
+            m_driveSubsystem)
+        .ignoringDisable(true));
   }
 
   /**

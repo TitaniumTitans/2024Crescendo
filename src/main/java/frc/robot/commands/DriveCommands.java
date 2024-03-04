@@ -39,9 +39,9 @@ public class DriveCommands {
       DoubleSupplier omegaSupplier) {
     return Commands.run(
         () -> {
-            double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
-            double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
-            double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.15);
+          double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
+          double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
+          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.15);
 
           // Apply deadband
           double linearMagnitude =

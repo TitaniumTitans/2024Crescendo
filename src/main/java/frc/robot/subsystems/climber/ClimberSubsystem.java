@@ -16,7 +16,7 @@ public class ClimberSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
-    Logger.processInputs("Climber", m_inputs);
+//    Logger.processInputs("Climber", m_inputs);
   }
 
   public void setClimberPower(double power) {
@@ -25,7 +25,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
 
   public Command setClimberPowerFactory(double power) {
-    return run(() -> setClimberPower(power));
+    return runEnd(() -> setClimberPower(power), () -> setClimberPower(0.0));
   }
 }
 
