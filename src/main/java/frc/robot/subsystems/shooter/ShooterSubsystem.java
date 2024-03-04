@@ -1,23 +1,10 @@
 package frc.robot.subsystems.shooter;
 
-import com.ctre.phoenix6.SignalLogger;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-
-import java.util.function.BooleanSupplier;
-
-import static edu.wpi.first.units.BaseUnits.Voltage;
-import static edu.wpi.first.units.MutableMeasure.mutable;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -60,7 +47,6 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    SlewRateLimiter kickerRamp = new SlewRateLimiter(0.5);
     return runEnd(() -> {
           m_io.setLeftVelocityRpm(m_leftSetpoint.get());
           m_io.setRightVelocityRpm(m_rightSetpoint.get());
