@@ -1,8 +1,10 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,8 +31,8 @@ public class ShooterSubsystem extends SubsystemBase {
     m_io = io;
     m_inputs = new ShooterIOInputsAutoLogged();
 
-    m_leftSetpoint = new LoggedDashboardNumber("Shooter/Left Flywheel Setpoint RPM");
-    m_rightSetpoint = new LoggedDashboardNumber("Shooter/Right Flywheel Setpoint RPM");
+    m_leftSetpoint = new LoggedDashboardNumber("Shooter/Left Flywheel Setpoint RPM", 5000);
+    m_rightSetpoint = new LoggedDashboardNumber("Shooter/Right Flywheel Setpoint RPM", 5000);
   }
 
   @Override
@@ -57,11 +59,29 @@ public class ShooterSubsystem extends SubsystemBase {
     m_io.setIntakeVoltage(power * 12.0);
   }
 
-  public void runShooterVelocity() {
-    m_io.setLeftVelocityRpm(m_leftSetpoint.get());
-    m_io.setRightVelocityRpm(m_rightSetpoint.get());
-    m_io.setKickerVoltage(9.0);
-    m_io.setIntakeVoltage(7.5);
+  public Command runShooterVelocity(boolean runKicker) {
+    SlewRateLimiter kickerRamp = new SlewRateLimiter(0.5);
+    return runEnd(() -> {
+          m_io.setLeftVelocityRpm(m_leftSetpoint.get());
+          m_io.setRightVelocityRpm(m_rightSetpoint.get());
+
+          if ( /*(Math.abs(m_leftSetpoint.get() - m_inputs.tlVelocityRPM) < 15
+          || Math.abs(m_rightSetpoint.get() - m_inputs.trVelocityRPM) < 15)
+          && */ runKicker) {
+            m_io.setKickerVoltage(3.0);
+            m_io.setIntakeVoltage(0.05);
+          } else {
+            m_io.setKickerVoltage(0.0);
+            m_io.setIntakeVoltage(0.0);
+          }
+        },
+        () -> {
+          m_io.setMotorVoltageTL(0.0);
+          m_io.setMotorVoltageTR(0.0);
+          m_io.setKickerVoltage(0.0);
+          m_io.setIntakeVoltage(0.0);
+        });
+
   }
 
   public boolean hasPiece() {
@@ -71,23 +91,25 @@ public class ShooterSubsystem extends SubsystemBase {
   /** Command Factories */
 
   public Command intakeCommand(double intakePower, double kickerPower, double timeout) {
-    return (run(() -> {
-      setIntakePower(intakePower);
-      setKickerPower(kickerPower);
-    }).until(this::hasPiece)
-        .andThen(() -> {
-          setIntakePower(intakePower * 0.5);
-          setKickerPower(kickerPower);
-        })
-          .withTimeout(timeout)
-        .andThen(() -> setKickerPower(kickerPower * -0.25))
-          .withTimeout(timeout * 0.5)
-        .finallyDo(() -> {
-          setIntakePower(0.0);
-          setKickerPower(0.0);
-        })
-        )
-        .handleInterrupt(() -> {
+    Timer timer = new Timer();
+    return runEnd(() -> {
+          if (!hasPiece()) {
+            setShooterPowerLeft(-0.1);
+            setShooterPowerRight(-0.1);
+            setIntakePower(intakePower);
+            setKickerPower(kickerPower);
+            timer.restart();
+          } else if (!timer.hasElapsed(timeout)) {
+            setShooterPowerLeft(0.0);
+            setShooterPowerRight(0.0);
+            setKickerPower(-0.25);
+            setIntakePower(0.0);
+          } else {
+            setKickerPower(0.0);
+            setIntakePower(0.0);
+          }
+        },
+        () -> {
           setIntakePower(0.0);
           setKickerPower(0.0);
         });

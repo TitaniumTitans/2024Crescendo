@@ -75,6 +75,8 @@ public class ShooterIOKraken implements ShooterIO {
     // everything else is
     shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     m_rightTalon.getConfigurator().apply(shooterConfig);
+
+    shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     m_indexer.getConfigurator().apply(shooterConfig);
     m_kicker.getConfigurator().apply(shooterConfig);
     m_intake.getConfigurator().apply(shooterConfig);

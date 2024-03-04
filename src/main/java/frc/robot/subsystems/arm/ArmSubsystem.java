@@ -35,8 +35,8 @@ public class ArmSubsystem extends SubsystemBase {
 
   private ArmState m_desiredState = ArmState.DISABLED;
 
-  private final ArmVisualizer m_setpointVisualizer;
-  private final ArmVisualizer m_poseVisualizer;
+//  private final ArmVisualizer m_setpointVisualizer;
+//  private final ArmVisualizer m_poseVisualizer;
 
   private final Supplier<Pose2d> m_poseSupplier;
 
@@ -55,8 +55,8 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_poseSupplier = supplier;
 
-    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
-    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
+//    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
+//    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
 
   @Override
@@ -65,7 +65,7 @@ public class ArmSubsystem extends SubsystemBase {
     Logger.processInputs("Arm", m_inputs);
 
     handleState();
-    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
+//    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
 
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY ?
@@ -84,30 +84,33 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     // check to make sure we're not in manual control
-    m_io.enableBrakeMode(m_desiredState != ArmState.DISABLED);
+    m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED);
 
     if (m_desiredState != ArmState.DISABLED) {
-      // set the arms angle
-      m_io.setArmAngle(m_desiredArmPoseDegs);
-      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
+
 
       // check to see if the wrist is currently too close to the rest of the arm
       double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
       if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
-        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
-        m_io.setWristAngle(m_inputs.wristPositionDegs + underGap, true);
-        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs + underGap);
+//        double underGap = Math.abs(ArmConstants.WRIST_ARM_GAP.getValue() - wristGap);
+//        m_desiredArmPoseDegs += underGap;
+        m_io.setWristAngle(m_inputs.wristPositionDegs, true);
+        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
       } else {
         m_io.setWristAngle(m_desiredWristPoseDegs, false);
         Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
       }
+
+      // set the arms angle
+      m_io.setArmAngle(m_desiredArmPoseDegs);
+      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
     }
 
-    Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
+//    Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
 
     // Update arm visualizers
-    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
-    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
+//    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
+//    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
   }
 
   public void handleState() {
@@ -117,11 +120,13 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
       }
       case AUTO_AIM -> {
-        ArmPose aimSetpoint = AimbotUtils.aimbotCalculate(
-                new Pose3d(m_poseSupplier.get()), m_inputs.armPositionDegs);
+//        ArmPose aimSetpoint = AimbotUtils.aimbotCalculate(
+//                new Pose3d(m_poseSupplier.get()), m_inputs.armPositionDegs);
 
-        m_desiredArmPoseDegs = aimSetpoint.armAngle();
-        m_desiredWristPoseDegs = aimSetpoint.wristAngle();
+        m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
+        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= ArmConstants.ARM_LOWER_LIMIT.getValue() ? m_desiredArmPoseDegs
+            : ArmConstants.ARM_LOWER_LIMIT.getValue();
+        m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
       }
       case INTAKE -> {
         m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armAngle();

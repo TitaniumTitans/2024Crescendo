@@ -44,7 +44,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -233,6 +233,8 @@ public final class Constants {
         new ArmPose("ArmPoses/Intake", false, 0.0, 35.0);
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", false, 90.0, 135.0);
+
+    public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
   }
 
   public static class ShooterConstants {
