@@ -121,8 +121,7 @@ public class ArmSubsystem extends SubsystemBase {
             && m_inputs.armPositionDegs < ArmSetpoints.AMP_INTERMEDIATE.armAngle() + 5
             && m_inputs.wristPositionDegs < ArmSetpoints.AMP_INTERMEDIATE.wristAngle() + 5) {
           m_currentState = ArmState.STOW;
-        } else if (m_currentState == ArmState.AMP) {\[]
-          
+        } else if (m_currentState == ArmState.AMP) {
           m_desiredArmPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.armAngle();
           m_desiredWristPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.wristAngle();
         } else {
