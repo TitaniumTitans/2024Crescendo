@@ -1,5 +1,6 @@
 package lib.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArmTrajectoryGenerator {
@@ -9,41 +10,25 @@ public class ArmTrajectoryGenerator {
   }
 
   public static ArmTrajectory generateTrajectory(List<ArmTrajectoryPose> setpoints, ArmTrajectoryConfig config) {
-    List<ArmTrajectory.ArmTrajectoryState> m_states;
+    List<ArmTrajectory.ArmTrajectoryState> m_states = new ArrayList<>();
     // forwards pass for ramp up
-    for (int i = 0; i < setpoints.size() - 1; i++) {
-      ArmTrajectoryPose start = setpoints.get(i);
-      ArmTrajectoryPose end = setpoints.get(i + 1);
+    for (int i = 0; i < setpoints.size(); i++) {
+      if (i == 0) {
+        ArmTrajectoryPose initialSetpoint = setpoints.get(0);
+        m_states.add(new ArmTrajectory.ArmTrajectoryState(
+            0.0,
+            initialSetpoint.armPoseDegs,
+            initialSetpoint.armVelocityDegsPerSecond,
+            config.armMaxAccelerationDegsPerSecondSq,
+            initialSetpoint.wristPoseDegs,
+            initialSetpoint.wristVelocityDegsPerSecond,
+            config.wristMaxAccelerationDegsPerSecondSq));
 
-      // calculate changed distance for arm and wrist
-      double armDs = end.armPoseDegs - start.armPoseDegs;
-      double wristDs = end.wristPoseDegs - start.wristPoseDegs;
+        continue;
+      }
 
-      double armDv = end.armVelocityDegsPerSecond - start.armVelocityDegsPerSecond;
-      double wristDv = end.wristVelocityDegsPerSecond - start.wristVelocityDegsPerSecond;
-
-      // calculate via between poses
-      ArmTrajectoryPose via = new ArmTrajectoryPose(
-              armDs / 2.0,
-              armDv / 2.0,
-              wristDs / 2.0,
-              wristDv / 2.0
-      );
-
-      // calculate velocities between start and via
-      double viaArmVelocity = Math.min(
-              config.armMaxVelocityDegsPerSecond,
-              Math.sqrt(
-                      start.armVelocityDegsPerSecond * start.armVelocityDegsPerSecond
-                              + config.armMaxAccelerationDegsPerSecondSq * armDs)
-      );
-
-      double viaWristVelocity = Math.min(
-              config.wristMaxVelocityDegsPerSecond,
-              Math.sqrt(
-                      start.wristVelocityDegsPerSecond * start.wristVelocityDegsPerSecond
-                              + config.wristMaxAccelerationDegsPerSecondSq * wristDs)
-      );
+      ArmTrajectoryPose current = setpoints.get(i);
+      ArmTrajectoryPose predecessor = setpoints.get(i - 1);
 
       
     }
