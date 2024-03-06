@@ -219,7 +219,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   /** Logging util */
   public void setupLogging() {
-    DataLogUtil logUtil = new DataLogUtil("Arm");
+    DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
 
     logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
     logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
