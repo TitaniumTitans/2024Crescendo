@@ -13,24 +13,17 @@ public class ArmTrajectoryGenerator {
     List<ArmTrajectory.ArmTrajectoryState> m_states = new ArrayList<>();
     // forwards pass for ramp up
     for (int i = 0; i < setpoints.size(); i++) {
-      if (i == 0) {
-        ArmTrajectoryPose initialSetpoint = setpoints.get(0);
-        m_states.add(new ArmTrajectory.ArmTrajectoryState(
-            0.0,
-            initialSetpoint.armPoseDegs,
-            initialSetpoint.armVelocityDegsPerSecond,
-            config.armMaxAccelerationDegsPerSecondSq,
-            initialSetpoint.wristPoseDegs,
-            initialSetpoint.wristVelocityDegsPerSecond,
-            config.wristMaxAccelerationDegsPerSecondSq));
-
-        continue;
-      }
-
       ArmTrajectoryPose current = setpoints.get(i);
-      ArmTrajectoryPose predecessor = setpoints.get(i - 1);
+      ArmTrajectoryPose next = setpoints.get(i);
 
-      
+      // look ahead a consistent time step (20 ms) and calculate the state
+      ArmTrajectory.ArmTrajectoryState prevState = null;
+      while (true) {
+        if (prevState == null) {
+          // inital state
+          
+        }
+      }
     }
   }
 
