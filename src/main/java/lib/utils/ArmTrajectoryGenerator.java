@@ -12,19 +12,70 @@ public class ArmTrajectoryGenerator {
   public static ArmTrajectory generateTrajectory(List<ArmTrajectoryPose> setpoints, ArmTrajectoryConfig config) {
     List<ArmTrajectory.ArmTrajectoryState> m_states = new ArrayList<>();
     // forwards pass for ramp up
-    for (int i = 0; i < setpoints.size(); i++) {
+    double timestamp = 0.0;
+    for (int i = 0; i < setpoints.size() - 1; i++) {
       ArmTrajectoryPose current = setpoints.get(i);
-      ArmTrajectoryPose next = setpoints.get(i);
+      ArmTrajectoryPose next = setpoints.get(i + 1);
 
       // look ahead a consistent time step (20 ms) and calculate the state
       ArmTrajectory.ArmTrajectoryState prevState = null;
       while (true) {
         if (prevState == null) {
           // inital state
-          
+          prevState = new ArmTrajectory.ArmTrajectoryState(
+              timestamp,
+              current.armPoseDegs,
+              current.armVelocityDegsPerSecond,
+              config.armMaxAccelerationDegsPerSecondSq,
+              current.wristPoseDegs,
+              current.wristVelocityDegsPerSecond,
+              config.wristMaxAccelerationDegsPerSecondSq);
+
+          m_states.add(prevState);
         }
+
+        // check to see if we're past the setpoint trying to move to, if we are then continue to the next set of
+        // setpoints
+        if (((prevState.armPoseDegs > next.armPoseDegs && prevState.armVelocityDegsPerSecond > 0.0)
+            || (prevState.armPoseDegs < next.armPoseDegs && prevState.armVelocityDegsPerSecond < 0.0))
+            && ((prevState.wristPoseDegs > next.wristPoseDegs && prevState.wristVelocityDegsPerSecond > 0.0)
+            || (prevState.wristPoseDegs < next.wristPoseDegs && prevState.wristVelocityDegsPerSecond < 0.0))) {
+          break;
+        }
+
+        timestamp += 0.02;
+
+        // calculate new joint positions
+        // dx = x + vt + 1/2at^2
+        double newArmPose = prevState.armPoseDegs +
+            (1.0 / 2.0) * config.armMaxAccelerationDegsPerSecondSq * Math.pow(0.02, 2);
+        double newWristPose = prevState.wristPoseDegs +
+            (1.0 / 2.0) * config.wristMaxAccelerationDegsPerSecondSq * Math.pow(0.02, 2);
+
+        // calculate new joint velocities
+        // vf = sqrt(vi^2 + 2at)
+        double newArmVel = Math.min(Math.sqrt(Math.pow(prevState.armVelocityDegsPerSecond, 2)
+            + 2 * config.armMaxAccelerationDegsPerSecondSq + 0.02),
+            config.armMaxVelocityDegsPerSecond);
+        double newWristVel = Math.min(Math.sqrt(Math.pow(prevState.wristVelocityDegsPerSecond, 2)
+            + 2 * config.wristMaxAccelerationDegsPerSecondSq + 0.02),
+            config.wristMaxVelocityDegsPerSecond);
+
+        // create new point at time step
+        prevState = new ArmTrajectory.ArmTrajectoryState(
+            timestamp,
+            newArmPose,
+            newArmVel,
+            config.armMaxAccelerationDegsPerSecondSq,
+            newWristPose,
+            newWristVel,
+            config.wristMaxAccelerationDegsPerSecondSq);
+
+        m_states.add(prevState);
       }
     }
+
+    return new ArmTrajectory(m_states);
   }
 
   public record ArmTrajectoryPose(double armPoseDegs, double armVelocityDegsPerSecond,
@@ -33,8 +84,13 @@ public class ArmTrajectoryGenerator {
   public record ArmTrajectoryConfig(double armMaxVelocityDegsPerSecond, double armMaxAccelerationDegsPerSecondSq,
                                     double wristMaxVelocityDegsPerSecond, double wristMaxAccelerationDegsPerSecondSq) {}
 
-  public class ArmTrajectory {
-    List<ArmTrajectoryState> states;
+  public static class ArmTrajectory {
+    private final List<ArmTrajectoryState> states;
+
+    public ArmTrajectory(List<ArmTrajectoryState> states) {
+      this.states = states;
+    }
+
     public record ArmTrajectoryState(double timeSeconds,
                                      double armPoseDegs,
                                      double armVelocityDegsPerSecond,
