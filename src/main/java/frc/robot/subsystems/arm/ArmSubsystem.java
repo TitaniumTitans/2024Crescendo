@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
+import lib.logger.DataLogUtil;
 
 import java.util.function.Supplier;
 
@@ -52,6 +53,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_poseSupplier = supplier;
 
+    setupLogging();
 //    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
 //    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
@@ -215,6 +217,16 @@ public class ArmSubsystem extends SubsystemBase {
         () -> m_io.setWristVoltage(0.0));
   }
 
+  /** Logging util */
+  public void setupLogging() {
+    DataLogUtil logUtil = new DataLogUtil("Arm");
+
+    logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
+    logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
+
+    logUtil.addDouble("ArmSetpointDegs", () -> m_desiredArmPoseDegs, true);
+    logUtil.addDouble("WristSetpointDegs", () -> m_desiredWristPoseDegs, true);
+  }
 
 }
 

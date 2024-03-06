@@ -1,7 +1,6 @@
 package lib.logger;
 
 public class ComplexLoggers {
-  public static class StructLogger {
-    
-  }
+  // quick and lazy loggers for complex datatypes
+
 }

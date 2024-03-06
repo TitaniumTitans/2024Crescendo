@@ -1,5 +1,6 @@
 package lib.logger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -42,6 +43,27 @@ public class DataLogUtil {
 
   public void addBoolean(String logName, BooleanSupplier updateChecker, boolean updateNT) {
     m_booleanLogs.add(new BooleanLogger(m_loggingTable.getEntry(logName), updateChecker, updateNT));
+  }
+
+  public void addPose2d(String logName, Supplier<Pose2d> updateChecker, boolean updateNT) {
+    addDoubleArray(logName + "/Translation",
+        () -> new double[] {
+            updateChecker.get().getX(),
+            updateChecker.get().getY()
+        },
+        updateNT);
+    addDouble(logName + "/Rotation",
+        () -> updateChecker.get().getRotation().getDegrees(),
+        updateNT);
+  }
+
+  public void addPose2dArray(String logName, Supplier<Pose2d[]> updateChecker, boolean updateNT) {
+    for (int i = 0; i < updateChecker.get().length; i++) {
+      int finalI = i;
+      addPose2d(logName + "/" + i,
+          () -> updateChecker.get()[finalI],
+          updateNT);
+    }
   }
 
   public void updateLogs() {
