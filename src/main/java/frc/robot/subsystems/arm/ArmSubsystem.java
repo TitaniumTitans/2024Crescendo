@@ -33,6 +33,9 @@ public class ArmSubsystem extends SubsystemBase {
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
 
+
+  private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
+
 //  private final ArmVisualizer m_setpointVisualizer;
 //  private final ArmVisualizer m_poseVisualizer;
 
@@ -219,14 +222,11 @@ public class ArmSubsystem extends SubsystemBase {
 
   /** Logging util */
   public void setupLogging() {
-    DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
-
     logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
     logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
 
     logUtil.addDouble("ArmSetpointDegs", () -> m_desiredArmPoseDegs, true);
     logUtil.addDouble("WristSetpointDegs", () -> m_desiredWristPoseDegs, true);
   }
-
 }
 
