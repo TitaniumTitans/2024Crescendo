@@ -46,6 +46,7 @@ import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOKraken;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
+import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.AllianceFlipUtil;
 import lib.utils.FieldConstants;
 import org.littletonrobotics.junction.Logger;
@@ -84,7 +85,10 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
+            new VisionSubsystem[]{
+                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
+            });
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});

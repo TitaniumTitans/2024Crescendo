@@ -93,20 +93,23 @@ public class ArmSubsystem extends SubsystemBase {
       Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
 
       double underGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
-          - (m_inputs.armPositionDegs = m_inputs.wristPositionDegs), 0, 180);
+          - (m_inputs.armPositionDegs + m_inputs.wristPositionDegs), 0, 180);
 
       // set the arms angle
       m_io.setArmAngle(m_desiredArmPoseDegs + underGap, m_armVelocityMult);
-      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
+      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs + underGap);
     }
   }
 
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_inputs.armPositionDegs > 60) {
+        if (m_inputs.armPositionDegs > 60 && m_currentState == ArmState.AMP) {
           m_wristVelocityMult = 0.0;
+          m_armVelocityMult = 1.0;
         } else {
+          m_currentState = ArmState.STOW;
+          m_armVelocityMult = 1.0;
           m_wristVelocityMult = 1.0;
         }
 
@@ -114,12 +117,18 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
       }
       case AUTO_AIM -> {
+        m_armVelocityMult = 1.0;
+        m_wristVelocityMult = 1.0;
+
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
         m_desiredArmPoseDegs = m_desiredArmPoseDegs >= ArmConstants.ARM_LOWER_LIMIT.getValue() ? m_desiredArmPoseDegs
             : ArmConstants.ARM_LOWER_LIMIT.getValue();
         m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
       }
       case INTAKE -> {
+        m_armVelocityMult = 1.0;
+        m_wristVelocityMult = 1.0;
+
         m_currentState = ArmState.INTAKE;
         m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristAngle();
@@ -127,14 +136,21 @@ public class ArmSubsystem extends SubsystemBase {
       case AMP -> {
         if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5) {
           m_armVelocityMult = 0.5;
+          m_wristVelocityMult = 1.0;
         } else {
           m_armVelocityMult = 1.0;
+          m_wristVelocityMult = 1.0;
         }
+
+        m_currentState = ArmState.AMP;
 
         m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
       default -> {
+        m_armVelocityMult = 1.0;
+        m_wristVelocityMult = 1.0;
+
         m_desiredArmPoseDegs = m_inputs.armPositionDegs;
         m_desiredWristPoseDegs = m_inputs.wristPositionDegs;
       }

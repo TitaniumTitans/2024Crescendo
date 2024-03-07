@@ -31,6 +31,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -47,6 +49,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import lib.utils.PoseEstimator;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 
 public class DriveSubsystem extends SubsystemBase {
 
@@ -59,6 +62,9 @@ public class DriveSubsystem extends SubsystemBase {
   private final PoseEstimator m_poseEstimator;
 
   private final SwerveDrivePoseEstimator m_wpiPoseEstimator;
+
+  private final Field2d m_field = new Field2d();
+
   private Pose2d pose = new Pose2d();
   private Rotation2d lastGyroRotation = new Rotation2d();
 
@@ -135,6 +141,8 @@ public class DriveSubsystem extends SubsystemBase {
             "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
     PathPlannerLogging.setLogTargetPoseCallback(
         (Pose2d targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
+
+    SmartDashboard.putData("Field",m_field);
   }
 
   @Override
@@ -196,16 +204,20 @@ public class DriveSubsystem extends SubsystemBase {
 //    }
 
 //    List<PoseEstimator.TimestampedVisionUpdate> visionUpdates = new java.util.ArrayList<>(List.of());
-//    for (VisionSubsystem camera : m_cameras) {
-//      camera.updateInputs();
-//      Optional<PoseEstimator.TimestampedVisionUpdate> update = camera.getPose(m_poseEstimator.getLatestPose());
-//      update.ifPresent(visionUpdates::add);
-//    }
+    for (VisionSubsystem camera : m_cameras) {
+      camera.updateInputs();
+      camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
+          (PoseEstimator.TimestampedVisionUpdate pose) ->
+              m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
+      );
+    }
 
 //    m_poseEstimator.addVisionData(visionUpdates);
 
     m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
+
+    m_field.setRobotPose(getVisionPose());
   }
 
   /**

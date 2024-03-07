@@ -93,12 +93,12 @@ public final class Constants {
 //        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(18))
 //        );
 
-    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(9.0), Units.inchesToMeters(6.0)),
-        new Rotation3d(Units.degreesToRadians(5.0), Units.degreesToRadians(-28.125), Units.degreesToRadians(35.0 + 180))
+    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(Units.inchesToMeters(12.0), Units.inchesToMeters(6.0), Units.inchesToMeters(7.8)),
+        new Rotation3d(Units.degreesToRadians(0.0), Units.degreesToRadians(20.0), -Units.degreesToRadians(7.5))
     );
 
-    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(-9.0), Units.inchesToMeters(6.0)),
         new Rotation3d(Units.degreesToRadians(2.0), Units.degreesToRadians(-26.0), Units.degreesToRadians(-35.0 - 180))
     );
@@ -173,8 +173,8 @@ public final class Constants {
     /* Because the absolute encoders are on a 2/1 ratio, we have to move our offset down a little into a rotation lower
     * than the lowest point the arm and wrist will move to , and then compensate for that in our encoder reset code */
     public static final double OFFSET_NUDGE = 45;
-    public static final double ARM_OFFSET = -0.604004 + Units.degreesToRotations(OFFSET_NUDGE);
-    public static final double WRIST_OFFSET = -0.108643 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double ARM_OFFSET = -0.123779 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double WRIST_OFFSET = -0.163330 + Units.degreesToRotations(OFFSET_NUDGE);
     public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
     public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
 
