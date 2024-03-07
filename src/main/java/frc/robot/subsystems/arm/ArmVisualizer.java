@@ -1,5 +1,6 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.Constants.ArmConstants;
+import lib.logger.DataLogUtil;
 import lib.utils.AimbotUtils;
 
 public class ArmVisualizer {
@@ -44,5 +46,7 @@ public class ArmVisualizer {
 
     Pose3d pivotWrist = new Pose3d(AimbotUtils.getShooterTransformation(armAngleDegs).getTranslation(),
         new Rotation3d(0.0, Units.degreesToRadians(-wristAngleDegs), 0.0));
+
+    DataLogUtil.getTable("Arm/").addPose3dArray(key, () -> new Pose3d[]{pivotArm, pivotWrist}, true);
   }
 }

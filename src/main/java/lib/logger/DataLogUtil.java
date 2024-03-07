@@ -1,11 +1,9 @@
 package lib.logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.BooleanLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +14,7 @@ import java.util.function.Supplier;
 import lib.logger.DoubleLoggers.DoubleLogger;
 import lib.logger.DoubleLoggers.DoubleArrayLogger;
 import lib.logger.BooleanLoggers.BooleanLogger;
+import lib.logger.ComplexLoggers.StringLogger;
 
 public class DataLogUtil {
   private static final List<DataLogTable> logTables =  new ArrayList<>();
@@ -45,6 +44,7 @@ public class DataLogUtil {
     private final List<DoubleLogger> m_doubleLogs = new ArrayList<>();
     private final List<DoubleArrayLogger> m_doubleArrayLogs = new ArrayList<>();
     private final List<BooleanLogger> m_booleanLogs = new ArrayList<>();
+    private final List<StringLogger> m_stringLogs = new ArrayList<>();
 
     public DataLogTable(String loggingTableName) {
       this(NetworkTableInstance.getDefault().getTable(loggingTableName));
@@ -67,14 +67,18 @@ public class DataLogUtil {
       m_booleanLogs.add(new BooleanLogger(m_loggingTable.getEntry(logName), updateChecker, updateNT));
     }
 
+    public void addString(String logName, Supplier<String> updateChecker, boolean updateNT) {
+      m_stringLogs.add(new StringLogger(m_loggingTable.getEntry(logName), updateChecker, updateNT));
+    }
+
     public void addPose2d(String logName, Supplier<Pose2d> updateChecker, boolean updateNT) {
-      addDoubleArray(logName + "/Translation",
+      addDoubleArray(logName + "/translation",
           () -> new double[]{
               updateChecker.get().getX(),
               updateChecker.get().getY()
           },
           updateNT);
-      addDouble(logName + "/Rotation",
+      addDouble(logName + "/rotation",
           () -> updateChecker.get().getRotation().getDegrees(),
           updateNT);
     }
@@ -88,6 +92,33 @@ public class DataLogUtil {
       }
     }
 
+    public void addPose3d(String logName, Supplier<Pose3d> updateChecker, boolean updateNT) {
+      addDoubleArray(logName + "/translation",
+              () -> new double[] {
+                      updateChecker.get().getX(),
+                      updateChecker.get().getY(),
+                      updateChecker.get().getZ()
+              },
+              updateNT);
+      addDoubleArray(logName + "/rotation",
+              () -> new double[] {
+                      updateChecker.get().getRotation().getQuaternion().getW(),
+                      updateChecker.get().getRotation().getQuaternion().getX(),
+                      updateChecker.get().getRotation().getQuaternion().getY(),
+                      updateChecker.get().getRotation().getQuaternion().getZ()
+              },
+              updateNT);
+    }
+
+    public void addPose3dArray(String logName, Supplier<Pose3d[]> updateChecker, boolean updateNT) {
+      for (int i = 0; i < updateChecker.get().length; i++) {
+        int finalI = i;
+        addPose3d(logName + "/" + i,
+                () -> updateChecker.get()[finalI],
+                updateNT);
+      }
+    }
+
     public void updateLogs() {
       for (BooleanLogger booleanLogger : m_booleanLogs) {
         booleanLogger.updateBooleanEntry();
@@ -97,6 +128,9 @@ public class DataLogUtil {
       }
       for (DoubleArrayLogger doubleArrayLogger : m_doubleArrayLogs) {
         doubleArrayLogger.updateDoubleArrayEntry();
+      }
+      for (StringLogger stringLogger : m_stringLogs) {
+        stringLogger.updateStingEntry();
       }
     }
   }
