@@ -59,9 +59,9 @@ import lib.utils.FieldConstants;
 public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
-  private final ShooterSubsystem m_shooter;
-  public final ArmSubsystem m_armSubsystem;
-  private final ClimberSubsystem m_climber;
+//  private final ShooterSubsystem m_shooter;
+//  public final ArmSubsystem m_armSubsystem;
+//  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -85,9 +85,9 @@ public class RobotContainer {
             new VisionSubsystem[]{
                 new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
             });
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
-        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
+//        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+//        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
+//        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -96,9 +96,9 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {},
             new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_shooter = new ShooterSubsystem(new ShooterIO() {});
+//        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -108,9 +108,9 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {},
             new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+//        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
       case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
@@ -121,9 +121,9 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-        m_shooter = new ShooterSubsystem(new ShooterIOSim());
-        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getPose);
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_shooter = new ShooterSubsystem(new ShooterIOSim());
+//        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getPose);
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -134,9 +134,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
+//        m_shooter = new ShooterSubsystem(new ShooterIO() {});
+//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+//        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
@@ -169,31 +169,17 @@ public class RobotContainer {
     Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
     Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
 
-    intakeTrigger.whileTrue(new IntakeControlCommand(m_armSubsystem, m_shooter));
+//    intakeTrigger.whileTrue(new IntakeControlCommand(m_armSubsystem, m_shooter));
 
-    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
-    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
+//    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
+//    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
 
-    controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
-        () -> m_shooter.setKickerPower(0.0),
-        m_shooter));
-
-//    controller.leftTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
-//        .whileTrue(DriveCommands.alignmentDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-//        ));
-
-//    controller.rightTrigger().whileTrue(m_shooter.intakeCommand(0.75, 0.25, 0.1));
-//    controller.rightBumper().whileTrue(m_shooter.intakeCommand(0.0, -0.25, 0.1));
-
-    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(0.55));
-    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(-0.55));
+//    controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+//    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+//        () -> m_shooter.setKickerPower(0.0),
+//        m_shooter));
 
     double centerDistance = 1.34 - Units.inchesToMeters(3.0);
 
@@ -219,15 +205,15 @@ public class RobotContainer {
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
+//    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
 //    NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
   }
 
   private void configureDashboard() {
     ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
 
-    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
-    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
+//    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
+//    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
 
     commandTab.add("Center Robot Pose", Commands.runOnce(
             () ->
