@@ -8,6 +8,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -22,7 +23,7 @@ public class DataLogUtil {
 
   public static DataLogTable getTable(String name) {
     for (DataLogTable table : logTables) {
-      if (table.name == name) {
+      if (Objects.equals(table.name, name)) {
         return table;
       }
     }
@@ -73,14 +74,12 @@ public class DataLogUtil {
     }
 
     public void addPose2d(String logName, Supplier<Pose2d> updateChecker, boolean updateNT) {
-      addDoubleArray(logName + "/translation",
+      addDoubleArray(logName,
           () -> new double[]{
               updateChecker.get().getX(),
-              updateChecker.get().getY()
+              updateChecker.get().getY(),
+              updateChecker.get().getRotation().getRadians()
           },
-          updateNT);
-      addDouble(logName + "/rotation",
-          () -> updateChecker.get().getRotation().getDegrees(),
           updateNT);
     }
 
@@ -94,15 +93,11 @@ public class DataLogUtil {
     }
 
     public void addPose3d(String logName, Supplier<Pose3d> updateChecker, boolean updateNT) {
-      addDoubleArray(logName + "/translation",
+      addDoubleArray(logName,
               () -> new double[] {
                       updateChecker.get().getX(),
                       updateChecker.get().getY(),
-                      updateChecker.get().getZ()
-              },
-              updateNT);
-      addDoubleArray(logName + "/rotation",
-              () -> new double[] {
+                      updateChecker.get().getZ(),
                       updateChecker.get().getRotation().getQuaternion().getW(),
                       updateChecker.get().getRotation().getQuaternion().getX(),
                       updateChecker.get().getRotation().getQuaternion().getY(),
@@ -120,22 +115,16 @@ public class DataLogUtil {
       }
     }
 
-    public void addSwerveModuleState(String logName, Supplier<SwerveModuleState> updateChecker, boolean updateNT) {
-      addDouble(logName + "/velocity",
-              () -> updateChecker.get().speedMetersPerSecond,
-              updateNT);
-      addDouble(logName + "/postion",
-              () -> updateChecker.get().angle.getRadians(),
-              updateNT);
-    }
-
     public void addSwerveModuleStateArray(String logName, Supplier<SwerveModuleState[]> updateChecker, boolean updateNT) {
-      for (int i = 0; i < updateChecker.get().length; i++) {
-        int finalI = i;
-        addSwerveModuleState(logName + "/" + i,
-                () -> updateChecker.get()[finalI],
-                updateNT);
-      }
+      addDoubleArray(logName, () -> {
+                double[] stateArray = new double[8];
+                for (int i = 0; i < updateChecker.get().length * 2; i += 2) {
+                  stateArray[i] = updateChecker.get()[(int) (i / 2.0)].angle.getRadians();
+                  stateArray[i + 1] = updateChecker.get()[(int) (i / 2.0)].speedMetersPerSecond;
+                }
+                return stateArray;
+              },
+              updateNT);
     }
 
     public void updateLogs() {
