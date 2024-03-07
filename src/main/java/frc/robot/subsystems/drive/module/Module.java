@@ -43,9 +43,9 @@ public class Module {
 
     setBrakeMode(true);
 
-    DataLogUtil.getTable("Swerve/").addDoubleArray("Module" + m_index + "/DriveCurrentDraw",
+    DataLogUtil.getTable("Swerve").addDoubleArray("Module" + m_index + "/DriveCurrentDraw",
             () -> m_inputs.driveCurrentAmps, false);
-    DataLogUtil.getTable("Swerve/").addDoubleArray("Module" + m_index + "/TurnCurrentDraw",
+    DataLogUtil.getTable("Swerve").addDoubleArray("Module" + m_index + "/TurnCurrentDraw",
             () -> m_inputs.turnCurrentAmps, false);
 
   }

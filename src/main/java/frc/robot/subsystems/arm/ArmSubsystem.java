@@ -39,7 +39,7 @@ public class ArmSubsystem extends SubsystemBase {
   private ArmState m_currentState = ArmState.DISABLED;
 
 
-  private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm/");
+  private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
 
   private final ArmVisualizer m_setpointVisualizer;
   private final ArmVisualizer m_poseVisualizer;

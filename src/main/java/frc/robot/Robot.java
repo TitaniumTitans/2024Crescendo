@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
     String logPath = "/media/sda1/aoede";
 
     DataLogManager.start(logPath);
-    DriverStation.startDataLog(DataLogManager.getLog());`
+    DriverStation.startDataLog(DataLogManager.getLog());
 
     SignalLogger.setPath(logPath);
     SignalLogger.start();

@@ -68,7 +68,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
 
-  private final DataLogTable m_logTable = DataLogUtil.getTable("Swerve/");
+  private final DataLogTable m_logTable = DataLogUtil.getTable("Swerve");
 
   private final SwerveModuleState[] m_measureStates = new SwerveModuleState[] {
       new SwerveModuleState(),

@@ -34,7 +34,7 @@ public class ArmVisualizer {
     root.append(arm);
     arm.append(wrist);
 
-    DataLogUtil.getTable("Arm/").addPose3dArray(key, () -> new Pose3d[]{pivotArm, pivotWrist}, true);
+    DataLogUtil.getTable("Arm").addPose3dArray(key, () -> new Pose3d[]{pivotArm, pivotWrist}, true);
   }
 
   /** Update arm visualizer with current arm angle */

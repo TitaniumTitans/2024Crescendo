@@ -12,7 +12,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final ShooterIO m_io;
   private final ShooterIO.ShooterIOInputs m_inputs;
 
-  private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter/");
+  private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
