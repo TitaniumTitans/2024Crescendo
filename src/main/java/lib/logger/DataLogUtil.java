@@ -146,7 +146,7 @@ public class DataLogUtil {
         doubleLogger.updateDoubleEntry();
       }
       for (DoubleArrayLogger doubleArrayLogger : m_doubleArrayLogs) {
-//        doubleArrayLogger.updateDoubleArrayEntry();
+        doubleArrayLogger.updateDoubleArrayEntry();
       }
       for (StringLogger stringLogger : m_stringLogs) {
         stringLogger.updateStingEntry();

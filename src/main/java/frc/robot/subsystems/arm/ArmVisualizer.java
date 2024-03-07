@@ -20,6 +20,9 @@ public class ArmVisualizer {
   private final MechanismLigament2d wrist;
   private final String key;
 
+  Pose3d pivotArm = new Pose3d();
+  Pose3d pivotWrist = new Pose3d();
+
   public ArmVisualizer(String key, Color color) {
     this.key = key;
     mechanism = new Mechanism2d(3.0, 3.0, new Color8Bit(Color.kWhite));
@@ -30,6 +33,8 @@ public class ArmVisualizer {
     wrist = new MechanismLigament2d("wrist", ArmConstants.WRIST_LENGTH_METERS, 45.0, 5, new Color8Bit(color));
     root.append(arm);
     arm.append(wrist);
+
+    DataLogUtil.getTable("Arm/").addPose3dArray(key, () -> new Pose3d[]{pivotArm, pivotWrist}, true);
   }
 
   /** Update arm visualizer with current arm angle */
@@ -39,14 +44,12 @@ public class ArmVisualizer {
     wrist.setAngle(Rotation2d.fromDegrees(wristAngleDegs));
 
     // Log 3D poses
-    Pose3d pivotArm =
+    pivotArm =
             new Pose3d(ArmConstants.PIVOT_JOINT_TRANSLATION.getX(), 0.0,
                 ArmConstants.PIVOT_JOINT_TRANSLATION.getY(),
                 new Rotation3d(0.0, Units.degreesToRadians(armAngleDegs), 0.0));
 
-    Pose3d pivotWrist = new Pose3d(AimbotUtils.getShooterTransformation(armAngleDegs).getTranslation(),
+    pivotWrist = new Pose3d(AimbotUtils.getShooterTransformation(armAngleDegs).getTranslation(),
         new Rotation3d(0.0, Units.degreesToRadians(-wristAngleDegs), 0.0));
-
-    DataLogUtil.getTable("Arm/").addPose3dArray(key, () -> new Pose3d[]{pivotArm, pivotWrist}, true);
   }
 }
