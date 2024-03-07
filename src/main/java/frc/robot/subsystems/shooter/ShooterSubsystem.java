@@ -17,6 +17,9 @@ public class ShooterSubsystem extends SubsystemBase {
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
     m_inputs = new ShooterIO.ShooterIOInputs();
+
+    // turn on logging
+    setupLogging();
   }
 
   @Override

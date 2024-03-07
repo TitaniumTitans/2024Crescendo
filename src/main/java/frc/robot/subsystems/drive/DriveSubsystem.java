@@ -64,9 +64,24 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Swerve/");
 
-  private final SwerveModuleState[] m_measureStates = new SwerveModuleState[4];
-  private SwerveModuleState[] m_setpointStates = new SwerveModuleState[4];
-  private final SwerveModuleState[] m_optimizedStates = new SwerveModuleState[4];
+  private final SwerveModuleState[] m_measureStates = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
+  private SwerveModuleState[] m_setpointStates = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
+  private final SwerveModuleState[] m_optimizedStates = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
 
 
   public DriveSubsystem(
@@ -132,6 +147,9 @@ public class DriveSubsystem extends SubsystemBase {
                 && DriverStation.getAlliance().get() == Alliance.Red,
         this);
     Pathfinding.setPathfinder(new LocalADStar());
+
+    // turn on logging
+    setupLogging();
   }
 
   @Override
