@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
-import org.littletonrobotics.junction.Logger;
+import lib.logger.DataLogUtil;
 
 import java.util.function.Supplier;
 
@@ -26,18 +26,22 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   private final ArmIO m_io;
-  private final ArmIOInputsAutoLogged m_inputs;
+  private final ArmIO.ArmIOInputs m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_armVelocityMult = 0;
   private double m_desiredWristPoseDegs;
+  private double m_wristGap;
   private double m_wristVelocityMult = 0;
   private double m_startTime;
 
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
 
-//  private final ArmVisualizer m_setpointVisualizer;
-//  private final ArmVisualizer m_poseVisualizer;
+
+  private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm/");
+
+  private final ArmVisualizer m_setpointVisualizer;
+  private final ArmVisualizer m_poseVisualizer;
 
   private final Supplier<Pose2d> m_poseSupplier;
 
@@ -47,7 +51,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
     m_io = io;
-    m_inputs = new ArmIOInputsAutoLogged();
+    m_inputs = new ArmIO.ArmIOInputs();
 
     m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
     m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
@@ -56,17 +60,16 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_poseSupplier = supplier;
 
-//    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
-//    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
+    setupLogging();
+    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
+    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
 
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
-    Logger.processInputs("Arm", m_inputs);
 
     handleState();
-//    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
 
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY ?
@@ -99,6 +102,10 @@ public class ArmSubsystem extends SubsystemBase {
       m_io.setArmAngle(m_desiredArmPoseDegs + underGap, m_armVelocityMult);
       Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs + underGap);
     }
+
+    // Update arm visualizers
+    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
+    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
   }
 
   public void handleState() {
@@ -217,6 +224,25 @@ public class ArmSubsystem extends SubsystemBase {
         () -> m_io.setWristVoltage(0.0));
   }
 
+  /** Logging util */
+  public void setupLogging() {
+    logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
+    logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
 
+    logUtil.addDouble("ArmSetpointDegs", () -> m_desiredArmPoseDegs, true);
+    logUtil.addDouble("WristSetpointDegs", () -> m_desiredWristPoseDegs, true);
+
+    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
+    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
+
+    logUtil.addDouble("ArmClosedLoopOutput", () -> m_inputs.armClosedLoopOutput, false);
+    logUtil.addDouble("WristClosedLoopOutput", () -> m_inputs.wristClosedLoopOutput, false);
+
+    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
+    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
+
+    logUtil.addDouble("WristArmGap", () -> m_wristGap, true);
+    logUtil.addString("Arm Current State", () -> m_desiredState.toString(), true);
+  }
 }
 

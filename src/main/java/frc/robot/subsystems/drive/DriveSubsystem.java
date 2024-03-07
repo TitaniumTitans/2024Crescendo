@@ -16,8 +16,8 @@ package frc.robot.subsystems.drive;
 import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.*;
@@ -25,7 +25,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -39,23 +38,19 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.vision.VisionSubsystem;
-import lib.utils.LocalADStarAK;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import lib.logger.DataLogUtil;
+import lib.logger.DataLogUtil.DataLogTable;
 import lib.utils.PoseEstimator;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-import org.photonvision.EstimatedRobotPose;
 
 public class DriveSubsystem extends SubsystemBase {
 
   public static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
-  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  private final GyroIO.GyroIOInputs gyroInputs = new GyroIO.GyroIOInputs();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
@@ -72,6 +67,28 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
+
+  private final DataLogTable m_logTable = DataLogUtil.getTable("Swerve/");
+
+  private final SwerveModuleState[] m_measureStates = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
+  private SwerveModuleState[] m_setpointStates = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
+  private final SwerveModuleState[] m_optimizedStates = new SwerveModuleState[] {
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState(),
+      new SwerveModuleState()
+  };
+
 
   public DriveSubsystem(
       GyroIO gyroIO,
@@ -135,13 +152,10 @@ public class DriveSubsystem extends SubsystemBase {
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
         this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
-    PathPlannerLogging.setLogActivePathCallback(
-        (List<Pose2d> activePath) -> Logger.recordOutput(
-            "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
-    PathPlannerLogging.setLogTargetPoseCallback(
-        (Pose2d targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
+    Pathfinding.setPathfinder(new LocalADStar());
 
+    // turn on logging
+    setupLogging();
     SmartDashboard.putData("Field",m_field);
   }
 
@@ -153,7 +167,6 @@ public class DriveSubsystem extends SubsystemBase {
       module.updateInputs();
     }
     odometryLock.unlock();
-//    Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
     }
@@ -163,13 +176,6 @@ public class DriveSubsystem extends SubsystemBase {
       for (var module : modules) {
         module.stop();
       }
-    }
-    // Log empty setpoint states when disabled
-
-    Logger.recordOutput("Pose", getPose());
-    if (DriverStation.isDisabled()) {
-//      Logger.recordOutput("SwerveStates/Setpoints");
-//      Logger.recordOutput("SwerveStates/SetpointsOptimized");
     }
 
     // Update odometry
@@ -228,19 +234,14 @@ public class DriveSubsystem extends SubsystemBase {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
+    m_setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(m_setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
-    SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
       // The module returns the optimized state, useful for logging
-      optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
+      m_optimizedStates[i] = modules[i].runSetpoint(m_setpointStates[i]);
     }
-
-    // Log setpoint states
-//    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-//    Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
   }
 
   /**
@@ -256,10 +257,7 @@ public class DriveSubsystem extends SubsystemBase {
     double desiredRotation = Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY())
         + Units.degreesToRadians(270));
 
-    double output =  m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
-//    Logger.recordOutput("Drive/Alignment output", output);
-//    Logger.recordOutput("Drive/Desired Alignment", desiredRotation);
-    return output;
+    return m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
   }
 
   /** Stops the drive. */
@@ -360,4 +358,24 @@ public class DriveSubsystem extends SubsystemBase {
       new Translation2d(-DriveConstants.TRACK_WIDTH_X / 2.0, -DriveConstants.TRACK_WIDTH_Y / 2.0)
     };
   }
-}
+
+  public void setupLogging() {
+    for (int i = 0; i < modules.length; i++) {
+      Module module = modules[i];
+      String moduleName = "Module" + i;
+
+      m_logTable.addDouble(moduleName + "/AzimuthPose", () -> module.getAngle().getDegrees(), true);
+      m_logTable.addDouble(moduleName + "/DrivePose", module::getPositionMeters, true);
+
+      m_logTable.addDouble(moduleName + "/VelocityMPS", module::getVelocityMetersPerSec, true);
+    }
+
+    m_logTable.addPose2d("Vision Pose", this::getVisionPose, true);
+
+    m_logTable.addSwerveModuleStateArray("MeasuredStates", () -> m_measureStates, true);
+    m_logTable.addSwerveModuleStateArray("SetpointStates", () -> m_setpointStates, true);
+    m_logTable.addSwerveModuleStateArray("OptimizedStates", () -> m_optimizedStates, true);
+
+    m_logTable.addDouble("GyroHeading", () -> gyroInputs.yawPosition.getDegrees(), true);
+  }
+ }

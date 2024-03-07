@@ -4,9 +4,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ArmSetpoints;
 import frc.robot.subsystems.arm.ArmPose;
-import org.littletonrobotics.junction.Logger;
 
 public class AimbotUtils {
 

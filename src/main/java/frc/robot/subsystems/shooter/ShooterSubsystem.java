@@ -3,29 +3,28 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+
+import lib.logger.DataLogUtil;
+import lib.logger.DataLogUtil.DataLogTable;
 
 public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterIO m_io;
-  private final ShooterIOInputsAutoLogged m_inputs;
+  private final ShooterIO.ShooterIOInputs m_inputs;
 
-  private final LoggedDashboardNumber m_leftSetpoint;
-  private final LoggedDashboardNumber m_rightSetpoint;
+  private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter/");
 
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
-    m_inputs = new ShooterIOInputsAutoLogged();
+    m_inputs = new ShooterIO.ShooterIOInputs();
 
-    m_leftSetpoint = new LoggedDashboardNumber("Shooter/Left Flywheel Setpoint RPM", 5000);
-    m_rightSetpoint = new LoggedDashboardNumber("Shooter/Right Flywheel Setpoint RPM", 5000);
+    // turn on logging
+    setupLogging();
   }
 
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
-    Logger.processInputs("Shooter", m_inputs);
   }
 
   public void setShooterPowerLeft(double power) {
@@ -48,12 +47,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command runShooterVelocity(boolean runKicker) {
     return runEnd(() -> {
-          m_io.setLeftVelocityRpm(m_leftSetpoint.get());
-          m_io.setRightVelocityRpm(m_rightSetpoint.get());
+          m_io.setLeftVelocityRpm(0.0);
+          m_io.setRightVelocityRpm(0.0);
 
-          if ( /*(Math.abs(m_leftSetpoint.get() - m_inputs.tlVelocityRPM) < 15
-          || Math.abs(m_rightSetpoint.get() - m_inputs.trVelocityRPM) < 15)
-          && */ runKicker) {
+          if (runKicker) {
             m_io.setKickerVoltage(3.0);
             m_io.setIntakeVoltage(0.05);
           } else {
@@ -109,5 +106,18 @@ public class ShooterSubsystem extends SubsystemBase {
       setIntakePower(intake);
     });
   }
-}
 
+  public void setupLogging() {
+    m_logTable.addDouble("LeftVelocity", () -> m_inputs.tlVelocityRPM, true);
+    m_logTable.addDouble("RightVelocity", () -> m_inputs.trVelocityRPM, true);
+
+    m_logTable.addDouble("LeftAppliedVolts", () -> m_inputs.tlAppliedVolts, true);
+    m_logTable.addDouble("RightAppliedVolts", () -> m_inputs.trAppliedVolts, true);
+
+    m_logTable.addDouble("LeftCurrentDraw", () -> m_inputs.tlCurrentDraw, false);
+    m_logTable.addDouble("RightCurrentDraw", () -> m_inputs.trCurrentDraw, false);
+
+    m_logTable.addDouble("LeftTemperature", () -> m_inputs.tlTemperature, false);
+    m_logTable.addDouble("RightTemperature", () -> m_inputs.trTemperature, false);
+  }
+}

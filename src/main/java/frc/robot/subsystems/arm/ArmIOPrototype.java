@@ -8,7 +8,6 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.util.Units;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
-import org.littletonrobotics.junction.Logger;
 
 import frc.robot.Constants.ArmConstants;
 
@@ -81,7 +80,7 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void updateInputs(ArmIOInputsAutoLogged inputs) {
+  public void updateInputs(ArmIOInputs inputs) {
     m_shoulderPID.updateIfChanged();
     m_wristPID.updateIfChanged();
 
@@ -102,12 +101,6 @@ public class ArmIOPrototype implements ArmIO {
 
     inputs.armCurrentDraw = m_shoulder.getSupplyCurrent().getValueAsDouble();
     inputs.wristCurrentDraw = m_wrist.getSupplyCurrent().getValueAsDouble();
-
-    Logger.recordOutput("Arm/Should PID Output", m_shoulder.getClosedLoopOutput().getValueAsDouble());
-    Logger.recordOutput("Arm/Wrist PID Output", m_wrist.getClosedLoopOutput().getValueAsDouble());
-
-    Logger.recordOutput("Arm/Shoulder PID Setpoint", m_shoulder.getClosedLoopReference().getValueAsDouble());
-    Logger.recordOutput("Arm/Wrist PID Setpoint", m_wrist.getClosedLoopReference().getValueAsDouble());
   }
 
   @Override
