@@ -15,6 +15,8 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.PropertyManager;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -44,7 +46,7 @@ public class Robot extends TimedRobot {
     // Clear dead properties
     PropertyManager.purgeExtraKeys();
 
-    String logPath = "/media/sda1/aoede";
+    String logPath = "/media/sda1/aoide";
 
     DataLogManager.start(logPath);
     DriverStation.startDataLog(DataLogManager.getLog());
@@ -57,6 +59,15 @@ public class Robot extends TimedRobot {
     robotContainer = new RobotContainer();
 
     pdp = new PowerDistribution();
+
+    final StringLogEntry entry = new StringLogEntry(DataLogManager.getLog(), "/ntlog");
+    NetworkTableInstance.getDefault()
+        .addLogger(
+            0,
+            100,
+            event ->
+                entry.append(
+                    event.logMessage.filename + ":" + event.logMessage.line + ":" + event.logMessage.message));
   }
 
   /** This function is called periodically during all modes. */
