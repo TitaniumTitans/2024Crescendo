@@ -346,5 +346,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_logTable.addSwerveModuleStateArray("MeasuredStates", () -> m_measureStates, true);
     m_logTable.addSwerveModuleStateArray("SetpointStates", () -> m_setpointStates, true);
     m_logTable.addSwerveModuleStateArray("OptimizedStates", () -> m_optimizedStates, true);
+
+    m_logTable.addDouble("GyroHeading", () -> gyroInputs.yawPosition.getDegrees(), true);
   }
  }
