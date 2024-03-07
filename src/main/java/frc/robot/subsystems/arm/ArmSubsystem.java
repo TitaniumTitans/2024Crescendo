@@ -2,9 +2,7 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
@@ -30,7 +28,9 @@ public class ArmSubsystem extends SubsystemBase {
   private final ArmIO m_io;
   private final ArmIOInputsAutoLogged m_inputs;
   private double m_desiredArmPoseDegs;
+  private double m_armVelocityMult = 0;
   private double m_desiredWristPoseDegs;
+  private double m_wristVelocityMult = 0;
   private double m_startTime;
 
   private ArmState m_desiredState = ArmState.DISABLED;
@@ -89,11 +89,14 @@ public class ArmSubsystem extends SubsystemBase {
 
     if (m_desiredState != ArmState.DISABLED) {
       // check to see if the wrist is currently too close to the rest of the arm
-      m_io.setWristAngle(m_desiredWristPoseDegs, false);
+      m_io.setWristAngle(m_desiredWristPoseDegs, m_wristVelocityMult);
       Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
 
+      double underGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
+          - (m_inputs.armPositionDegs = m_inputs.wristPositionDegs), 0, 180);
+
       // set the arms angle
-      m_io.setArmAngle(m_desiredArmPoseDegs);
+      m_io.setArmAngle(m_desiredArmPoseDegs + underGap, m_armVelocityMult);
       Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
     }
   }
@@ -101,17 +104,14 @@ public class ArmSubsystem extends SubsystemBase {
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_currentState == ArmState.AMP
-            && m_inputs.armPositionDegs < ArmSetpoints.AMP_INTERMEDIATE.armAngle() + 5
-            && m_inputs.wristPositionDegs < ArmSetpoints.AMP_INTERMEDIATE.wristAngle() + 5) {
-          m_currentState = ArmState.STOW;
-        } else if (m_currentState == ArmState.AMP) {
-          m_desiredArmPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.armAngle();
-          m_desiredWristPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.wristAngle();
+        if (m_inputs.armPositionDegs > 60) {
+          m_wristVelocityMult = 0.0;
         } else {
-          m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armAngle();
-          m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
+          m_wristVelocityMult = 1.0;
         }
+
+        m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
       }
       case AUTO_AIM -> {
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
@@ -125,15 +125,14 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristAngle();
       }
       case AMP -> {
-        if (m_currentState != ArmState.TRANSITION_AMP && m_currentState != ArmState.AMP) {
-          m_startTime = Timer.getFPGATimestamp();
-          m_currentState = ArmState.TRANSITION_AMP;
+        if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5) {
+          m_armVelocityMult = 0.5;
+        } else {
+          m_armVelocityMult = 1.0;
         }
 
-        if (m_currentState == ArmState.TRANSITION_AMP) {
-          double trajTime = Timer.getFPGATimestamp() - m_startTime;
-          Trajectory.State armState = ArmSetpoints.STOW_AMP_TRAJ.sample(trajTime);
-        }
+        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
       default -> {
         m_desiredArmPoseDegs = m_inputs.armPositionDegs;
