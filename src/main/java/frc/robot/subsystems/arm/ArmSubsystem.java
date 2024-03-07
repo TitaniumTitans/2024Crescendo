@@ -89,8 +89,6 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED);
 
     if (m_desiredState != ArmState.DISABLED) {
-
-
       // check to see if the wrist is currently too close to the rest of the arm
       m_wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
       if (m_wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {

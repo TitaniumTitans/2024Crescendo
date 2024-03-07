@@ -196,17 +196,17 @@ public final class Constants {
     public static final double ARM_KG = 0.375;
 
     public static final GosDoubleProperty WRIST_LOWER_LIMIT =
-        new GosDoubleProperty(false, "Arm/WristLowerLimit", 30);
+        new GosDoubleProperty(true, "Arm/WristLowerLimit", 0);
     public static final GosDoubleProperty WRIST_UPPER_LIMIT =
-        new GosDoubleProperty(false, "Arm/WristUpperLimit", 30);
+        new GosDoubleProperty(true, "Arm/WristUpperLimit", 180);
 
     public static final GosDoubleProperty ARM_LOWER_LIMIT =
-        new GosDoubleProperty(false, "Arm/ArmLowerLimit", 30);
+        new GosDoubleProperty(false, "Arm/ArmLowerLimit", -9);
     public static final GosDoubleProperty ARM_UPPER_LIMIT =
-        new GosDoubleProperty(false, "Arm/ArmUpperLimit", 30);
+        new GosDoubleProperty(true, "Arm/ArmUpperLimit", 180);
 
     public static final GosDoubleProperty WRIST_ARM_GAP =
-        new GosDoubleProperty(false, "Arm/Wrist Gap", 20);
+        new GosDoubleProperty(true, "Arm/Wrist Gap", 10);
 
     public static final Translation2d PIVOT_JOINT_TRANSLATION =
         new Translation2d(Units.inchesToMeters(9.27),
@@ -230,11 +230,11 @@ public final class Constants {
     }
 
     public static final ArmPose STOW_SETPOINT = new
-        ArmPose("ArmPoses/Stow", false, 0.0, 45.0);
+        ArmPose("ArmPoses/Stow", true, 0.0, 45.0);
     public static final ArmPose INTAKE_SETPOINT =
-        new ArmPose("ArmPoses/Intake", false, 0.0, 35.0);
+        new ArmPose("ArmPoses/Intake", true, 0.0, 55.0);
     public static final ArmPose AMP_SETPOINT =
-        new ArmPose("ArmPoses/Amp", false, 90.0, 135.0);
+        new ArmPose("ArmPoses/Amp", true, 92.0, 145.0);
 
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
   }
