@@ -21,7 +21,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * Physics sim implementation of module IO.

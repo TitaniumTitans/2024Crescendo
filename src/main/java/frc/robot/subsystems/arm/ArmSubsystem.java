@@ -2,15 +2,13 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
-import lib.utils.AimbotUtils;
-import org.littletonrobotics.junction.Logger;
+import lib.logger.DataLogUtil;
 
 import java.util.function.Supplier;
 
@@ -29,15 +27,22 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   private final ArmIO m_io;
-  private final ArmIOInputsAutoLogged m_inputs;
+  private final ArmIO.ArmIOInputs m_inputs;
   private double m_desiredArmPoseDegs;
+  private double m_armVelocityMult = 0;
   private double m_desiredWristPoseDegs;
+  private double m_wristGap;
+  private double m_wristVelocityMult = 0;
+  private double m_startTime;
 
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
 
-//  private final ArmVisualizer m_setpointVisualizer;
-//  private final ArmVisualizer m_poseVisualizer;
+
+  private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
+
+  private final ArmVisualizer m_setpointVisualizer;
+  private final ArmVisualizer m_poseVisualizer;
 
   private final Supplier<Pose2d> m_poseSupplier;
 
@@ -47,7 +52,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
     m_io = io;
-    m_inputs = new ArmIOInputsAutoLogged();
+    m_inputs = new ArmIO.ArmIOInputs();
 
     m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
     m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
@@ -56,17 +61,16 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_poseSupplier = supplier;
 
-//    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
-//    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
+    setupLogging();
+    m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
+    m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
 
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
-    Logger.processInputs("Arm", m_inputs);
 
     handleState();
-//    Logger.recordOutput("Arm/Arm Desired State", m_desiredState.toString());
 
     // clamp values for PID in between acceptable ranges
     m_desiredWristPoseDegs = m_desiredWristPoseDegs > Double.NEGATIVE_INFINITY ?
@@ -88,50 +92,39 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED);
 
     if (m_desiredState != ArmState.DISABLED) {
-
-
       // check to see if the wrist is currently too close to the rest of the arm
-      double wristGap = m_inputs.wristPositionDegs + m_inputs.armPositionDegs;
-      if (wristGap < ArmConstants.WRIST_ARM_GAP.getValue()) {
-        double underGap = ArmConstants.WRIST_ARM_GAP.getValue() - wristGap;
-        m_desiredArmPoseDegs += underGap;
-        m_io.setWristAngle(m_desiredWristPoseDegs + underGap, true);
-        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_inputs.wristPositionDegs);
-      } else {
-        m_io.setWristAngle(m_desiredWristPoseDegs, false);
-        Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
-      }
+      m_io.setWristAngle(m_desiredWristPoseDegs, m_wristVelocityMult);
+
+      double underGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
+          - (m_inputs.armPositionDegs + m_inputs.wristPositionDegs), 0, 180);
 
       // set the arms angle
-      m_io.setArmAngle(m_desiredArmPoseDegs);
-      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs);
+      m_io.setArmAngle(m_desiredArmPoseDegs + underGap, m_armVelocityMult);
     }
 
-//    Logger.recordOutput("Arm/Wrist Gap", m_inputs.wristPositionDegs + m_inputs.armPositionDegs);
-
     // Update arm visualizers
-//    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
-//    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
+    m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
+    m_setpointVisualizer.update(m_desiredArmPoseDegs, m_desiredWristPoseDegs);
   }
 
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_currentState == ArmState.AMP
-            && m_inputs.armPositionDegs < ArmSetpoints.AMP_INTERMEDIATE.armAngle() + 5
-            && m_inputs.wristPositionDegs < ArmSetpoints.AMP_INTERMEDIATE.wristAngle() + 5) {
-          m_currentState = ArmState.STOW;
-        } else if (m_currentState == ArmState.AMP) {
-          m_desiredArmPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.armAngle();
-          m_desiredWristPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.wristAngle();
+        if (m_inputs.armPositionDegs > 60 && m_currentState == ArmState.AMP) {
+          m_wristVelocityMult = 0.0;
+          m_armVelocityMult = 1.0;
         } else {
-          m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armAngle();
-          m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
+          m_currentState = ArmState.STOW;
+          m_armVelocityMult = 1.0;
+          m_wristVelocityMult = 1.0;
         }
+
+        m_desiredArmPoseDegs = ArmSetpoints.STOW_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.STOW_SETPOINT.wristAngle();
       }
       case AUTO_AIM -> {
-//        ArmPose aimSetpoint = AimbotUtils.aimbotCalculate(
-//                new Pose3d(m_poseSupplier.get()), m_inputs.armPositionDegs);
+        m_armVelocityMult = 1.0;
+        m_wristVelocityMult = 1.0;
 
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
         m_desiredArmPoseDegs = m_desiredArmPoseDegs >= ArmConstants.ARM_LOWER_LIMIT.getValue() ? m_desiredArmPoseDegs
@@ -139,24 +132,31 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
       }
       case INTAKE -> {
+        m_armVelocityMult = 1.0;
+        m_wristVelocityMult = 1.0;
+
         m_currentState = ArmState.INTAKE;
         m_desiredArmPoseDegs = ArmSetpoints.INTAKE_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristAngle();
       }
       case AMP -> {
-
-        if (m_inputs.armPositionDegs > ArmSetpoints.AMP_INTERMEDIATE.armAngle() - 5
-            && m_inputs.wristPositionDegs > ArmSetpoints.AMP_INTERMEDIATE.wristAngle() - 5) {
-          m_currentState = ArmState.AMP;
-          m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
-          m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
+        if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5) {
+          m_armVelocityMult = 0.5;
+          m_wristVelocityMult = 1.0;
         } else {
-          m_currentState = ArmState.TRANSITION_AMP;
-          m_desiredArmPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.armAngle();
-          m_desiredWristPoseDegs = ArmSetpoints.AMP_INTERMEDIATE.wristAngle();
+          m_armVelocityMult = 1.0;
+          m_wristVelocityMult = 1.0;
         }
+
+        m_currentState = ArmState.AMP;
+
+        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
       default -> {
+        m_armVelocityMult = 1.0;
+        m_wristVelocityMult = 1.0;
+
         m_desiredArmPoseDegs = m_inputs.armPositionDegs;
         m_desiredWristPoseDegs = m_inputs.wristPositionDegs;
       }
@@ -223,6 +223,25 @@ public class ArmSubsystem extends SubsystemBase {
         () -> m_io.setWristVoltage(0.0));
   }
 
+  /** Logging util */
+  public void setupLogging() {
+    logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
+    logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
 
+    logUtil.addDouble("ArmSetpointDegs", () -> m_desiredArmPoseDegs, true);
+    logUtil.addDouble("WristSetpointDegs", () -> m_desiredWristPoseDegs, true);
+
+    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
+    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
+
+    logUtil.addDouble("ArmClosedLoopOutput", () -> m_inputs.armClosedLoopOutput, false);
+    logUtil.addDouble("WristClosedLoopOutput", () -> m_inputs.wristClosedLoopOutput, false);
+
+    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
+    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
+
+    logUtil.addDouble("WristArmGap", () -> m_wristGap, true);
+    logUtil.addString("Arm Current State", () -> m_desiredState.toString(), true);
+  }
 }
 

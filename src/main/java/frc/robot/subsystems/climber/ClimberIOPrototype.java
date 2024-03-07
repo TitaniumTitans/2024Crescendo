@@ -66,7 +66,7 @@ public class ClimberIOPrototype implements ClimberIO {
   }
 
   @Override
-  public void updateInputs(ClimberIOInputsAutoLogged inputs) {
+  public void updateInputs(ClimberIOInputs inputs) {
     m_leftClimberPid.updateIfChanged();
     m_rightClimberPid.updateIfChanged();
 

@@ -12,24 +12,25 @@
 // GNU General Public License for more details.
 
 package frc.robot;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.units.Unit;
 import frc.robot.subsystems.arm.ArmPose;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.module.ModuleConstants;
+
+import java.util.List;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -92,12 +93,12 @@ public final class Constants {
 //        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(18))
 //        );
 
-    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(9.0), Units.inchesToMeters(6.0)),
-        new Rotation3d(Units.degreesToRadians(5.0), Units.degreesToRadians(-28.125), Units.degreesToRadians(35.0 + 180))
+    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(Units.inchesToMeters(12.0), Units.inchesToMeters(6.0), Units.inchesToMeters(7.8)),
+        new Rotation3d(Units.degreesToRadians(0.0), Units.degreesToRadians(20.0), -Units.degreesToRadians(7.5))
     );
 
-    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(-9.0), Units.inchesToMeters(6.0)),
         new Rotation3d(Units.degreesToRadians(2.0), Units.degreesToRadians(-26.0), Units.degreesToRadians(-35.0 - 180))
     );
@@ -172,8 +173,8 @@ public final class Constants {
     /* Because the absolute encoders are on a 2/1 ratio, we have to move our offset down a little into a rotation lower
     * than the lowest point the arm and wrist will move to , and then compensate for that in our encoder reset code */
     public static final double OFFSET_NUDGE = 45;
-    public static final double ARM_OFFSET = -0.604004 + Units.degreesToRotations(OFFSET_NUDGE);
-    public static final double WRIST_OFFSET = -0.108643 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double ARM_OFFSET = -0.123779 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double WRIST_OFFSET = -0.163330 + Units.degreesToRotations(OFFSET_NUDGE);
     public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
     public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
 
@@ -196,17 +197,17 @@ public final class Constants {
     public static final double ARM_KG = 0.375;
 
     public static final GosDoubleProperty WRIST_LOWER_LIMIT =
-        new GosDoubleProperty(false, "Arm/WristLowerLimit", 30);
+        new GosDoubleProperty(true, "Arm/WristLowerLimit", 0);
     public static final GosDoubleProperty WRIST_UPPER_LIMIT =
-        new GosDoubleProperty(false, "Arm/WristUpperLimit", 30);
+        new GosDoubleProperty(true, "Arm/WristUpperLimit", 180);
 
     public static final GosDoubleProperty ARM_LOWER_LIMIT =
-        new GosDoubleProperty(false, "Arm/ArmLowerLimit", 30);
+        new GosDoubleProperty(false, "Arm/ArmLowerLimit", -9);
     public static final GosDoubleProperty ARM_UPPER_LIMIT =
-        new GosDoubleProperty(false, "Arm/ArmUpperLimit", 30);
+        new GosDoubleProperty(true, "Arm/ArmUpperLimit", 180);
 
     public static final GosDoubleProperty WRIST_ARM_GAP =
-        new GosDoubleProperty(false, "Arm/Wrist Gap", 20);
+        new GosDoubleProperty(true, "Arm/Wrist Gap", 10);
 
     public static final Translation2d PIVOT_JOINT_TRANSLATION =
         new Translation2d(Units.inchesToMeters(9.27),
@@ -223,20 +224,47 @@ public final class Constants {
   }
 
   public static class ArmSetpoints {
-    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
-
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
 
+    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
+
     public static final ArmPose STOW_SETPOINT = new
-        ArmPose("ArmPoses/Stow", false, 0.0, 45.0);
+        ArmPose("ArmPoses/Stow", true, 0.0, 45.0);
     public static final ArmPose INTAKE_SETPOINT =
-        new ArmPose("ArmPoses/Intake", false, 0.0, 35.0);
+        new ArmPose("ArmPoses/Intake", true, 0.0, 55.0);
     public static final ArmPose AMP_SETPOINT =
-        new ArmPose("ArmPoses/Amp", false, 90.0, 135.0);
+        new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
 
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
+
+    public static final Trajectory STOW_AMP_TRAJ;
+    public static final Trajectory AMP_STOW_TRAJ;
+
+    static {
+      // kinda janky(?) spline generation
+      // use Pose2d x for arm angle and y for wrist angle, ignore heading
+      var stowPose = new Pose2d(0.0, 45.0, new Rotation2d());
+      var ampPose = new Pose2d(94.0, 145.0, new Rotation2d());
+      var ampIntermediatePose = List.of(new Pose2d(60.0, 145.0, new Rotation2d()).getTranslation());
+
+      var trajConfig = new TrajectoryConfig(Units.degreesToRotations(30), Units.degreesToRotations(30));
+
+      STOW_AMP_TRAJ = TrajectoryGenerator.generateTrajectory(
+              stowPose,
+              ampIntermediatePose,
+              ampPose,
+              trajConfig
+      );
+
+      AMP_STOW_TRAJ = TrajectoryGenerator.generateTrajectory(
+              ampPose,
+              ampIntermediatePose,
+              stowPose,
+              trajConfig
+      );
+    }
   }
 
   public static class ShooterConstants {

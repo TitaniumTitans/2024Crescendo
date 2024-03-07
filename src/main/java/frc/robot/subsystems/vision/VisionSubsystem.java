@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import lib.utils.PoseEstimator;
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -34,7 +33,7 @@ public class VisionSubsystem {
   private final double xyStdDevCoefficient = 0.01;
   private final double thetaStdDevCoefficient = 0.01;
 
-  private final PhotonVisionIOInputsAutoLogged inputs = new PhotonVisionIOInputsAutoLogged();
+  private final PhotonVisionIOInputs inputs = new PhotonVisionIOInputs();
 
   public VisionSubsystem(String camName, Transform3d camPose) {
     m_camera = new PhotonCamera(camName);
@@ -44,9 +43,11 @@ public class VisionSubsystem {
       m_aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
       m_photonPoseEstimator = new PhotonPoseEstimator(
           m_aprilTagFieldLayout,
-          PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+          PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
           m_camera,
           robotToCam);
+
+      m_photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
     } catch (IOException e){
       throw new IllegalStateException(e);
     }
@@ -58,9 +59,6 @@ public class VisionSubsystem {
     inputs.setTagIds(getTargetIDs());
     inputs.setNumTagsFound(m_camera.getLatestResult().targets.size());
     inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
-
-    Logger.recordOutput("PhotonVision/" + m_name + "/Last Estimated Pose", m_lastEstimatedPose);
-    Logger.processInputs("PhotonVision/" + m_name, inputs);
   }
 
   public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
