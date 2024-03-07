@@ -2,6 +2,7 @@ package lib.logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
@@ -114,6 +115,24 @@ public class DataLogUtil {
       for (int i = 0; i < updateChecker.get().length; i++) {
         int finalI = i;
         addPose3d(logName + "/" + i,
+                () -> updateChecker.get()[finalI],
+                updateNT);
+      }
+    }
+
+    public void addSwerveModuleState(String logName, Supplier<SwerveModuleState> updateChecker, boolean updateNT) {
+      addDouble(logName + "/velocity",
+              () -> updateChecker.get().speedMetersPerSecond,
+              updateNT);
+      addDouble(logName + "/postion",
+              () -> updateChecker.get().angle.getRadians(),
+              updateNT);
+    }
+
+    public void addSwerveModuleStateArray(String logName, Supplier<SwerveModuleState[]> updateChecker, boolean updateNT) {
+      for (int i = 0; i < updateChecker.get().length; i++) {
+        int finalI = i;
+        addSwerveModuleState(logName + "/" + i,
                 () -> updateChecker.get()[finalI],
                 updateNT);
       }

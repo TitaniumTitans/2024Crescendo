@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
+import lib.logger.DataLogUtil;
 
 public class Module {
   private static final double WHEEL_RADIUS = Constants.DriveConstants.WHEEL_RADIUS_METERS;
@@ -41,6 +42,12 @@ public class Module {
     Timer.delay(0.5);
 
     setBrakeMode(true);
+
+    DataLogUtil.getTable("Swerve/").addDoubleArray("Module" + m_index + "/DriveCurrentDraw",
+            () -> m_inputs.driveCurrentAmps, false);
+    DataLogUtil.getTable("Swerve/").addDoubleArray("Module" + m_index + "/TurnCurrentDraw",
+            () -> m_inputs.turnCurrentAmps, false);
+
   }
 
   /**
@@ -52,11 +59,9 @@ public class Module {
   }
 
   public void periodic() {
-//    Logger.processInputs("Drive/Module" + Integer.toString(m_index), m_inputs);
-
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (m_turnRelativeOffset == null) {// && m_inputs.getTurnAbsolutePosition().getRadians() != 0.0) {
+    if (m_turnRelativeOffset == null) {
       m_turnRelativeOffset = m_inputs.getTurnAbsolutePosition().minus(m_inputs.getTurnPosition());
     }
 
