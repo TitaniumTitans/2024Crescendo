@@ -15,6 +15,8 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.PropertyManager;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,6 +44,12 @@ public class Robot extends TimedRobot {
     // Clear dead properties
     PropertyManager.purgeExtraKeys();
 
+    String logPath = "/media/sda1/aoede";
+
+    DataLogManager.start(logPath);
+    DriverStation.startDataLog(DataLogManager.getLog());
+
+    SignalLogger.setPath(logPath);
     SignalLogger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,

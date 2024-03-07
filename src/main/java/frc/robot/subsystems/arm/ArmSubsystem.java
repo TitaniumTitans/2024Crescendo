@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
@@ -93,14 +94,12 @@ public class ArmSubsystem extends SubsystemBase {
     if (m_desiredState != ArmState.DISABLED) {
       // check to see if the wrist is currently too close to the rest of the arm
       m_io.setWristAngle(m_desiredWristPoseDegs, m_wristVelocityMult);
-      Logger.recordOutput("Arm/Wrist Setpoint Degs", m_desiredWristPoseDegs);
 
       double underGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
           - (m_inputs.armPositionDegs + m_inputs.wristPositionDegs), 0, 180);
 
       // set the arms angle
       m_io.setArmAngle(m_desiredArmPoseDegs + underGap, m_armVelocityMult);
-      Logger.recordOutput("Arm/Arm Setpoint Degs", m_desiredArmPoseDegs + underGap);
     }
 
     // Update arm visualizers
