@@ -12,24 +12,25 @@
 // GNU General Public License for more details.
 
 package frc.robot;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.units.Unit;
 import frc.robot.subsystems.arm.ArmPose;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.module.ModuleConstants;
+
+import java.util.List;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -223,20 +224,47 @@ public final class Constants {
   }
 
   public static class ArmSetpoints {
-    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
-
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
+
+    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
 
     public static final ArmPose STOW_SETPOINT = new
         ArmPose("ArmPoses/Stow", false, 0.0, 45.0);
     public static final ArmPose INTAKE_SETPOINT =
         new ArmPose("ArmPoses/Intake", false, 0.0, 35.0);
     public static final ArmPose AMP_SETPOINT =
-        new ArmPose("ArmPoses/Amp", false, 90.0, 135.0);
+        new ArmPose("ArmPoses/Amp", false, 94.0, 145.0);
 
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
+
+    public static final Trajectory STOW_AMP_TRAJ;
+    public static final Trajectory AMP_STOW_TRAJ;
+
+    static {
+      // kinda janky(?) spline generation
+      // use Pose2d x for arm angle and y for wrist angle, ignore heading
+      var stowPose = new Pose2d(0.0, 45.0, new Rotation2d());
+      var ampPose = new Pose2d(94.0, 145.0, new Rotation2d());
+      var ampIntermediatePose = List.of(new Pose2d(60.0, 145.0, new Rotation2d()).getTranslation());
+
+      var trajConfig = new TrajectoryConfig(Units.degreesToRotations(30), Units.degreesToRotations(30));
+
+      STOW_AMP_TRAJ = TrajectoryGenerator.generateTrajectory(
+              stowPose,
+              ampIntermediatePose,
+              ampPose,
+              trajConfig
+      );
+
+      AMP_STOW_TRAJ = TrajectoryGenerator.generateTrajectory(
+              ampPose,
+              ampIntermediatePose,
+              stowPose,
+              trajConfig
+      );
+    }
   }
 
   public static class ShooterConstants {

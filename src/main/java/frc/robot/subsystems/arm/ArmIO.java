@@ -28,11 +28,11 @@ public interface ArmIO {
 
   default void setArmVoltage(double voltage) {}
 
-  default void setArmAngle(double degrees) {}
+  default void setArmAngle(double degrees, double velocity) {}
 
   default void setWristVoltage(double voltage) {}
 
-  default void setWristAngle(double degrees, boolean track) {}
+  default void setWristAngle(double degrees, double velocity) {}
 
   default void resetPosition() {}
   default void stop() {}
