@@ -13,10 +13,8 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -33,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.commands.IntakeControlCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -170,15 +169,14 @@ public class RobotContainer {
     Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
     Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
 
-    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.90, 0.5, 0.25)
-        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE)));
+    intakeTrigger.whileTrue(new IntakeControlCommand(m_armSubsystem, m_shooter));
 
     spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
     shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
 
-    controller.x().whileTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
+    controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter));

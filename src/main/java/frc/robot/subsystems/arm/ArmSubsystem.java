@@ -163,9 +163,25 @@ public class ArmSubsystem extends SubsystemBase {
     }
   }
 
+  public void setDesiredState(ArmState state) {
+    m_desiredState = state;
+  }
+
+  public boolean armAtSetpoint() {
+    return Math.abs(m_inputs.armPositionDegs - m_desiredArmPoseDegs) < 5.0;
+  }
+
+  public boolean wristAtSetpoint() {
+    return Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) < 5.0;
+  }
+
+  public boolean bothAtSetpoint() {
+    return armAtSetpoint() && wristAtSetpoint();
+  }
+
   /* Command Factories */
 
-  public Command setDesiredState(ArmState state) {
+  public Command setDesiredStateFactory(ArmState state) {
     return runEnd(() -> m_desiredState = state,
         () -> m_desiredState = ArmState.STOW);
   }
