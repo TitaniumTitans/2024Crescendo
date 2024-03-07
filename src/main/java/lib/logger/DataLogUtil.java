@@ -8,6 +8,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -22,7 +23,7 @@ public class DataLogUtil {
 
   public static DataLogTable getTable(String name) {
     for (DataLogTable table : logTables) {
-      if (table.name == name) {
+      if (Objects.equals(table.name, name)) {
         return table;
       }
     }
