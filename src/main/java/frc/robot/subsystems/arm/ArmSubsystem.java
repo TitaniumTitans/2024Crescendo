@@ -99,7 +99,7 @@ public class ArmSubsystem extends SubsystemBase {
           - (m_inputs.armPositionDegs + m_inputs.wristPositionDegs), 0, 180);
 
       // set the arms angle
-      m_io.setArmAngle(m_desiredArmPoseDegs + underGap, m_armVelocityMult);
+      m_io.setArmAngle(m_desiredArmPoseDegs, m_armVelocityMult);
     }
 
     // Update arm visualizers

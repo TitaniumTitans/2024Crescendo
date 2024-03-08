@@ -21,7 +21,7 @@ public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_intake;
   private final TalonFX m_indexer;
 
-  private final TimeOfFlight m_tof;
+//  private final TimeOfFlight m_tof;
 
   private final PidPropertyPublic m_leftProperty;
   private final PidPropertyPublic m_rightProperty;
@@ -57,10 +57,8 @@ public class ShooterIOKraken implements ShooterIO {
     m_intake = new TalonFX(ShooterConstants.INTAKE_ID, canbus);
     m_indexer = new TalonFX(ShooterConstants.INDEXER_ID, canbus);
 
-    m_tof = new TimeOfFlight(28);
-    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
-
-    m_tof.pidGet();
+//    m_tof = new TimeOfFlight(28);
+//    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
 
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();

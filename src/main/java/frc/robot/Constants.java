@@ -233,7 +233,7 @@ public final class Constants {
     public static final ArmPose STOW_SETPOINT = new
         ArmPose("ArmPoses/Stow", true, 0.0, 45.0);
     public static final ArmPose INTAKE_SETPOINT =
-        new ArmPose("ArmPoses/Intake", true, 0.0, 55.0);
+        new ArmPose("ArmPoses/Intake", true, -7.0, 55.0);
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
 

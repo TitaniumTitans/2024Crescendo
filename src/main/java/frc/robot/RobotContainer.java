@@ -171,6 +171,8 @@ public class RobotContainer {
     Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
 
 //    intakeTrigger.whileTrue(new IntakeControlCommand(m_armSubsystem, m_shooter));
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.95, 0.5, 0.1)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
 //    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
 //        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
