@@ -173,9 +173,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Trigger intakeTrigger = controller.rightTrigger().and(controller.leftTrigger().negate());
-    Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
-    Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
+    Trigger intakeTrigger = controller.y().and(controller.a().negate());
+    Trigger spinUpTrigger = controller.a().and(controller.y().negate());
+    Trigger shootTrigger = controller.a().and(controller.y());
+    Trigger ampDepositeTrigger = controller.x().and(controller.a());
 
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.95, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
@@ -186,7 +187,7 @@ public class RobotContainer {
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
 
     controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter));
 
