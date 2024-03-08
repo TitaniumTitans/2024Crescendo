@@ -98,7 +98,7 @@ public class ClimberIOKraken implements ClimberIO {
   }
 
   @Override
-  public void updateInputs(ClimberIOInputs inputs) {
+  public void updateInputs(ClimberIOInputsAutoLogged inputs) {
     inputs.leftClimberPosition = m_leftPositionSignal.getValueAsDouble();
     inputs.rightClimberPosition = m_rightPositionSignal.getValueAsDouble();
 

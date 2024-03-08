@@ -19,13 +19,14 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import lib.logger.DataLogUtil;
+import org.littletonrobotics.junction.Logger;
 
 public class Module {
   private static final double WHEEL_RADIUS = Constants.DriveConstants.WHEEL_RADIUS_METERS;
   public static final double ODOMETRY_FREQUENCY = 250.0;
 
   private final ModuleIO m_io;
-  private final ModuleIO.ModuleIOInputs m_inputs = new ModuleIO.ModuleIOInputs();
+  private final ModuleIOInputsAutoLogged m_inputs = new ModuleIOInputsAutoLogged();
   private final int m_index;
 
   private Rotation2d m_angleSetpoint = null; // Setpoint for closed loop control, null for open loop
@@ -58,6 +59,8 @@ public class Module {
   }
 
   public void periodic() {
+    Logger.processInputs("Module" + m_index, m_inputs);
+
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
     if (m_turnRelativeOffset == null) {

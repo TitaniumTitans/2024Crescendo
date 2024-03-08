@@ -196,7 +196,7 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void updateInputs(ArmIOInputs inputs) {
+  public void updateInputs(ArmIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
             m_armPositionSignal,
             m_wristPositionSignal,

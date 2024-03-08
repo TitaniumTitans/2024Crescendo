@@ -53,7 +53,7 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {
+  public void updateInputs(ModuleIOInputsAutoLogged inputs) {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 

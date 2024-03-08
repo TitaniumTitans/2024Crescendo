@@ -14,8 +14,10 @@
 package frc.robot.subsystems.drive.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
+  @AutoLog
   class ModuleIOInputs {
     protected double drivePositionRad = 0.0;
     protected double driveVelocityRadPerSec = 0.0;
@@ -123,7 +125,7 @@ public interface ModuleIO {
   }
 
   /** Updates the set of loggable inputs. */
-  default void updateInputs(ModuleIOInputs inputs) {}
+  default void updateInputs(ModuleIOInputsAutoLogged inputs) {}
 
   /** Run the drive motor at the specified voltage. */
   default void setDriveVelocityMPS(double mps) {}

@@ -27,7 +27,7 @@ public class ArmIOSim implements ArmIO{
   private static final double LOOP_PERIOD_SECS = 0.02;
 
   @Override
-  public void updateInputs(ArmIOInputs inputs) {
+  public void updateInputs(ArmIOInputsAutoLogged inputs) {
     m_armSim.update(LOOP_PERIOD_SECS);
     m_wristSim.update(LOOP_PERIOD_SECS);
 

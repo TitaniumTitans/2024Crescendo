@@ -80,7 +80,7 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void updateInputs(ArmIOInputs inputs) {
+  public void updateInputs(ArmIOInputsAutoLogged inputs) {
     m_shoulderPID.updateIfChanged();
     m_wristPID.updateIfChanged();
 

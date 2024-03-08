@@ -147,7 +147,7 @@ public class ShooterIOKraken implements ShooterIO {
   }
 
   @Override
-  public void updateInputs(ShooterIOInputs inputs) {
+  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
         m_leftVelSignal,
         m_rightVelSignal,

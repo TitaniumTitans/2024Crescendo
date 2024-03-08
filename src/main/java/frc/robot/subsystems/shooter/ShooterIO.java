@@ -1,6 +1,9 @@
 package frc.robot.subsystems.shooter;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ShooterIO {
+  @AutoLog
   class ShooterIOInputs {
     protected double tlVelocityRPM = 0.0;
     protected double trVelocityRPM = 0.0;
@@ -246,7 +249,7 @@ public interface ShooterIO {
   default void setLeftVelocityRpm(double rpm) {}
   default void setRightVelocityRpm(double rpm) {}
   default boolean hasPiece() {return false;}
-  default void updateInputs(ShooterIOInputs inputs) {}
+  default void updateInputs(ShooterIOInputsAutoLogged inputs) {}
   default void stop() {}
 
 }

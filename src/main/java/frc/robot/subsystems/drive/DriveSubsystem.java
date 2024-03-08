@@ -19,6 +19,7 @@ import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.*;
@@ -49,7 +50,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
+import lib.utils.LocalADStarAK;
 import lib.utils.PoseEstimator;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -169,10 +173,15 @@ public class DriveSubsystem extends SubsystemBase {
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
         this);
-    Pathfinding.setPathfinder(new LocalADStar());
+    Pathfinding.setPathfinder(new LocalADStarAK());
+    PathPlannerLogging.setLogActivePathCallback(
+            (activePath) -> Logger.recordOutput(
+                    "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
+    PathPlannerLogging.setLogTargetPoseCallback(
+            (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
 
     // turn on logging
-    setupLogging();
+//    setupLogging();
     SmartDashboard.putData("Field",m_field);
 
     m_sysId = new SysIdRoutine(
@@ -279,7 +288,6 @@ public class DriveSubsystem extends SubsystemBase {
    * @param point the desired point to align to
    */
   public double alignToPoint(Pose3d point) {
-
     Transform3d robotToPoint = new Transform3d(new Pose3d(
         new Pose2d(pose.getTranslation(), new Rotation2d())), point);
 
@@ -324,7 +332,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns the module states (turn angles and drive velocities) for all the modules. */
-//  @AutoLogOutput(key = "SwerveStates/Measured")
+  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
@@ -342,13 +350,13 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns the current odometry pose. */
-//  @AutoLogOutput(key = "Odometry/Robot")
+  @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return pose;
   }
 
   /** Returns the robot pose with vision updates */
-//  @AutoLogOutput(key = "Odometry/RobotVision")
+  @AutoLogOutput(key = "Odometry/RobotVision")
   public Pose2d getVisionPose() {
     return m_wpiPoseEstimator.getEstimatedPosition();
   }

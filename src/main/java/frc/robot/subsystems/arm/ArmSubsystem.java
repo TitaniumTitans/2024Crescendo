@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
 import lib.logger.DataLogUtil;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -27,7 +28,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   private final ArmIO m_io;
-  private final ArmIO.ArmIOInputs m_inputs;
+  private final ArmIOInputsAutoLogged m_inputs;
   private double m_desiredArmPoseDegs;
   private double m_armVelocityMult = 0;
   private double m_desiredWristPoseDegs;
@@ -52,7 +53,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
     m_io = io;
-    m_inputs = new ArmIO.ArmIOInputs();
+    m_inputs = new ArmIOInputsAutoLogged();
 
     m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
     m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
@@ -61,7 +62,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_poseSupplier = supplier;
 
-    setupLogging();
+//    setupLogging();
     m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
     m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
@@ -69,6 +70,7 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
+    Logger.processInputs("Arm", m_inputs);
 
     handleState();
 

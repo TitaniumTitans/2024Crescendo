@@ -1,6 +1,9 @@
 package frc.robot.subsystems.climber;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ClimberIO {
+  @AutoLog
   class ClimberIOInputs {
     protected double leftClimberPosition = 0.0;
     protected double rightClimberPosition = 0.0;
@@ -102,6 +105,6 @@ public interface ClimberIO {
   default void setLeftVoltage(double volts) {}
   default void setRightPosition(double degrees) {}
   default void setLeftPosition(double degrees) {}
-  default void updateInputs(ClimberIOInputs inputs) {}
+  default void updateInputs(ClimberIOInputsAutoLogged inputs) {}
   default void stop() {}
 }

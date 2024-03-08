@@ -6,17 +6,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
+import org.littletonrobotics.junction.Logger;
 
 public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterIO m_io;
-  private final ShooterIO.ShooterIOInputs m_inputs;
+  private final ShooterIOInputsAutoLogged m_inputs;
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
-    m_inputs = new ShooterIO.ShooterIOInputs();
+    m_inputs = new ShooterIOInputsAutoLogged();
 
     // turn on logging
     setupLogging();
@@ -25,6 +26,7 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     m_io.updateInputs(m_inputs);
+    Logger.processInputs("Shooter", m_inputs);
   }
 
   public void setShooterPowerLeft(double power) {
