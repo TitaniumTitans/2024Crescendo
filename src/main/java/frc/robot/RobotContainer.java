@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
@@ -145,12 +146,18 @@ public class RobotContainer {
     autoChooser = new SendableChooser<>();
 
     // Set up feedforward characterization
-//    autoChooser.addOption(
-//        "Drive FF Characterization",
-//        new FeedForwardCharacterization(
-//                m_driveSubsystem,
-//                m_driveSubsystem::runCharacterizationVolts,
-//                m_driveSubsystem::getCharacterizationVelocity));
+    autoChooser.addOption(
+        "Drive Quasistatic Forward",
+            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+            "Drive Quasistatic Backwards",
+            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+            "Drive Dynamic Forward",
+            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+            "Drive Dynamic Backwards",
+            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -170,131 +177,49 @@ public class RobotContainer {
     Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
     Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
 
-//    intakeTrigger.whileTrue(new IntakeControlCommand(m_armSubsystem, m_shooter));
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.95, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-//    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
-//    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
+    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
+    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
 
-//    controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-//    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
-//        () -> m_shooter.setKickerPower(0.0),
-//        m_shooter));
+    controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+        () -> m_shooter.setKickerPower(0.0),
+        m_shooter));
 
-    double centerDistance = 1.34 - Units.inchesToMeters(3.0);
-
-//    m_driveSubsystem.setDefaultCommand(
-//        DriveCommands.joystickDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> -controller.getRightX()));
-//    controller
-//        .start()
-//        .onTrue(
-//            Commands.runOnce(
-//                    () ->
-//                        m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-//                            new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(240.25), 5.55),
-//                            Rotation2d.fromDegrees(180.0)))),
-//                    m_driveSubsystem)
-//                .ignoringDisable(true));
+    m_driveSubsystem.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
+    controller
+        .start()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+                            new Pose2d(m_driveSubsystem.getVisionPose().getTranslation(),
+                            Rotation2d.fromDegrees(180.0)))),
+                    m_driveSubsystem)
+                .ignoringDisable(true));
   }
 
   /**
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-//    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
-//    NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
   }
 
   private void configureDashboard() {
     ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
 
-//    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
-//    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
-/*
-    commandTab.add("Center Robot Pose", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(
-                    new Pose2d(
-                        FieldConstants.FIELD_LENGTH / 2.0,
-                        FieldConstants.FIELD_WIDTH / 2.0,
-                        new Rotation2d())),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("CenterToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(1.34, 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    double centerDistance = 1.34 - Units.inchesToMeters(3.0);
-
-    commandTab.add("2InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(2.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("6InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(6.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("12InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(12.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("24InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(24.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("48InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(48.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("96InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(96.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("192InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(192.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
- */
+    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
+    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
   }
 
   /**

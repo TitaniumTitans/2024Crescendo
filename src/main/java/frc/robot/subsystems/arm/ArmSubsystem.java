@@ -93,10 +93,10 @@ public class ArmSubsystem extends SubsystemBase {
 
     if (m_desiredState != ArmState.DISABLED) {
       // check to see if the wrist is currently too close to the rest of the arm
-      m_io.setWristAngle(m_desiredWristPoseDegs, m_wristVelocityMult);
+      double predictedUnderGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
+              - (m_desiredArmPoseDegs + m_desiredWristPoseDegs), 0, 180);
 
-      double underGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
-          - (m_inputs.armPositionDegs + m_inputs.wristPositionDegs), 0, 180);
+      m_io.setWristAngle(m_desiredWristPoseDegs + predictedUnderGap, m_wristVelocityMult);
 
       // set the arms angle
       m_io.setArmAngle(m_desiredArmPoseDegs, m_armVelocityMult);
@@ -110,8 +110,8 @@ public class ArmSubsystem extends SubsystemBase {
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_inputs.armPositionDegs > 60 && m_currentState == ArmState.AMP) {
-          m_wristVelocityMult = 0.0;
+        if (m_inputs.armPositionDegs > 65 && m_currentState == ArmState.AMP) {
+          m_wristVelocityMult = 0.25;
           m_armVelocityMult = 1.0;
         } else {
           m_currentState = ArmState.STOW;

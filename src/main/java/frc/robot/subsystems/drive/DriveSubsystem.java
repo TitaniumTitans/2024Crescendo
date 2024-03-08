@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -27,12 +28,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
@@ -45,6 +50,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
 import lib.utils.PoseEstimator;
+
+import static edu.wpi.first.units.Units.Volts;
 
 public class DriveSubsystem extends SubsystemBase {
 
@@ -75,6 +82,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final PidProperty m_thetaPidProperty;
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Swerve");
+
+  private final SysIdRoutine m_sysId;
 
   private final SwerveModuleState[] m_measureStates = new SwerveModuleState[] {
       new SwerveModuleState(),
@@ -165,6 +174,20 @@ public class DriveSubsystem extends SubsystemBase {
     // turn on logging
     setupLogging();
     SmartDashboard.putData("Field",m_field);
+
+    m_sysId = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    null,
+                    null,
+                    (SysIdRoutineLog.State state) -> SignalLogger.writeString("Drive/SysidState", state.toString())
+            ),
+            new SysIdRoutine.Mechanism(
+                    (Measure<Voltage> volts) -> runCharacterizationVolts(volts.in(Volts)),
+                    null,
+                    this
+            )
+    );
   }
 
   @Override
@@ -363,6 +386,14 @@ public class DriveSubsystem extends SubsystemBase {
       new Translation2d(-DriveConstants.TRACK_WIDTH_X / 2.0, DriveConstants.TRACK_WIDTH_Y / 2.0),
       new Translation2d(-DriveConstants.TRACK_WIDTH_X / 2.0, -DriveConstants.TRACK_WIDTH_Y / 2.0)
     };
+  }
+
+  public Command runSysidQuasistatic(SysIdRoutine.Direction direction) {
+    return m_sysId.quasistatic(direction);
+  }
+
+  public Command runSysidDynamic(SysIdRoutine.Direction direction) {
+    return m_sysId.dynamic(direction);
   }
 
   public void setupLogging() {
