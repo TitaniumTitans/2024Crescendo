@@ -59,9 +59,9 @@ import lib.utils.FieldConstants;
 public class RobotContainer {
   // Subsystems
   private final DriveSubsystem m_driveSubsystem;
-//  private final ShooterSubsystem m_shooter;
-//  public final ArmSubsystem m_armSubsystem;
-//  private final ClimberSubsystem m_climber;
+  private final ShooterSubsystem m_shooter;
+  public final ArmSubsystem m_armSubsystem;
+  private final ClimberSubsystem m_climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -81,13 +81,14 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
-            new VisionSubsystem[]{
-                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
-            });
-//        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-//        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
-//        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS)
+//            new VisionSubsystem[]{
+//                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
+//            }
+            );
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken());
+        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case PROTO_ARM -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -96,9 +97,9 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {},
             new ModuleIO() {});
-//        m_shooter = new ShooterSubsystem(new ShooterIO() {});
-//        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       case PROTO_SHOOTER -> {
         m_driveSubsystem = new DriveSubsystem(
@@ -108,9 +109,9 @@ public class RobotContainer {
             new ModuleIO() {},
             new ModuleIO() {},
             new ModuleIO() {});
-//        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
-//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
       }
       case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
@@ -121,9 +122,9 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.FR_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
-//        m_shooter = new ShooterSubsystem(new ShooterIOSim());
-//        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getPose);
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIOSim());
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim());
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -134,9 +135,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-//        m_shooter = new ShooterSubsystem(new ShooterIO() {});
-//        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-//        m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_shooter = new ShooterSubsystem(new ShooterIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
 
@@ -144,12 +145,12 @@ public class RobotContainer {
     autoChooser = new SendableChooser<>();
 
     // Set up feedforward characterization
-    autoChooser.addOption(
-        "Drive FF Characterization",
-        new FeedForwardCharacterization(
-                m_driveSubsystem,
-                m_driveSubsystem::runCharacterizationVolts,
-                m_driveSubsystem::getCharacterizationVelocity));
+//    autoChooser.addOption(
+//        "Drive FF Characterization",
+//        new FeedForwardCharacterization(
+//                m_driveSubsystem,
+//                m_driveSubsystem::runCharacterizationVolts,
+//                m_driveSubsystem::getCharacterizationVelocity));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -183,22 +184,22 @@ public class RobotContainer {
 
     double centerDistance = 1.34 - Units.inchesToMeters(3.0);
 
-    m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    controller
-        .start()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                            new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(240.25), 5.55),
-                            Rotation2d.fromDegrees(180.0)))),
-                    m_driveSubsystem)
-                .ignoringDisable(true));
+//    m_driveSubsystem.setDefaultCommand(
+//        DriveCommands.joystickDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> -controller.getRightX()));
+//    controller
+//        .start()
+//        .onTrue(
+//            Commands.runOnce(
+//                    () ->
+//                        m_driveSubsystem.setPose(AllianceFlipUtil.apply(
+//                            new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(240.25), 5.55),
+//                            Rotation2d.fromDegrees(180.0)))),
+//                    m_driveSubsystem)
+//                .ignoringDisable(true));
   }
 
   /**
@@ -214,7 +215,7 @@ public class RobotContainer {
 
 //    commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
 //    commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
-
+/*
     commandTab.add("Center Robot Pose", Commands.runOnce(
             () ->
                 m_driveSubsystem.setPose(
@@ -290,6 +291,8 @@ public class RobotContainer {
                         Rotation2d.fromDegrees(180.0)))),
             m_driveSubsystem)
         .ignoringDisable(true));
+
+ */
   }
 
   /**

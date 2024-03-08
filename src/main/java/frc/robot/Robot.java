@@ -48,11 +48,11 @@ public class Robot extends TimedRobot {
 
     String logPath = "/media/sda1/aoide";
 
-    DataLogManager.start(logPath);
-    DriverStation.startDataLog(DataLogManager.getLog());
+//    DataLogManager.start(logPath);
+//    DriverStation.startDataLog(DataLogManager.getLog());
 
-    SignalLogger.setPath(logPath);
-    SignalLogger.start();
+//    SignalLogger.setPath(logPath);
+//    SignalLogger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -60,14 +60,14 @@ public class Robot extends TimedRobot {
 
     pdp = new PowerDistribution();
 
-    final StringLogEntry entry = new StringLogEntry(DataLogManager.getLog(), "/ntlog");
-    NetworkTableInstance.getDefault()
-        .addLogger(
-            0,
-            100,
-            event ->
-                entry.append(
-                    event.logMessage.filename + ":" + event.logMessage.line + ":" + event.logMessage.message));
+//    final StringLogEntry entry = new StringLogEntry(DataLogManager.getLog(), "/ntlog");
+//    NetworkTableInstance.getDefault()
+//        .addLogger(
+//            0,
+//            100,
+//            event ->
+//                entry.append(
+//                    event.logMessage.filename + ":" + event.logMessage.line + ":" + event.logMessage.message));
   }
 
   /** This function is called periodically during all modes. */

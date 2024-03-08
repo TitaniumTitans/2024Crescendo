@@ -60,6 +60,8 @@ public class ShooterIOKraken implements ShooterIO {
     m_tof = new TimeOfFlight(28);
     m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
 
+    m_tof.pidGet();
+
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -188,11 +190,16 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.intakeTemperature = m_intakeTemperatureSignal.getValueAsDouble();
     inputs.indexerTemperature = m_indexerTemperatureSignal.getValueAsDouble();
 
-    inputs.tofDistanceIn = m_tof.getRange();
+//    inputs.tofDistanceIn = m_tof.getRange();
 
     m_leftProperty.updateIfChanged();
     m_rightProperty.updateIfChanged();
   }
+
+//  @Override
+//  public boolean hasPiece() {
+//    return m_tof.getRange() < 60;
+//  }
 
   @Override
   public void setMotorVoltageTL(double voltage) {

@@ -68,7 +68,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean hasPiece() {
-    return m_inputs.tofDistanceIn < 60;
+    return m_io.hasPiece();
   }
 
   /** Command Factories */
