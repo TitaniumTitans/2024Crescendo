@@ -47,6 +47,16 @@ public class TalonFXFactory {
     return talonFX;
   }
 
+  //METHOD: This allows for the creation of a new Talon Brushless Motor with a preset Config
+  public static TalonFX createTalon(int id, TalonFXConfiguration config) {
+    TalonFX talonFX = new TalonFX(id, "canivore");
+
+    talonFX.getConfigurator().apply(config);
+
+    TalonFxMotors.add(new Pair<>(talonFX, config));
+    return talonFX;
+  }
+
   // METHOD: Checks each motor and handles sticky faults
   public static void handleFaults() {
     TalonFxMotors.forEach((Pair<TalonFX, TalonFXConfiguration> pair) -> {

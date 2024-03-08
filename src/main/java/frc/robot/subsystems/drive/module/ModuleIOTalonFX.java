@@ -14,6 +14,7 @@
 package frc.robot.subsystems.drive.module;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -28,6 +29,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 
 import java.util.Queue;
@@ -75,8 +77,6 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
     String canbus = "canivore";
-    m_driveTalon = new TalonFX(moduleConstants.DRIVE_MOTOR_ID(), canbus);
-    m_turnTalon = new TalonFX(moduleConstants.TURN_MOTOR_ID(), canbus);
     
     /*
     * this is technically the proper way of using any class that
@@ -104,7 +104,8 @@ public class ModuleIOTalonFX implements ModuleIO {
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
     driveConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
-    m_driveTalon.getConfigurator().apply(driveConfig);
+
+    m_driveTalon = TalonFXFactory.createTalon(moduleConstants.DRIVE_MOTOR_ID(), canbus, driveConfig);
     setDriveBrakeMode(true);
 
     // setup pid gains for drive motor
@@ -126,7 +127,8 @@ public class ModuleIOTalonFX implements ModuleIO {
                     : InvertedValue.CounterClockwise_Positive;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
     turnConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.TURNING_GEAR_RATIO();
-    m_turnTalon.getConfigurator().apply(turnConfig);
+
+    m_turnTalon = TalonFXFactory.createTalon(moduleConstants.TURN_MOTOR_ID(), turnConfig);
     setTurnBrakeMode(true);
 
     // setup pid gains for turn motor
