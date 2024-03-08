@@ -17,15 +17,16 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.ParentDevice;
-import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.subsystems.drive.DriveSubsystem;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.drive.DriveSubsystem;
+//import org.littletonrobotics.junction.Logger;
 
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
@@ -40,6 +41,7 @@ public class PhoenixOdometryThread extends Thread {
       new ReentrantLock(); // Prevents conflicts when registering signals
   private BaseStatusSignal[] signals = new BaseStatusSignal[0];
   private final List<Queue<Double>> queues = new ArrayList<>();
+  private final List<Queue<Double>> timestampQueues = new ArrayList<>();
   private boolean isCANFD = false;
 
   private static PhoenixOdometryThread instance = null;
@@ -54,7 +56,13 @@ public class PhoenixOdometryThread extends Thread {
   private PhoenixOdometryThread() {
     setName("PhoenixOdometryThread");
     setDaemon(true);
-    start();
+  }
+
+  @Override
+  public void start() {
+    if (timestampQueues.size() > 0) {
+      super.start();
+    }
   }
 
   public Queue<Double> registerSignal(ParentDevice device, StatusSignal<Double> signal) {
@@ -75,6 +83,17 @@ public class PhoenixOdometryThread extends Thread {
     return queue;
   }
 
+  public Queue<Double> makeTimestampQueue() {
+    Queue<Double> queue = new ArrayBlockingQueue<>(20);
+    DriveSubsystem.odometryLock.lock();
+    try {
+      timestampQueues.add(queue);
+    } finally {
+      DriveSubsystem.odometryLock.unlock();
+    }
+    return queue;
+  }
+
   @Override
   public void run() {
     while (true) {
@@ -89,13 +108,10 @@ public class PhoenixOdometryThread extends Thread {
           // of Pro licensing. No reasoning for this behavior
           // is provided by the documentation.
           Thread.sleep((long) (1000.0 / Module.ODOMETRY_FREQUENCY));
-          if (signals.length > 0) {
-            BaseStatusSignal.refreshAll(signals);
-          }
+          if (signals.length > 0) BaseStatusSignal.refreshAll(signals);
         }
       } catch (InterruptedException e) {
-        DriverStation.reportError(e.toString(), true);
-        Thread.currentThread().interrupt();
+        e.printStackTrace();
       } finally {
         signalsLock.unlock();
       }
@@ -103,8 +119,19 @@ public class PhoenixOdometryThread extends Thread {
       // Save new data to queues
       DriveSubsystem.odometryLock.lock();
       try {
+        double timestamp = Timer.getFPGATimestamp() / 1e6;
+        double totalLatency = 0.0;
+        for (BaseStatusSignal signal : signals) {
+          totalLatency += signal.getTimestamp().getLatency();
+        }
+        if (signals.length > 0) {
+          timestamp -= totalLatency / signals.length;
+        }
         for (int i = 0; i < signals.length; i++) {
           queues.get(i).offer(signals[i].getValueAsDouble());
+        }
+        for (int i = 0; i < timestampQueues.size(); i++) {
+          timestampQueues.get(i).offer(timestamp);
         }
       } finally {
         DriveSubsystem.odometryLock.unlock();

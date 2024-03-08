@@ -29,7 +29,6 @@ import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
+import frc.robot.subsystems.drive.module.PhoenixOdometryThread;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.util.concurrent.locks.Lock;
@@ -61,7 +61,13 @@ public class DriveSubsystem extends SubsystemBase {
   private final Field2d m_field = new Field2d();
 
   private Pose2d pose = new Pose2d();
-  private Rotation2d lastGyroRotation = new Rotation2d();
+  private Rotation2d m_rawGyroRotation = new Rotation2d();
+  private SwerveModulePosition[] m_lastModulePositions = new SwerveModulePosition[] {
+      new SwerveModulePosition(),
+      new SwerveModulePosition(),
+      new SwerveModulePosition(),
+      new SwerveModulePosition()
+  };
 
   private final VisionSubsystem[] m_cameras;
 
@@ -116,6 +122,8 @@ public class DriveSubsystem extends SubsystemBase {
     modules[1] = new Module(frModuleIO);
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
+
+    PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(-Math.PI, Math.PI);
@@ -179,37 +187,37 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Update odometry
-//    int deltaCount =
-//        gyroInputs.isConnected() ? gyroInputs.getOdometryYawPositions().length : Integer.MAX_VALUE;
-//    for (int i = 0; i < 4; i++) {
-//      deltaCount = Math.min(deltaCount, modules[i].getPositionDeltas().length);
-//    }
-//    Logger.recordOutput("Odometry/Delta Count", deltaCount);
-//    for (int deltaIndex = 0; deltaIndex < deltaCount; deltaIndex++) {
-//       Read wheel deltas from each module
-//      SwerveModulePosition[] wheelDeltas = new SwerveModulePosition[4];
-//      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-//        wheelDeltas[moduleIndex] = modules[moduleIndex].getPositionDeltas()[deltaIndex];
-//      }
+    double[] sampleTimestamps =
+        modules[0].getOdometryTimestamps(); // All signals are sampled together
+    int sampleCount = sampleTimestamps.length;
+    for (int i = 0; i < sampleCount; i++) {
+      // Read wheel positions and deltas from each module
+      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+        moduleDeltas[moduleIndex] =
+            new SwerveModulePosition(
+                modulePositions[moduleIndex].distanceMeters
+                    - m_lastModulePositions[moduleIndex].distanceMeters,
+                modulePositions[moduleIndex].angle);
+        m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+      }
 
-      // The twist represents the motion of the robot since the last
-      // sample in x, y, and theta based only on the modules, without
-      // the gyro. The gyro is always disconnected in simulation.
-//      var twist = kinematics.toTwist2d(wheelDeltas);
-//      if (gyroInputs.isConnected()) {
-        // If the gyro is connected, replace the theta component of the twist
-        // with the change in angle since the last sample.
-//        Rotation2d gyroRotation = gyroInputs.getOdometryYawPositions()[deltaIndex];
-//        twist = new Twist2d(twist.dx, twist.dy, gyroRotation.minus(lastGyroRotation).getRadians());
-//        lastGyroRotation = gyroRotation;
-//      }
-//      Logger.recordOutput("Odometry/Twist", twist);
-      // Apply the twist (change since last sample) to the current pose
-//      m_poseEstimator.addDriveData(Timer.getFPGATimestamp(), twist);
-//      pose = pose.exp(twist);
-//    }
+      // Update gyro angle
+      if (gyroInputs.connected) {
+        // Use the real gyro angle
+        m_rawGyroRotation = gyroInputs.odometryYawPositions[i];
+      } else {
+        // Use the angle delta from the kinematics and module deltas
+        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+      }
 
-//    List<PoseEstimator.TimestampedVisionUpdate> visionUpdates = new java.util.ArrayList<>(List.of());
+      // Apply update
+      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
+    }
+
     for (VisionSubsystem camera : m_cameras) {
       camera.updateInputs();
       camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
@@ -217,8 +225,6 @@ public class DriveSubsystem extends SubsystemBase {
               m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
       );
     }
-
-//    m_poseEstimator.addVisionData(visionUpdates);
 
     m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();

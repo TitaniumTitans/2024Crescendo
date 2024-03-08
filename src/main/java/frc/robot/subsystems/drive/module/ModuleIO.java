@@ -31,6 +31,8 @@ public interface ModuleIO {
     protected double[] odometryDrivePositionsRad = new double[] {};
     protected Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
 
+    protected double[] odometryTimestamps = new double[] {};
+
     public double getDrivePositionRad() {
       return drivePositionRad;
     }
