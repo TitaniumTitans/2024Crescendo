@@ -82,10 +82,11 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS)
-//            new VisionSubsystem[]{
-//                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
-//            }
+            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
+            new VisionSubsystem[]{
+                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
+                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION)
+            }
             );
         m_shooter = new ShooterSubsystem(new ShooterIOKraken() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken());

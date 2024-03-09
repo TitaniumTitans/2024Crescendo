@@ -84,23 +84,26 @@ public final class Constants {
     // kP, kI, kD in order
     public static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
 
-//    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
-//        new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),
-//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(-18))
-//    );
-//    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-//                new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(-8.5), Units.inchesToMeters(6)),
-//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(18))
-//        );
-
-    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(12.0), Units.inchesToMeters(6.0), Units.inchesToMeters(7.8)),
-        new Rotation3d(Units.degreesToRadians(0.0), Units.degreesToRadians(20.0), -Units.degreesToRadians(7.5))
+    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(11.0351),
+            Units.inchesToMeters(10.023204),
+            Units.inchesToMeters(4.1374)),
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-120.0 + 91.0), // 120.0
+            Units.degreesToRadians(165.3224 + 180)) // 165.3224
     );
 
-    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(-9.0), Units.inchesToMeters(6.0)),
-        new Rotation3d(Units.degreesToRadians(2.0), Units.degreesToRadians(-26.0), Units.degreesToRadians(-35.0 - 180))
+    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(7.0351),
+            Units.inchesToMeters(-9.023204),
+            Units.inchesToMeters(4.1374)),
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-120.0 + 91.0), // 120.0
+            Units.degreesToRadians(-165.3224 + 180 - 11)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
