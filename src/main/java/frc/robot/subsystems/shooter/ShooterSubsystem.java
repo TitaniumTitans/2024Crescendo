@@ -1,5 +1,10 @@
 package frc.robot.subsystems.shooter;
 
+import com.gos.lib.properties.GosDoubleProperty;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -7,18 +12,35 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
 import org.littletonrobotics.junction.Logger;
+import lib.utils.AimbotUtils;
+import lib.utils.AllianceFlipUtil;
+import lib.utils.FieldConstants;
+
+import java.util.function.Supplier;
 
 public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterIO m_io;
   private final ShooterIOInputsAutoLogged m_inputs;
 
+  private final Supplier<Pose2d> m_poseSupplier;
+
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
+  private final GosDoubleProperty m_leftPower = new
+      GosDoubleProperty(false, "Shooter/Left RPM", 3600);
+  private final GosDoubleProperty m_rightPower = new
+      GosDoubleProperty(false, "Shooter/Right RPM", 3600);
+
   public ShooterSubsystem(ShooterIO io) {
+    this(io, Pose2d::new);
+  }
+
+  public ShooterSubsystem(ShooterIO io, Supplier<Pose2d> poseSupplier) {
     m_io = io;
     m_inputs = new ShooterIOInputsAutoLogged();
 
+    m_poseSupplier = poseSupplier;
     // turn on logging
     setupLogging();
   }
@@ -49,11 +71,18 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command runShooterVelocity(boolean runKicker) {
     return runEnd(() -> {
-          m_io.setLeftVelocityRpm(0.0);
-          m_io.setRightVelocityRpm(0.0);
+//          m_io.setLeftVelocityRpm(m_leftPower.getValue());
+//          m_io.setRightVelocityRpm(m_rightPower.getValue());
+
+          Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+          Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
+          double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
+
+          m_io.setLeftVelocityRpm(AimbotUtils.getLeftSpeed(groundDistance));
+          m_io.setRightVelocityRpm(AimbotUtils.getRightSpeed(groundDistance));
 
           if (runKicker) {
-            m_io.setKickerVoltage(3.0);
+            m_io.setKickerVoltage(12.0);
             m_io.setIntakeVoltage(0.05);
           } else {
             m_io.setKickerVoltage(0.0);
@@ -85,11 +114,11 @@ public class ShooterSubsystem extends SubsystemBase {
             setKickerPower(kickerPower);
             timer.restart();
           } else if (!timer.hasElapsed(timeout)) {
-            setShooterPowerLeft(0.0);
-            setShooterPowerRight(0.0);
-            setKickerPower(-0.25);
+            setKickerPower(-0.1);
             setIntakePower(0.0);
           } else {
+            setShooterPowerRight(0.0);
+            setShooterPowerLeft(0.0);
             setKickerPower(0.0);
             setIntakePower(0.0);
           }
@@ -121,5 +150,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     m_logTable.addDouble("LeftTemperature", () -> m_inputs.tlTemperature, false);
     m_logTable.addDouble("RightTemperature", () -> m_inputs.trTemperature, false);
+
+    m_logTable.addDouble("IntakeCurrent", () -> m_inputs.intakeCurrentDraw, true);
   }
 }

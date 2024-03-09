@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import lib.logger.DataLogUtil;
 import org.littletonrobotics.junction.Logger;
@@ -76,8 +77,11 @@ public class Module {
       if (m_speedSetpoint != null) {
         // Run drive controller
         m_io.setDriveVelocityMPS(m_speedSetpoint);
+        SmartDashboard.putNumber("Module" + m_index + "/Desired MPS", m_speedSetpoint);
       }
     }
+
+    SmartDashboard.putNumber("Module" + m_index + "/Actual MPS", m_inputs.driveVelocityRadPerSec * WHEEL_RADIUS);
 
     // Calculate positions for odometry
     int sampleCount = m_inputs.odometryTimestamps.length; // All signals are sampled together

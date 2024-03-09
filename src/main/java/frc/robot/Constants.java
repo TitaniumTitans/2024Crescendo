@@ -70,7 +70,7 @@ public final class Constants {
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.0);
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.8);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.6);
     public static final double TRACK_WIDTH_Y = Units.inchesToMeters(18.6);
     public static final double DRIVE_BASE_RADIUS =
@@ -84,35 +84,38 @@ public final class Constants {
     // kP, kI, kD in order
     public static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
 
-//    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
-//        new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),
-//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(-18))
-//    );
-//    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-//                new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(-8.5), Units.inchesToMeters(6)),
-//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(18))
-//        );
-
-    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(12.0), Units.inchesToMeters(6.0), Units.inchesToMeters(7.8)),
-        new Rotation3d(Units.degreesToRadians(0.0), Units.degreesToRadians(20.0), -Units.degreesToRadians(7.5))
+    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(7.0351), // 11.0351
+            Units.inchesToMeters(-6.523204), // 10.023204
+            Units.inchesToMeters(6.1374)), // 4.1374
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-30.0 + 1), // -120.0 + 91.0
+            Units.degreesToRadians(-13.7)) // 165.3224 + 180
     );
 
-    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(-9.0), Units.inchesToMeters(6.0)),
-        new Rotation3d(Units.degreesToRadians(2.0), Units.degreesToRadians(-26.0), Units.degreesToRadians(-35.0 - 180))
+    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(5.0351), //11.0351
+            Units.inchesToMeters(-22.023204), //-10.023204
+            Units.inchesToMeters(4.1374)), // 7.1374
+        new Rotation3d(
+            Units.degreesToRadians(2.0),
+            Units.degreesToRadians(-30.0 + 3), // -30.0 - 1
+            Units.degreesToRadians(5.25)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        Units.radiansToDegrees(MAX_LINEAR_SPEED),
-        Units.radiansToDegrees(MAX_LINEAR_SPEED),
-        MAX_ANGULAR_SPEED,
-        MAX_ANGULAR_SPEED
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.25
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0),new PIDConstants(5.0),
-        DriveConstants.MAX_LINEAR_SPEED, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
+        new PIDConstants(1.0),new PIDConstants(1.0),
+        DriveConstants.MAX_LINEAR_SPEED * 0.25, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
@@ -236,6 +239,8 @@ public final class Constants {
         new ArmPose("ArmPoses/Intake", true, -7.0, 55.0);
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
+
+    public static final ArmPose STATIC_SHOOTER = new ArmPose(0.0, 55.0);
 
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
 

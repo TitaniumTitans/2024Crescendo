@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import lib.logger.DataLogUtil;
 import lib.utils.PoseEstimator;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -30,8 +31,8 @@ public class VisionSubsystem {
   private final String m_name;
 
   private Pose3d m_lastEstimatedPose = new Pose3d();
-  private final double xyStdDevCoefficient = 0.01;
-  private final double thetaStdDevCoefficient = 0.01;
+  private final double xyStdDevCoefficient = 0.025;
+  private final double thetaStdDevCoefficient = 0.025;
 
   private final PhotonVisionIOInputs inputs = new PhotonVisionIOInputs();
 
@@ -51,6 +52,8 @@ public class VisionSubsystem {
     } catch (IOException e){
       throw new IllegalStateException(e);
     }
+
+    DataLogUtil.getTable(camName).addPose3d("Estimated Pose3d", () -> m_lastEstimatedPose, true);
   }
 
   public void updateInputs() {
@@ -77,8 +80,16 @@ public class VisionSubsystem {
       double distance = estPose.estimatedPose.toPose2d().getTranslation().getDistance(
           robotToCam.getTranslation().toTranslation2d());
 
-      double xyStdDev = xyStdDevCoefficient * Math.pow(distance, 2.0);
-      double thetaStdDev = thetaStdDevCoefficient * Math.pow(distance, 2.0);
+      double xyStdDev = 0.0;
+      double thetaStdDev = 0.0;
+
+      if (estPose.strategy != PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+        xyStdDev = xyStdDevCoefficient * Math.pow(distance, 2.0);
+        thetaStdDev = thetaStdDevCoefficient * Math.pow(distance, 2.0);
+      } else {
+        xyStdDev = (xyStdDevCoefficient / 2.0) * Math.pow(distance, 2.0);
+        thetaStdDev = (thetaStdDevCoefficient / 2.0) * Math.pow(distance, 2.0);
+      }
 
       return Optional.of(new PoseEstimator.TimestampedVisionUpdate(estPose.timestampSeconds,
           estPose.estimatedPose.toPose2d(),

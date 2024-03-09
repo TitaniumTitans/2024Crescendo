@@ -16,6 +16,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -41,7 +42,7 @@ public class DriveCommands {
         () -> {
           double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
           double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
-          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.15);
+          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0);
 
           // Apply deadband
           double linearMagnitude =
@@ -57,13 +58,23 @@ public class DriveCommands {
                   .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
                   .getTranslation();
 
+          Rotation2d heading = new Rotation2d();
+
+          // if red change heading goal
+          if (DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            heading = driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
+          } else {
+            heading = driveSubsystem.getRotation();
+          }
+
           // Convert to field relative speeds & send command
           driveSubsystem.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
                   omega * driveSubsystem.getMaxAngularSpeedRadPerSec(),
-                  driveSubsystem.getRotation()));
+                  heading));
         },
             driveSubsystem);
   }
@@ -93,8 +104,18 @@ public class DriveCommands {
               .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
               .getTranslation();
 
-      if (linearVelocity.getNorm() > 0.1) {
-        omega = omega * 4;
+//      if (linearVelocity.getNorm() > 0.1) {
+//        omega = omega * 4;
+//      }
+
+      Rotation2d heading = new Rotation2d();
+
+      // if red change heading goal
+      if (DriverStation.getAlliance().isPresent()
+          && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+        heading = driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
+      } else {
+        heading = driveSubsystem.getRotation();
       }
 
       // Convert to field relative speeds & send command
@@ -103,7 +124,7 @@ public class DriveCommands {
               linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
               linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
               omega * driveSubsystem.getMaxAngularSpeedRadPerSec(),
-              driveSubsystem.getRotation()));
+              heading));
 
     }, driveSubsystem);
   }

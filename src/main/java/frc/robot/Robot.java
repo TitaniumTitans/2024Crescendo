@@ -57,7 +57,7 @@ public class Robot extends LoggedRobot {
     DataLogManager.start(logPath);
     DriverStation.startDataLog(DataLogManager.getLog());
 
-    SignalLogger.setPath(logPath + "/ctre");
+    SignalLogger.setPath(logPath);
     SignalLogger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,

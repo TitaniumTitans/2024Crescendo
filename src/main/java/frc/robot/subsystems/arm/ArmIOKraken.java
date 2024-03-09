@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ArmConstants;
@@ -47,8 +48,8 @@ public class ArmIOKraken implements ArmIO {
 
   private boolean m_tracking = false;
 
-  private double m_prevArmVelocityMult;
-  private double m_prevWristVelocityMult;
+  private double m_prevArmVelocity = 0.0;
+  private double m_prevWristVelocity = 0.0;
 
   // Status signals
   private final StatusSignal<Double> m_armPositionSignal;
