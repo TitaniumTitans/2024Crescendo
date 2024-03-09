@@ -48,8 +48,8 @@ public class ArmIOKraken implements ArmIO {
 
   private boolean m_tracking = false;
 
-  private double m_prevArmVelocity = 0.0;
-  private double m_prevWristVelocity = 0.0;
+  private double m_prevArmVelocityMult = 0.0;
+  private double m_prevWristVelocityMult = 0.0;
 
   // Status signals
   private final StatusSignal<Double> m_armPositionSignal;

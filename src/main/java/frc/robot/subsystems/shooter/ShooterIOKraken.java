@@ -29,6 +29,8 @@ public class ShooterIOKraken implements ShooterIO {
   private final VelocityVoltage m_velRequest;
   private final NeutralOut m_stopRequest;
 
+  private final double[] m_prevKickerCurrent = new double[] {0.0, 0.0, 0.0, 0.0};
+
   private final StatusSignal<Double> m_leftVelSignal;
   private final StatusSignal<Double> m_rightVelSignal;
 
@@ -182,6 +184,8 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.intakeCurrentDraw = m_intakeCurrentDrawSignal.getValueAsDouble();
     inputs.indexerCurrentDraw = m_indexerCurrentDrawSignal.getValueAsDouble();
     inputs.kickerCurrentDraw = m_kickerCurrentDrawSignal.getValueAsDouble();
+
+
 
     inputs.tlTemperature = m_leftTemperatureSignal.getValueAsDouble();
     inputs.trTemperature = m_rightTemperatureSignal.getValueAsDouble();
