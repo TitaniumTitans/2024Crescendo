@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ArmConstants;
@@ -258,6 +259,8 @@ public class ArmIOKraken implements ArmIO {
     }
     m_armDynMMRequest.Velocity = m_armDynMMRequest.Velocity * velocityMult;
     m_prevArmVelocity = velocityMult;
+
+    SmartDashboard.putNumber("Prev Arm Vel Mult", m_prevArmVelocity);
 
     m_armMaster.setControl(m_armDynMMRequest.withPosition(degrees / 360));
     m_armFollower.setControl(m_armFollowerRequest);

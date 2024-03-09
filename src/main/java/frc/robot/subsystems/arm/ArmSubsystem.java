@@ -116,8 +116,8 @@ public class ArmSubsystem extends SubsystemBase {
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_inputs.armPositionDegs > 65 && m_currentState == ArmState.AMP) {
-          m_wristVelocityMult = 0.25;
+        if (m_inputs.armPositionDegs > 67.5 && m_currentState == ArmState.AMP) {
+          m_wristVelocityMult = 0.35;
           m_armVelocityMult = 1.0;
         } else {
           m_currentState = ArmState.STOW;
@@ -152,11 +152,10 @@ public class ArmSubsystem extends SubsystemBase {
       case AMP -> {
         if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5) {
           m_armVelocityMult = 0.5;
-          m_wristVelocityMult = 1.0;
         } else {
           m_armVelocityMult = 1.0;
-          m_wristVelocityMult = 1.0;
         }
+        m_wristVelocityMult = 1.0;
 
         m_currentState = ArmState.AMP;
 
@@ -192,7 +191,7 @@ public class ArmSubsystem extends SubsystemBase {
   /* Command Factories */
 
   public Command setDesiredStateFactory(ArmState state) {
-    return runEnd(() -> m_desiredState = state,
+    return startEnd(() -> m_desiredState = state,
         () -> m_desiredState = ArmState.STOW);
   }
 

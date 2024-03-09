@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +26,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -143,8 +146,11 @@ public class RobotContainer {
       }
     }
 
-    // Set up auto routines
-    autoChooser = new SendableChooser<>();
+    // configure named commands for auto
+    configureNamedCommands();
+    configureDashboard();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
 
     // Set up feedforward characterization
     autoChooser.addOption(
@@ -160,11 +166,10 @@ public class RobotContainer {
             "Drive Dynamic Backwards",
             m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kReverse));
 
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
     // Configure the button bindings
     configureButtonBindings();
-    // configure named commands for auto
-    configureNamedCommands();
-    configureDashboard();
   }
 
   /**
@@ -174,10 +179,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Trigger intakeTrigger = controller.y().and(controller.a().negate());
-    Trigger spinUpTrigger = controller.a().and(controller.y().negate());
-    Trigger shootTrigger = controller.a().and(controller.y());
-    Trigger ampDepositeTrigger = controller.x().and(controller.a());
+    Trigger intakeTrigger = controller.y().and(controller.x().negate());
+    Trigger spinUpTrigger = controller.x().and(controller.y().negate());
+    Trigger shootTrigger = controller.x().and(controller.y());
+    Trigger ampDepositeTrigger = controller.b().and(controller.a());
 
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
@@ -200,10 +205,12 @@ public class RobotContainer {
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
 
-    controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    controller.b().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter));
+
+    controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(

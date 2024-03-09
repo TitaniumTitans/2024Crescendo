@@ -70,7 +70,7 @@ public final class Constants {
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.0);
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.8);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.6);
     public static final double TRACK_WIDTH_Y = Units.inchesToMeters(18.6);
     public static final double DRIVE_BASE_RADIUS =
@@ -107,15 +107,15 @@ public final class Constants {
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        Units.radiansToDegrees(MAX_LINEAR_SPEED),
-        Units.radiansToDegrees(MAX_LINEAR_SPEED),
-        MAX_ANGULAR_SPEED,
-        MAX_ANGULAR_SPEED
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.25
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0),new PIDConstants(5.0),
-        DriveConstants.MAX_LINEAR_SPEED, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
+        new PIDConstants(1.0),new PIDConstants(1.0),
+        DriveConstants.MAX_LINEAR_SPEED * 0.25, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
