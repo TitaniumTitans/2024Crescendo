@@ -47,6 +47,10 @@ public class ArmIOKraken implements ArmIO {
 
   private boolean m_tracking = false;
 
+
+  private double m_prevArmVelocity = 0.0;
+  private double m_prevWristVelocity = 0.0;
+
   // Status signals
   private final StatusSignal<Double> m_armPositionSignal;
   private final StatusSignal<Double> m_wristPositionSignal;
@@ -249,8 +253,11 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setArmAngle(double degrees, double velocityMult) {
-    m_armMaxVelDegS.updateIfChanged(true);
+    if (m_prevArmVelocity != velocityMult) {
+      m_armMaxVelDegS.updateIfChanged(true);
+    }
     m_armDynMMRequest.Velocity = m_armDynMMRequest.Velocity * velocityMult;
+    m_prevArmVelocity = velocityMult;
 
     m_armMaster.setControl(m_armDynMMRequest.withPosition(degrees / 360));
     m_armFollower.setControl(m_armFollowerRequest);
@@ -264,8 +271,11 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setWristAngle(double degrees, double velocityMult) {
-    m_wristMaxVelDegS.updateIfChanged(true);
+    if (m_prevWristVelocity != velocityMult) {
+      m_wristMaxVelDegS.updateIfChanged(true);
+    }
     m_wristDynMMRequest.Velocity = m_wristDynMMRequest.Velocity * velocityMult;
+    m_prevWristVelocity = velocityMult;
 
     m_wristMaster.setControl(m_wristDynMMRequest.withPosition(degrees / 360));
     m_wristFollower.setControl(m_wristFollowerRequest);
