@@ -252,7 +252,7 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setArmAngle(double degrees, double velocityMult) {
-    if (velocityMult == 0.0 && m_prevArmVelocityMult != velocityMult) {
+    if (m_prevArmVelocityMult != velocityMult) {
       m_armMaxVelDegS.updateIfChanged(true);
     }
     m_prevArmVelocityMult = velocityMult;
@@ -270,7 +270,7 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setWristAngle(double degrees, double velocityMult) {
-    if (velocityMult == 0.0 && m_prevWristVelocityMult != velocityMult) {
+    if (m_prevWristVelocityMult != velocityMult) {
       m_wristMaxVelDegS.updateIfChanged(true);
     }
     m_prevWristVelocityMult = velocityMult;
