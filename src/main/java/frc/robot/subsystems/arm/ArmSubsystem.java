@@ -2,6 +2,9 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,6 +12,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
 import lib.logger.DataLogUtil;
+import lib.utils.AimbotUtils;
+import lib.utils.AllianceFlipUtil;
+import lib.utils.FieldConstants;
 
 import java.util.function.Supplier;
 
@@ -35,7 +41,7 @@ public class ArmSubsystem extends SubsystemBase {
   private double m_wristVelocityMult = 0;
   private boolean m_disabledBrakeMode = true;
 
-  private ArmState m_desiredState = ArmState.DISABLED;
+  private ArmState m_desiredState = ArmState.STOW;
   private ArmState m_currentState = ArmState.DISABLED;
 
 
@@ -126,13 +132,14 @@ public class ArmSubsystem extends SubsystemBase {
         m_armVelocityMult = 1.0;
         m_wristVelocityMult = 1.0;
 
-        m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
-        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs
-            : 0;
-        m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
+        Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+        Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
+        double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
 
-//        m_desiredArmPoseDegs = ArmSetpoints.STATIC_SHOOTER.armAngle();
-//        m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();
+        m_desiredWristPoseDegs = AimbotUtils.getWristAngle(groundDistance);
+
+        m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
+        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
       }
       case INTAKE -> {
         m_armVelocityMult = 1.0;

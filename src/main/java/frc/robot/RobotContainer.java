@@ -88,8 +88,8 @@ public class RobotContainer {
                 new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION)
             }
             );
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIOKraken());
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken(), m_driveSubsystem::getVisionPose);
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case PROTO_ARM -> {
@@ -179,13 +179,26 @@ public class RobotContainer {
     Trigger shootTrigger = controller.a().and(controller.y());
     Trigger ampDepositeTrigger = controller.x().and(controller.a());
 
-    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.95, 0.5, 0.1)
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
     spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+        .alongWith(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        )));
+
     shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+        .alongWith(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        )));
 
     controller.x().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),

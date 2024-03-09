@@ -32,6 +32,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -249,7 +250,7 @@ public class DriveSubsystem extends SubsystemBase {
       );
     }
 
-    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
+    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 
     m_field.setRobotPose(getVisionPose());
@@ -281,10 +282,10 @@ public class DriveSubsystem extends SubsystemBase {
   public double alignToPoint(Pose3d point) {
 
     Transform3d robotToPoint = new Transform3d(new Pose3d(
-        new Pose2d(pose.getTranslation(), new Rotation2d())), point);
+        new Pose2d(m_wpiPoseEstimator.getEstimatedPosition().getTranslation(), new Rotation2d())), point);
 
-    double desiredRotation = Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY())
-        + Units.degreesToRadians(270));
+    double desiredRotation = Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
+        + Units.degreesToRadians(90);
 
     return m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
   }

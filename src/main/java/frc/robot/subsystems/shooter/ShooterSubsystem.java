@@ -1,17 +1,28 @@
 package frc.robot.subsystems.shooter;
 
 import com.gos.lib.properties.GosDoubleProperty;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
+import lib.utils.AimbotUtils;
+import lib.utils.AllianceFlipUtil;
+import lib.utils.FieldConstants;
+
+import java.util.function.Supplier;
 
 public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterIO m_io;
   private final ShooterIO.ShooterIOInputs m_inputs;
+
+  private final Supplier<Pose2d> m_poseSupplier;
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
@@ -21,9 +32,14 @@ public class ShooterSubsystem extends SubsystemBase {
       GosDoubleProperty(false, "Shooter/Right RPM", 3600);
 
   public ShooterSubsystem(ShooterIO io) {
+    this(io, Pose2d::new);
+  }
+
+  public ShooterSubsystem(ShooterIO io, Supplier<Pose2d> poseSupplier) {
     m_io = io;
     m_inputs = new ShooterIO.ShooterIOInputs();
 
+    m_poseSupplier = poseSupplier;
     // turn on logging
     setupLogging();
   }
@@ -53,8 +69,15 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command runShooterVelocity(boolean runKicker) {
     return runEnd(() -> {
-          m_io.setLeftVelocityRpm(m_leftPower.getValue());
-          m_io.setRightVelocityRpm(m_rightPower.getValue());
+//          m_io.setLeftVelocityRpm(m_leftPower.getValue());
+//          m_io.setRightVelocityRpm(m_rightPower.getValue());
+
+          Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+          Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
+          double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
+
+          m_io.setLeftVelocityRpm(AimbotUtils.getLeftSpeed(groundDistance));
+          m_io.setRightVelocityRpm(AimbotUtils.getRightSpeed(groundDistance));
 
           if (runKicker) {
             m_io.setKickerVoltage(12.0);

@@ -31,8 +31,8 @@ public class VisionSubsystem {
   private final String m_name;
 
   private Pose3d m_lastEstimatedPose = new Pose3d();
-  private final double xyStdDevCoefficient = 0.05;
-  private final double thetaStdDevCoefficient = 0.05;
+  private final double xyStdDevCoefficient = 0.025;
+  private final double thetaStdDevCoefficient = 0.025;
 
   private final PhotonVisionIOInputs inputs = new PhotonVisionIOInputs();
 
@@ -80,8 +80,16 @@ public class VisionSubsystem {
       double distance = estPose.estimatedPose.toPose2d().getTranslation().getDistance(
           robotToCam.getTranslation().toTranslation2d());
 
-      double xyStdDev = xyStdDevCoefficient * Math.pow(distance, 2.0);
-      double thetaStdDev = thetaStdDevCoefficient * Math.pow(distance, 2.0);
+      double xyStdDev = 0.0;
+      double thetaStdDev = 0.0;
+
+      if (estPose.strategy != PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+        xyStdDev = xyStdDevCoefficient * Math.pow(distance, 2.0);
+        thetaStdDev = thetaStdDevCoefficient * Math.pow(distance, 2.0);
+      } else {
+        xyStdDev = (xyStdDevCoefficient / 2.0) * Math.pow(distance, 2.0);
+        thetaStdDev = (thetaStdDevCoefficient / 2.0) * Math.pow(distance, 2.0);
+      }
 
       return Optional.of(new PoseEstimator.TimestampedVisionUpdate(estPose.timestampSeconds,
           estPose.estimatedPose.toPose2d(),

@@ -14,9 +14,9 @@ public class AimbotUtils {
 
   static {
     // angle measurements, meters -> degrees
-    m_angleLerpTable.put(Units.inchesToMeters(18.0), 50.0);
-    m_angleLerpTable.put(Units.inchesToMeters(46.0), 40.0);
-    m_angleLerpTable.put(Units.inchesToMeters(97.0), 31.5);
+    m_angleLerpTable.put(Units.inchesToMeters(18.0), 57.0);
+    m_angleLerpTable.put(Units.inchesToMeters(46.0), 45.0);
+    m_angleLerpTable.put(Units.inchesToMeters(97.0), 33.5);
     m_angleLerpTable.put(Units.inchesToMeters(116.0), 29.75);
     m_angleLerpTable.put(Units.inchesToMeters(155.0), 24.65);
 //    m_angleLerpTable.put(Units.inchesToMeters(229.0), 0.0);
@@ -35,6 +35,18 @@ public class AimbotUtils {
     m_rightSpeedLerpTable.put(Units.inchesToMeters(116.0), 3800.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(155.0), 4600.0);
 //    m_rightSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
+  }
+
+  public static double getWristAngle(double distance) {
+    return m_angleLerpTable.get(distance);
+  }
+
+  public static double getLeftSpeed(double distance) {
+    return m_leftSpeedLerpTable.get(distance);
+  }
+
+  public static double getRightSpeed(double distance) {
+    return m_rightSpeedLerpTable.get(distance);
   }
 
   /** Gets the top point of the shooter for checking limits*/
