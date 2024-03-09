@@ -33,7 +33,7 @@ public class ArmSubsystem extends SubsystemBase {
   private double m_desiredWristPoseDegs;
   private double m_wristGap;
   private double m_wristVelocityMult = 0;
-  private double m_startTime;
+  private boolean m_disabledBrakeMode = true;
 
   private ArmState m_desiredState = ArmState.DISABLED;
   private ArmState m_currentState = ArmState.DISABLED;
@@ -89,7 +89,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     // check to make sure we're not in manual control
-    m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED);
+    m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED && m_disabledBrakeMode);
 
     if (m_desiredState != ArmState.DISABLED) {
       // check to see if the wrist is currently too close to the rest of the arm
@@ -190,7 +190,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command enableBrakeMode(boolean enabled) {
-    return runOnce(() -> m_io.enableBrakeMode(enabled)).ignoringDisable(true);
+    return runOnce(() -> m_disabledBrakeMode = enabled).ignoringDisable(true);
   }
 
   public Command resetEncoderFactory() {

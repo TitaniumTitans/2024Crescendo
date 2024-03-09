@@ -19,7 +19,7 @@ public class AimbotUtils {
     m_angleLerpTable.put(Units.inchesToMeters(97.0), 31.5);
     m_angleLerpTable.put(Units.inchesToMeters(116.0), 29.75);
     m_angleLerpTable.put(Units.inchesToMeters(155.0), 24.65);
-    m_angleLerpTable.put(Units.inchesToMeters(229.0), 0.0);
+//    m_angleLerpTable.put(Units.inchesToMeters(229.0), 0.0);
 
     //flywheel measurements, meters -> RPM
     m_leftSpeedLerpTable.put(Units.inchesToMeters(18.0), 3600.0);
@@ -27,14 +27,14 @@ public class AimbotUtils {
     m_leftSpeedLerpTable.put(Units.inchesToMeters(97.0), 3600.0);
     m_leftSpeedLerpTable.put(Units.inchesToMeters(116.0), 3800.0);
     m_leftSpeedLerpTable.put(Units.inchesToMeters(155.0), 5000.0);
-    m_leftSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
+//    m_leftSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
 
     m_rightSpeedLerpTable.put(Units.inchesToMeters(18.0), 3600.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(46.0), 3600.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(97.0), 3600.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(116.0), 3800.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(155.0), 4600.0);
-    m_rightSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
+//    m_rightSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
   }
 
   /** Gets the top point of the shooter for checking limits*/
