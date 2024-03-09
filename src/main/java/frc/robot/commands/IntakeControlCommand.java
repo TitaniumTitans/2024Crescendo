@@ -16,10 +16,7 @@ public class IntakeControlCommand extends Command {
   public IntakeControlCommand(ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem) {
     m_armSubsystem = armSubsystem;
     m_shooterSubsystem = shooterSubsystem;
-
     m_timer = new Timer();
-    hasPieceRising = false;
-
     // each subsystem used by the command must be passed into the
     // addRequirements() method (which takes a vararg of Subsystem)
     addRequirements(m_armSubsystem, m_shooterSubsystem);
@@ -27,7 +24,8 @@ public class IntakeControlCommand extends Command {
 
   @Override
   public void initialize() {
-
+    hasPieceRising = false;
+    m_timer.reset();
   }
 
   @Override
@@ -35,11 +33,11 @@ public class IntakeControlCommand extends Command {
     if(!m_shooterSubsystem.hasPiece() && !hasPieceRising) {
       // run intake and kicker wheels in
       m_shooterSubsystem.setIntakePower(0.95);
-      m_shooterSubsystem.setKickerPower(0.5);
+      m_shooterSubsystem.setKickerPower(0.35);
       m_shooterSubsystem.setShooterPowerLeft(-0.1);
       m_shooterSubsystem.setShooterPowerRight(-0.1);
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
-    } else if (m_shooterSubsystem.hasPiece() && !hasPieceRising) {
+    } else if (m_shooterSubsystem.hasPiece() && !m_timer.hasElapsed(0.0001)) {
       // stop running intake
       m_shooterSubsystem.setIntakePower(0.0);
       m_shooterSubsystem.setKickerPower(0.0);
@@ -47,11 +45,11 @@ public class IntakeControlCommand extends Command {
       m_shooterSubsystem.setShooterPowerRight(0.0);
 
       // piece detected, mark as we have a piece and start moving up
-      hasPieceRising = true;
+      m_timer.start();
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
-    } else if (hasPieceRising && m_armSubsystem.bothAtSetpoint() && m_shooterSubsystem.hasPiece()) {
+    } else if (!m_timer.hasElapsed(0.075) && m_armSubsystem.bothAtSetpoint()) {
       // arm is up, haven't run kickers back yet
-      m_shooterSubsystem.setKickerPower(-0.25);
+      m_shooterSubsystem.setKickerPower(-0.2);
     } else {
       m_shooterSubsystem.setIntakePower(0.0);
       m_shooterSubsystem.setKickerPower(0.0);

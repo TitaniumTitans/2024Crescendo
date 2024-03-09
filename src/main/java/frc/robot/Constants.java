@@ -237,6 +237,8 @@ public final class Constants {
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
 
+    public static final ArmPose STATIC_SHOOTER = new ArmPose(0.0, 55.0);
+
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
 
     public static final Trajectory STOW_AMP_TRAJ;

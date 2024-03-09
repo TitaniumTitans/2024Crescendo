@@ -127,9 +127,12 @@ public class ArmSubsystem extends SubsystemBase {
         m_wristVelocityMult = 1.0;
 
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
-        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= ArmConstants.ARM_LOWER_LIMIT.getValue() ? m_desiredArmPoseDegs
-            : ArmConstants.ARM_LOWER_LIMIT.getValue();
+        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs
+            : 0;
         m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
+
+//        m_desiredArmPoseDegs = ArmSetpoints.STATIC_SHOOTER.armAngle();
+//        m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();
       }
       case INTAKE -> {
         m_armVelocityMult = 1.0;

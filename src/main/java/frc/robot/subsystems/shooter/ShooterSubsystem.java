@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import com.gos.lib.properties.GosDoubleProperty;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,6 +14,11 @@ public class ShooterSubsystem extends SubsystemBase {
   private final ShooterIO.ShooterIOInputs m_inputs;
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
+
+  private final GosDoubleProperty m_leftPower = new
+      GosDoubleProperty(false, "Shooter/Left RPM", 3600);
+  private final GosDoubleProperty m_rightPower = new
+      GosDoubleProperty(false, "Shooter/Right RPM", 3600);
 
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
@@ -47,11 +53,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command runShooterVelocity(boolean runKicker) {
     return runEnd(() -> {
-          m_io.setLeftVelocityRpm(0.0);
-          m_io.setRightVelocityRpm(0.0);
+          m_io.setLeftVelocityRpm(m_leftPower.getValue());
+          m_io.setRightVelocityRpm(m_rightPower.getValue());
 
           if (runKicker) {
-            m_io.setKickerVoltage(3.0);
+            m_io.setKickerVoltage(12.0);
             m_io.setIntakeVoltage(0.05);
           } else {
             m_io.setKickerVoltage(0.0);
@@ -83,11 +89,11 @@ public class ShooterSubsystem extends SubsystemBase {
             setKickerPower(kickerPower);
             timer.restart();
           } else if (!timer.hasElapsed(timeout)) {
-            setShooterPowerLeft(0.0);
-            setShooterPowerRight(0.0);
-            setKickerPower(-0.25);
+            setKickerPower(-0.1);
             setIntakePower(0.0);
           } else {
+            setShooterPowerRight(0.0);
+            setShooterPowerLeft(0.0);
             setKickerPower(0.0);
             setIntakePower(0.0);
           }
@@ -119,5 +125,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     m_logTable.addDouble("LeftTemperature", () -> m_inputs.tlTemperature, false);
     m_logTable.addDouble("RightTemperature", () -> m_inputs.trTemperature, false);
+
+    m_logTable.addDouble("IntakeCurrent", () -> m_inputs.intakeCurrentDraw, true);
   }
 }
