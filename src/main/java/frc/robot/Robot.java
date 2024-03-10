@@ -54,8 +54,8 @@ public class Robot extends LoggedRobot {
 
     String logPath = "/media/sda1/aoide";
 
-    DataLogManager.start(logPath);
-    DriverStation.startDataLog(DataLogManager.getLog());
+//    DataLogManager.start(logPath);
+//    DriverStation.startDataLog(DataLogManager.getLog());
 
     SignalLogger.setPath(logPath);
     SignalLogger.start();

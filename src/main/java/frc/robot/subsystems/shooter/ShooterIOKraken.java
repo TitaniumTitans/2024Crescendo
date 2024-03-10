@@ -21,7 +21,7 @@ public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_intake;
   private final TalonFX m_indexer;
 
-  private final TimeOfFlight m_tof;
+//  private final TimeOfFlight m_tof;
 
   private final PidPropertyPublic m_leftProperty;
   private final PidPropertyPublic m_rightProperty;
@@ -29,7 +29,7 @@ public class ShooterIOKraken implements ShooterIO {
   private final VelocityVoltage m_velRequest;
   private final NeutralOut m_stopRequest;
 
-  private final double[] m_prevKickerCurrent = new double[] {0.0, 0.0, 0.0, 0.0};
+  private double[] m_prevKickerCurrent = new double[] {0.0, 0.0, 0.0, 0.0};
 
   private final StatusSignal<Double> m_leftVelSignal;
   private final StatusSignal<Double> m_rightVelSignal;
@@ -59,8 +59,8 @@ public class ShooterIOKraken implements ShooterIO {
     m_intake = new TalonFX(ShooterConstants.INTAKE_ID, canbus);
     m_indexer = new TalonFX(ShooterConstants.INDEXER_ID, canbus);
 
-    m_tof = new TimeOfFlight(28);
-    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
+//    m_tof = new TimeOfFlight(28);
+//    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
 
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
@@ -185,7 +185,12 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.indexerCurrentDraw = m_indexerCurrentDrawSignal.getValueAsDouble();
     inputs.kickerCurrentDraw = m_kickerCurrentDrawSignal.getValueAsDouble();
 
-
+    m_prevKickerCurrent = new double[] {
+        m_prevKickerCurrent[1],
+        m_prevKickerCurrent[2],
+        m_prevKickerCurrent[3],
+        inputs.kickerCurrentDraw
+    };
 
     inputs.tlTemperature = m_leftTemperatureSignal.getValueAsDouble();
     inputs.trTemperature = m_rightTemperatureSignal.getValueAsDouble();
@@ -200,7 +205,13 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public boolean hasPiece() {
-    return m_tof.getRange() < 60;
+    double avgCurrentChange = (
+        m_prevKickerCurrent[0] +
+        m_prevKickerCurrent[1] +
+        m_prevKickerCurrent[2] +
+        m_prevKickerCurrent[3]
+        ) / 4.0;
+    return avgCurrentChange > 20;
   }
 
   @Override
