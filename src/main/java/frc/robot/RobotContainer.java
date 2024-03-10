@@ -179,10 +179,24 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Trigger intakeTrigger = controller.y().and(controller.x().negate());
-    Trigger spinUpTrigger = controller.x().and(controller.y().negate());
-    Trigger shootTrigger = controller.x().and(controller.y());
-    Trigger ampDepositeTrigger = controller.b().and(controller.a());
+    Trigger intakeTrigger = controller.y().and(controller.x().negate())
+        .and(controller.a().negate()) // make sure we don't amp
+        .and(controller.b().negate());
+
+    Trigger spinUpTrigger = controller.x().and(controller.y().negate())
+        .and(controller.a().negate()) // make sure we don't amp
+        .and(controller.b().negate());
+
+    Trigger shootTrigger = controller.x().and(controller.y())
+        .and(controller.a().negate()) // make sure we don't amp
+        .and(controller.b().negate());
+
+    Trigger ampLineupTrigger = controller.b().and(controller.a().negate());
+
+    Trigger ampDepositeTrigger = controller.b().and(controller.a())
+        .and(spinUpTrigger.negate()) // make sure we don't amp while trying to do anything else
+        .and(shootTrigger.negate())
+        .and(intakeTrigger.negate());
 
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
@@ -205,7 +219,7 @@ public class RobotContainer {
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
 
-    controller.b().whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    ampLineupTrigger.whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter));
