@@ -31,8 +31,8 @@ public class VisionSubsystem {
   private final String m_name;
 
   private Pose3d m_lastEstimatedPose = new Pose3d();
-  private final double xyStdDevCoefficient = 0.025;
-  private final double thetaStdDevCoefficient = 0.025;
+  private final double xyStdDevCoefficient = 0.01;
+  private final double thetaStdDevCoefficient = 0.01;
 
   private final PhotonVisionIOInputs inputs = new PhotonVisionIOInputs();
 
