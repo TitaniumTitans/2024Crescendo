@@ -26,6 +26,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
+  private double m_leftSpeedSetpoint = 0.0;
+  private double m_rightSpeedSetpoint = 0.0;
+
   private final GosDoubleProperty m_leftPower = new
       GosDoubleProperty(false, "Shooter/Left RPM", 3600);
   private final GosDoubleProperty m_rightPower = new
@@ -76,8 +79,11 @@ public class ShooterSubsystem extends SubsystemBase {
           Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
           double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
 
-          m_io.setLeftVelocityRpm(AimbotUtils.getLeftSpeed(groundDistance));
-          m_io.setRightVelocityRpm(AimbotUtils.getRightSpeed(groundDistance));
+          m_leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
+          m_rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
+
+          m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
+          m_io.setRightVelocityRpm(m_rightSpeedSetpoint);
 
           if (runKicker) {
             m_io.setKickerVoltage(12.0);
@@ -140,6 +146,9 @@ public class ShooterSubsystem extends SubsystemBase {
     m_logTable.addDouble("LeftVelocity", () -> m_inputs.tlVelocityRPM, true);
     m_logTable.addDouble("RightVelocity", () -> m_inputs.trVelocityRPM, true);
 
+    m_logTable.addDouble("LeftSetpoint", () -> m_leftSpeedSetpoint, true);
+    m_logTable.addDouble("RightSetpoint", () -> m_rightSpeedSetpoint, true);
+
     m_logTable.addDouble("LeftAppliedVolts", () -> m_inputs.tlAppliedVolts, true);
     m_logTable.addDouble("RightAppliedVolts", () -> m_inputs.trAppliedVolts, true);
 
@@ -150,5 +159,10 @@ public class ShooterSubsystem extends SubsystemBase {
     m_logTable.addDouble("RightTemperature", () -> m_inputs.trTemperature, false);
 
     m_logTable.addDouble("IntakeCurrent", () -> m_inputs.intakeCurrentDraw, true);
+  }
+
+  public boolean atSpeed() {
+    return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 75
+        && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 75;
   }
 }

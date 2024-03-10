@@ -86,24 +86,24 @@ public final class Constants {
 
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(7.0351), // 11.0351
-            Units.inchesToMeters(-6.523204), // 10.023204
-            Units.inchesToMeters(6.1374)), // 4.1374
+            Units.inchesToMeters(11.0351), // 11.0351
+            Units.inchesToMeters(10.023204), // 10.023204
+            Units.inchesToMeters(4.1374)), // 4.1374
         new Rotation3d(
             Units.degreesToRadians(0.0),
-            Units.degreesToRadians(-30.0 + 1), // -120.0 + 91.0
-            Units.degreesToRadians(-13.7)) // 165.3224 + 180
+            Units.degreesToRadians(-30.0), // -120.0 + 91.0
+            Units.degreesToRadians(-14.7)) // 165.3224 + 180
     );
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(5.0351), //11.0351
-            Units.inchesToMeters(-22.023204), //-10.023204
+            Units.inchesToMeters(11.0351), //11.0351
+            Units.inchesToMeters(-10.023204), //-10.023204
             Units.inchesToMeters(4.1374)), // 7.1374
         new Rotation3d(
-            Units.degreesToRadians(2.0),
-            Units.degreesToRadians(-30.0 + 3), // -30.0 - 1
-            Units.degreesToRadians(5.25)) // 165.3224)
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-30.0), // -30.0 - 1
+            Units.degreesToRadians(14.7)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
@@ -123,7 +123,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.472168), // offset 0.457764
+            Units.rotationsToDegrees(-0.017822) + 180, // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -134,7 +134,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.046143),
+            Units.rotationsToDegrees(-0.453857) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -145,7 +145,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.073730),
+            Units.rotationsToDegrees(0.428467) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -156,7 +156,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.404297),
+            Units.rotationsToDegrees(-0.093750) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
