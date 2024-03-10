@@ -29,6 +29,13 @@ public class FieldConstants {
   public static final Translation2d AMP_CENTER =
       new Translation2d(Units.inchesToMeters(72.455), Units.inchesToMeters(322.996));
 
+  public static final Pose2d AMP_LINEUP =
+    new Pose2d(
+        AMP_CENTER.getX() - Units.inchesToMeters(10),
+        AMP_CENTER.getY(),
+        Rotation2d.fromDegrees(90)
+    );
+
   /** Staging locations for each note */
   public static final class StagingLocations {
     public static final double CENTERLINE_X = FIELD_LENGTH / 2.0;

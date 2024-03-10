@@ -115,7 +115,7 @@ public class Robot extends LoggedRobot {
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
     TalonFXFactory.handleFaults();
-//    DataLogUtil.updateTables();
+    DataLogUtil.updateTables();
   }
 
   /** This function is called once when the robot is disabled. */

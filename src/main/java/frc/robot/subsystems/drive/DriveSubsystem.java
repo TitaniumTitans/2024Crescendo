@@ -48,6 +48,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
@@ -160,7 +161,9 @@ public class DriveSubsystem extends SubsystemBase {
         kinematics,
         new Rotation2d(),
         getModulePositions(),
-        new Pose2d()
+        new Pose2d(),
+        VecBuilder.fill(0.15, 0.15, 0.1),
+        VecBuilder.fill(1.0, 1.0, 1.25)
     );
 
     // Configure AutoBuilder for PathPlanner
@@ -383,8 +386,8 @@ public class DriveSubsystem extends SubsystemBase {
     return DriveConstants.MAX_ANGULAR_SPEED;
   }
 
-  public Command pathfollowFactory(Pose2d pose) {
-    return AutoBuilder.pathfindToPose(pose, DriveConstants.DEFAULT_CONSTRAINTS);
+  public Command pathfollowFactory(Supplier<Pose2d> pose) {
+    return AutoBuilder.pathfindToPose(pose.get(), DriveConstants.DEFAULT_CONSTRAINTS);
   }
 
   /** Returns an array of module translations. */

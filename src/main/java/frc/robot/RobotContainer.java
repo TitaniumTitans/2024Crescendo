@@ -36,6 +36,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
 import frc.robot.commands.IntakeControlCommand;
+import frc.robot.commands.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -222,9 +223,13 @@ public class RobotContainer {
     ampLineupTrigger.whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
-        m_shooter));
+        m_shooter)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
     controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
+    controller.pov(180).whileTrue(m_driveSubsystem.pathfollowFactory(
+        () -> AllianceFlipUtil.apply(FieldConstants.AMP_LINEUP)
+    ));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -248,7 +253,16 @@ public class RobotContainer {
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
+    NamedCommands.registerCommand("Run Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
+
+    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter)
+        .raceWith(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        )));
   }
 
   private void configureDashboard() {
