@@ -60,7 +60,7 @@ public class Module {
   }
 
   public void periodic() {
-    Logger.processInputs("Module" + m_index, m_inputs);
+    Logger.processInputs("Swerve/Module" + m_index, m_inputs);
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
@@ -77,11 +77,8 @@ public class Module {
       if (m_speedSetpoint != null) {
         // Run drive controller
         m_io.setDriveVelocityMPS(m_speedSetpoint);
-        SmartDashboard.putNumber("Module" + m_index + "/Desired MPS", m_speedSetpoint);
       }
     }
-
-    SmartDashboard.putNumber("Module" + m_index + "/Actual MPS", m_inputs.driveVelocityRadPerSec * WHEEL_RADIUS);
 
     // Calculate positions for odometry
     int sampleCount = m_inputs.odometryTimestamps.length; // All signals are sampled together

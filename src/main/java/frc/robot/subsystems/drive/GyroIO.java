@@ -57,7 +57,7 @@ public interface GyroIO {
     }
   }
 
-  default void updateInputs(GyroIOInputs inputs) {}
+  default void updateInputs(GyroIOInputsAutoLogged inputs) {}
 
   default void resetGyro(double degrees) {}
 }

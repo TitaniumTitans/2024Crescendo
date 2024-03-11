@@ -45,7 +45,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -88,7 +88,7 @@ public final class Constants {
         new Translation3d(
             Units.inchesToMeters(11.0351), // 11.0351
             Units.inchesToMeters(10.023204), // 10.023204
-            Units.inchesToMeters(4.1374)), // 4.1374
+            Units.inchesToMeters(7.1374)), // 4.1374
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(-30.0), // -120.0 + 91.0
@@ -99,7 +99,7 @@ public final class Constants {
         new Translation3d(
             Units.inchesToMeters(11.0351), //11.0351
             Units.inchesToMeters(-10.023204), //-10.023204
-            Units.inchesToMeters(4.1374)), // 7.1374
+            Units.inchesToMeters(7.1374)), // 7.1374
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(-30.0), // -30.0 - 1
@@ -114,7 +114,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(1.0),new PIDConstants(1.0),
+        new PIDConstants(7.5, 0.75), new PIDConstants(7.5, 0.75),
         DriveConstants.MAX_LINEAR_SPEED * 0.25, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
@@ -177,12 +177,14 @@ public final class Constants {
     * than the lowest point the arm and wrist will move to , and then compensate for that in our encoder reset code */
     public static final double OFFSET_NUDGE = 45;
     public static final double ARM_OFFSET = -0.123779 + Units.degreesToRotations(OFFSET_NUDGE);
-    public static final double WRIST_OFFSET = -0.163330 + Units.degreesToRotations(OFFSET_NUDGE);
-    public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
+    public static final double WRIST_OFFSET = 0.000000 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double ARM_SENSOR_MECHANISM_RATIO =
+        (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
     public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
 
     // the pulley on the encoder is a 1:1
-    public static final double WRIST_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
+    public static final double WRIST_SENSOR_MECHANISM_RATIO =
+        (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
     public static final double WRIST_CANCODER_MECHANISM_RATIO = (48.0 / 24.0);
 
     public static final double WRIST_KP = 108.0;

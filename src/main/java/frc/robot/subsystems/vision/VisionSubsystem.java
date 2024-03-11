@@ -12,8 +12,10 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import lib.logger.DataLogUtil;
 import lib.utils.PoseEstimator;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -31,13 +33,13 @@ public class VisionSubsystem {
   private final String m_name;
 
   private Pose3d m_lastEstimatedPose = new Pose3d();
-  private final double xyStdDevCoefficient = 0.03;
-  private final double thetaStdDevCoefficient = 0.05;
+  private final double xyStdDevCoefficient = Units.inchesToMeters(8.0);
+  private final double thetaStdDevCoefficient = Units.degreesToRadians(24.0);
 
-  private final double xyStdDevMultiTagCoefficient = 0.02;
-  private final double thetaStdDevMultiTagCoefficient = 0.04;
+  private final double xyStdDevMultiTagCoefficient = Units.inchesToMeters(4.0);
+  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(12.0);
 
-  private final PhotonVisionIOInputs inputs = new PhotonVisionIOInputs();
+  private final PhotonVisionIOInputsAutoLogged inputs = new PhotonVisionIOInputsAutoLogged();
 
   public VisionSubsystem(String camName, Transform3d camPose) {
     m_camera = new PhotonCamera(camName);
@@ -51,12 +53,10 @@ public class VisionSubsystem {
           m_camera,
           robotToCam);
 
-      m_photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
+      m_photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
     } catch (IOException e){
       throw new IllegalStateException(e);
     }
-
-    DataLogUtil.getTable(camName).addPose3d("Estimated Pose3d", () -> m_lastEstimatedPose, true);
   }
 
   public void updateInputs() {
@@ -65,6 +65,18 @@ public class VisionSubsystem {
     inputs.setTagIds(getTargetIDs());
     inputs.setNumTagsFound(m_camera.getLatestResult().targets.size());
     inputs.setTagsFound(m_camera.getLatestResult().hasTargets());
+
+    Logger.processInputs("Vision/" + m_name, inputs);
+  }
+
+  public double getTagDistance(){
+    var latestResult = m_camera.getLatestResult();
+    if (latestResult.hasTargets()){
+      var bestTarget = latestResult.getBestTarget();
+      var camToTarget = bestTarget.getBestCameraToTarget();
+      return camToTarget.getX();
+    }
+    return -1;
   }
 
   public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
@@ -72,6 +84,7 @@ public class VisionSubsystem {
     m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
 
     PhotonPipelineResult camResult = m_camera.getLatestResult();
+
     Optional<EstimatedRobotPose> opPose = m_photonPoseEstimator.update(camResult);
 
     if (opPose.isEmpty()) {
@@ -80,19 +93,35 @@ public class VisionSubsystem {
       EstimatedRobotPose estPose = opPose.get();
       m_lastEstimatedPose = estPose.estimatedPose;
 
-      double distance = estPose.estimatedPose.toPose2d().getTranslation().getDistance(
-          robotToCam.getTranslation().toTranslation2d());
+      // find average distance to tags
+      int numTags = 0;
+      double avgDist = 0;
+      for (var tgt : camResult.targets) {
+        var tagPose = m_photonPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+
+        if (tagPose.isEmpty()) {
+          continue;
+        }
+
+        numTags++;
+        avgDist +=
+            tagPose.get().toPose2d().getTranslation().getDistance(estPose.estimatedPose.toPose2d().getTranslation());
+      }
+
+      avgDist /= numTags;
 
       double xyStdDev;
       double thetaStdDev;
 
       if (estPose.strategy != PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-        xyStdDev = xyStdDevCoefficient * Math.pow(distance, 2.0);
-        thetaStdDev = thetaStdDevCoefficient * Math.pow(distance, 2.0);
+        xyStdDev = xyStdDevCoefficient * Math.pow(avgDist, 2.0);
+        thetaStdDev = thetaStdDevCoefficient * Math.pow(avgDist, 2.0);
       } else {
-        xyStdDev = xyStdDevMultiTagCoefficient * Math.pow(distance, 2.0);
-        thetaStdDev = thetaStdDevMultiTagCoefficient * Math.pow(distance, 2.0);
+        xyStdDev = xyStdDevMultiTagCoefficient * Math.pow(avgDist, 2.0);
+        thetaStdDev = thetaStdDevMultiTagCoefficient * Math.pow(avgDist, 2.0);
       }
+
+      Logger.recordOutput("Vision/" + m_name + "/Estimated Pose", estPose.estimatedPose);
 
       return Optional.of(new PoseEstimator.TimestampedVisionUpdate(estPose.timestampSeconds,
           estPose.estimatedPose.toPose2d(),

@@ -16,6 +16,7 @@ package frc.robot;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -182,7 +183,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Trigger intakeTrigger = controller.y().and(controller.x().negate())
         .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate());
+        .and(controller.b().negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
 
     Trigger spinUpTrigger = controller.x().and(controller.y().negate())
         .and(controller.a().negate()) // make sure we don't amp
@@ -190,14 +192,17 @@ public class RobotContainer {
 
     Trigger shootTrigger = controller.x().and(controller.y())
         .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate());
+        .and(controller.b().negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
 
-    Trigger ampLineupTrigger = controller.b().and(controller.a().negate());
+    Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
 
     Trigger ampDepositeTrigger = controller.b().and(controller.a())
         .and(spinUpTrigger.negate()) // make sure we don't amp while trying to do anything else
         .and(shootTrigger.negate())
-        .and(intakeTrigger.negate());
+        .and(intakeTrigger.negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
 
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
@@ -228,7 +233,7 @@ public class RobotContainer {
 
     controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
     controller.pov(180).whileTrue(m_driveSubsystem.pathfollowFactory(
-        () -> AllianceFlipUtil.apply(FieldConstants.AMP_LINEUP)
+        FieldConstants.AMP_LINEUP
     ));
 
     m_driveSubsystem.setDefaultCommand(
@@ -266,7 +271,7 @@ public class RobotContainer {
   }
 
   private void configureDashboard() {
-    ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
+    ShuffleboardTab commandTab = Shuffleboard.getTab("Commands");
 
     commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
     commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
