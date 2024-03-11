@@ -65,6 +65,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> m_turnAbsolutePosition;
   private final StatusSignal<Double> m_turnPosition;
   private final Queue<Double> m_turnPositionQueue;
+  private final Queue<Double> timestampQueue;
   private final StatusSignal<Double> m_turnVelocity;
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
@@ -98,8 +99,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // run configs on drive motor
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 40.0;
-    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    driveConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+    driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
@@ -168,6 +169,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnClosedLoopError = m_turnTalon.getClosedLoopError();
     m_turnClosedLoopReference = m_turnTalon.getClosedLoopReference();
 
+    timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
+
     // setup refresh rates on all inputs
     BaseStatusSignal.setUpdateFrequencyForAll(
         Module.ODOMETRY_FREQUENCY, m_drivePosition, m_turnPosition);
@@ -188,7 +191,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {
+  public void updateInputs(ModuleIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
             m_drivePosition,
             m_driveVelocity,

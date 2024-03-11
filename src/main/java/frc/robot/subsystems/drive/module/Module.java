@@ -17,22 +17,23 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import lib.logger.DataLogUtil;
+import org.littletonrobotics.junction.Logger;
 
 public class Module {
   private static final double WHEEL_RADIUS = Constants.DriveConstants.WHEEL_RADIUS_METERS;
   public static final double ODOMETRY_FREQUENCY = 250.0;
 
   private final ModuleIO m_io;
-  private final ModuleIO.ModuleIOInputs m_inputs = new ModuleIO.ModuleIOInputs();
+  private final ModuleIOInputsAutoLogged m_inputs = new ModuleIOInputsAutoLogged();
   private final int m_index;
 
   private Rotation2d m_angleSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Double m_speedSetpoint = null; // Setpoint for closed loop control, null for open loop
   private Rotation2d m_turnRelativeOffset = null; // Relative + Offset = Absolute
-  private double m_lastPositionMeters = 0.0; // Used for delta calculation
-  private SwerveModulePosition[] m_positionDeltas = new SwerveModulePosition[] {};
+  private SwerveModulePosition[] m_odometryPositions = new SwerveModulePosition[] {};
 
   public Module(ModuleIO io) {
     this.m_io = io;
@@ -59,6 +60,8 @@ public class Module {
   }
 
   public void periodic() {
+    Logger.processInputs("Swerve/Module" + m_index, m_inputs);
+
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
     if (m_turnRelativeOffset == null) {
@@ -77,18 +80,26 @@ public class Module {
       }
     }
 
-    // Calculate position deltas for odometry
-    int deltaCount =
-        Math.min(m_inputs.getOdometryDrivePositionsRad().length, m_inputs.getOdometryTurnPositions().length);
-    m_positionDeltas = new SwerveModulePosition[deltaCount];
-    for (int i = 0; i < deltaCount; i++) {
-      double positionMeters = m_inputs.getOdometryDrivePositionsRad()[i] * WHEEL_RADIUS;
+    // Calculate positions for odometry
+    int sampleCount = m_inputs.odometryTimestamps.length; // All signals are sampled together
+    m_odometryPositions = new SwerveModulePosition[sampleCount];
+    for (int i = 0; i < sampleCount; i++) {
+      double positionMeters = m_inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
       Rotation2d angle =
-          m_inputs.getOdometryTurnPositions()[i].plus(
+          m_inputs.odometryTurnPositions[i].plus(
               m_turnRelativeOffset != null ? m_turnRelativeOffset : new Rotation2d());
-      m_positionDeltas[i] = new SwerveModulePosition(positionMeters - m_lastPositionMeters, angle);
-      m_lastPositionMeters = positionMeters;
+      m_odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
     }
+  }
+
+  /** Returns the module positions received this cycle. */
+  public SwerveModulePosition[] getOdometryPositions() {
+    return m_odometryPositions;
+  }
+
+  /** Returns the timestamps of the samples received this cycle. */
+  public double[] getOdometryTimestamps() {
+    return m_inputs.odometryTimestamps;
   }
 
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
@@ -157,11 +168,6 @@ public class Module {
   /** Returns the module state (turn angle and drive velocity). */
   public SwerveModuleState getState() {
     return new SwerveModuleState(getVelocityMetersPerSec(), getAngle());
-  }
-
-  /** Returns the module position deltas received this cycle. */
-  public SwerveModulePosition[] getPositionDeltas() {
-    return m_positionDeltas;
   }
 
   /** Returns the drive velocity in radians/sec. */

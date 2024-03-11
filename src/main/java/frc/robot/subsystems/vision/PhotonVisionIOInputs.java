@@ -1,5 +1,8 @@
 package frc.robot.subsystems.vision;
 
+import org.littletonrobotics.junction.AutoLog;
+
+@AutoLog
 public class PhotonVisionIOInputs {
   protected boolean camConnected = false;
   protected double camLatency = 0.0;

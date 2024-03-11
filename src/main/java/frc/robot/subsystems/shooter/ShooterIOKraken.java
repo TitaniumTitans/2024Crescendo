@@ -30,6 +30,8 @@ public class ShooterIOKraken implements ShooterIO {
   private final VelocityVoltage m_velRequest;
   private final NeutralOut m_stopRequest;
 
+  private double[] m_prevKickerCurrent = new double[] {0.0, 0.0, 0.0, 0.0};
+
   private final StatusSignal<Double> m_leftVelSignal;
   private final StatusSignal<Double> m_rightVelSignal;
 
@@ -53,7 +55,7 @@ public class ShooterIOKraken implements ShooterIO {
   public ShooterIOKraken() {
     m_tof = new TimeOfFlight(28);
     m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
-
+   
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -144,7 +146,7 @@ public class ShooterIOKraken implements ShooterIO {
   }
 
   @Override
-  public void updateInputs(ShooterIOInputs inputs) {
+  public void updateInputs(ShooterIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
         m_leftVelSignal,
         m_rightVelSignal,
@@ -180,15 +182,27 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.indexerCurrentDraw = m_indexerCurrentDrawSignal.getValueAsDouble();
     inputs.kickerCurrentDraw = m_kickerCurrentDrawSignal.getValueAsDouble();
 
+    m_prevKickerCurrent = new double[] {
+        m_prevKickerCurrent[1],
+        m_prevKickerCurrent[2],
+        m_prevKickerCurrent[3],
+        inputs.kickerCurrentDraw
+    };
+
     inputs.tlTemperature = m_leftTemperatureSignal.getValueAsDouble();
     inputs.trTemperature = m_rightTemperatureSignal.getValueAsDouble();
     inputs.intakeTemperature = m_intakeTemperatureSignal.getValueAsDouble();
     inputs.indexerTemperature = m_indexerTemperatureSignal.getValueAsDouble();
 
-    inputs.tofDistanceIn = m_tof.getRange();
+   inputs.tofDistanceIn = m_tof.getRange();
 
     m_leftProperty.updateIfChanged();
     m_rightProperty.updateIfChanged();
+  }
+
+  @Override
+  public boolean hasPiece() {
+    return m_tof.getRange() < 60.0;
   }
 
   @Override

@@ -12,10 +12,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
+
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
+
 import frc.robot.Constants.ArmConstants;
 
 public class ArmIOKraken implements ArmIO {
@@ -47,6 +51,9 @@ public class ArmIOKraken implements ArmIO {
   private final NeutralOut m_stopRequest;
 
   private boolean m_tracking = false;
+
+  private double m_prevArmVelocityMult = 0.0;
+  private double m_prevWristVelocityMult = 0.0;
 
   // Status signals
   private final StatusSignal<Double> m_armPositionSignal;
@@ -192,7 +199,7 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void updateInputs(ArmIOInputs inputs) {
+  public void updateInputs(ArmIOInputsAutoLogged inputs) {
     BaseStatusSignal.refreshAll(
             m_armPositionSignal,
             m_wristPositionSignal,
@@ -245,7 +252,10 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setArmAngle(double degrees, double velocityMult) {
-    m_armMaxVelDegS.updateIfChanged(true);
+    if (m_prevArmVelocityMult != velocityMult) {
+      m_armMaxVelDegS.updateIfChanged(true);
+    }
+    m_prevArmVelocityMult = velocityMult;
     m_armDynMMRequest.Velocity = m_armDynMMRequest.Velocity * velocityMult;
 
     m_armMaster.setControl(m_armDynMMRequest.withPosition(degrees / 360));
@@ -260,7 +270,10 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setWristAngle(double degrees, double velocityMult) {
-    m_wristMaxVelDegS.updateIfChanged(true);
+    if (m_prevWristVelocityMult != velocityMult) {
+      m_wristMaxVelDegS.updateIfChanged(true);
+    }
+    m_prevWristVelocityMult = velocityMult;
     m_wristDynMMRequest.Velocity = m_wristDynMMRequest.Velocity * velocityMult;
 
     m_wristMaster.setControl(m_wristDynMMRequest.withPosition(degrees / 360));

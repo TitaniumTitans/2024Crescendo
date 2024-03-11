@@ -13,10 +13,11 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -26,13 +27,17 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.FeedForwardCharacterization;
+import frc.robot.commands.IntakeControlCommand;
+import frc.robot.commands.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -84,9 +89,11 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
-                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION)
-            });
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
+                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION)
+            }
+            );
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken(), m_driveSubsystem::getVisionPose);
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
@@ -123,7 +130,7 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
-        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getPose);
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
       default -> {
@@ -141,22 +148,30 @@ public class RobotContainer {
       }
     }
 
-    // Set up auto routines
-    autoChooser = new SendableChooser<>();
-
-    // Set up feedforward characterization
-    autoChooser.addOption(
-        "Drive FF Characterization",
-        new FeedForwardCharacterization(
-                m_driveSubsystem,
-                m_driveSubsystem::runCharacterizationVolts,
-                m_driveSubsystem::getCharacterizationVelocity));
-
-    // Configure the button bindings
-    configureButtonBindings();
     // configure named commands for auto
     configureNamedCommands();
     configureDashboard();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+
+    // Set up feedforward characterization
+    autoChooser.addOption(
+        "Drive Quasistatic Forward",
+            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+            "Drive Quasistatic Backwards",
+            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+            "Drive Dynamic Forward",
+            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+            "Drive Dynamic Backwards",
+            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kReverse));
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    // Configure the button bindings
+    configureButtonBindings();
   }
 
   /**
@@ -166,38 +181,60 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Trigger intakeTrigger = controller.rightTrigger().and(controller.leftTrigger().negate());
-    Trigger spinUpTrigger = controller.leftTrigger().and(controller.rightTrigger().negate());
-    Trigger shootTrigger = controller.leftTrigger().and(controller.rightTrigger());
+    Trigger intakeTrigger = controller.y().and(controller.x().negate())
+        .and(controller.a().negate()) // make sure we don't amp
+        .and(controller.b().negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
 
-    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.90, 0.5, 0.25)
-        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE)));
+    Trigger spinUpTrigger = controller.x().and(controller.y().negate())
+        .and(controller.a().negate()) // make sure we don't amp
+        .and(controller.b().negate());
+
+    Trigger shootTrigger = controller.x().and(controller.y())
+        .and(controller.a().negate()) // make sure we don't amp
+        .and(controller.b().negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
+
+    Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
+
+    Trigger ampDepositeTrigger = controller.b().and(controller.a())
+        .and(spinUpTrigger.negate()) // make sure we don't amp while trying to do anything else
+        .and(shootTrigger.negate())
+        .and(intakeTrigger.negate())
+        .debounce(0.1, Debouncer.DebounceType.kBoth);
+
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
     spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+        .alongWith(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        )));
+
     shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-        .alongWith(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+        .alongWith(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        )));
 
-    controller.x().whileTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP));
-    controller.y().whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+    ampLineupTrigger.whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
-        m_shooter));
+        m_shooter)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
-//    controller.leftTrigger().onTrue(m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM))
-//        .whileTrue(DriveCommands.alignmentDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-//        ));
-
-//    controller.rightTrigger().whileTrue(m_shooter.intakeCommand(0.75, 0.25, 0.1));
-//    controller.rightBumper().whileTrue(m_shooter.intakeCommand(0.0, -0.25, 0.1));
-
-    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(0.55));
-    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(-0.55));
-
-    double centerDistance = 1.34 - Units.inchesToMeters(3.0);
+    controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
+    controller.pov(180).whileTrue(m_driveSubsystem.pathfollowFactory(
+        FieldConstants.AMP_LINEUP
+    ));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -211,7 +248,7 @@ public class RobotContainer {
             Commands.runOnce(
                     () ->
                         m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                            new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(240.25), 5.55),
+                            new Pose2d(m_driveSubsystem.getVisionPose().getTranslation(),
                             Rotation2d.fromDegrees(180.0)))),
                     m_driveSubsystem)
                 .ignoringDisable(true));
@@ -221,91 +258,23 @@ public class RobotContainer {
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Run Intake", Commands.run(() -> m_shooter.setIntakePower(0.5)));
-//    NamedCommands.registerCommand("Run Shooter", Commands.run(m_shooter::runShooterVelocity));
+    NamedCommands.registerCommand("Run Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
+
+    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter)
+        .raceWith(DriveCommands.alignmentDrive(
+            m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+        )));
   }
 
   private void configureDashboard() {
-    ShuffleboardTab commandTab = Shuffleboard.getTab("Commads");
+    ShuffleboardTab commandTab = Shuffleboard.getTab("Commands");
 
     commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
     commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
-
-    commandTab.add("Center Robot Pose", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(
-                    new Pose2d(
-                        FieldConstants.FIELD_LENGTH / 2.0,
-                        FieldConstants.FIELD_WIDTH / 2.0,
-                        new Rotation2d())),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("CenterToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(1.34, 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    double centerDistance = 1.34 - Units.inchesToMeters(3.0);
-
-    commandTab.add("2InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(2.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("6InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(6.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("12InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(12.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("24InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(24.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("48InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(48.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("96InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(96.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
-
-    commandTab.add("192InchesToSpeaker", Commands.runOnce(
-            () ->
-                m_driveSubsystem.setPose(AllianceFlipUtil.apply(
-                    new Pose2d(new Translation2d(centerDistance + Units.inchesToMeters(192.0), 5.55),
-                        Rotation2d.fromDegrees(180.0)))),
-            m_driveSubsystem)
-        .ignoringDisable(true));
   }
 
   /**

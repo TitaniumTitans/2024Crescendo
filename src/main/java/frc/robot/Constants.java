@@ -45,7 +45,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -70,7 +70,7 @@ public final class Constants {
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.0);
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.8);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.6);
     public static final double TRACK_WIDTH_Y = Units.inchesToMeters(18.6);
     public static final double DRIVE_BASE_RADIUS =
@@ -84,35 +84,38 @@ public final class Constants {
     // kP, kI, kD in order
     public static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
 
-//    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
-//        new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(8.5), Units.inchesToMeters(6)),
-//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(-18))
-//    );
-//    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-//                new Translation3d(Units.inchesToMeters(10.5), Units.inchesToMeters(-8.5), Units.inchesToMeters(6)),
-//        new Rotation3d(0.0, Units.degreesToRadians(50), Units.degreesToRadians(18))
-//        );
-
-    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(12.0), Units.inchesToMeters(6.0), Units.inchesToMeters(7.8)),
-        new Rotation3d(Units.degreesToRadians(0.0), Units.degreesToRadians(20.0), -Units.degreesToRadians(7.5))
+    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(11.0351), // 11.0351
+            Units.inchesToMeters(10.023204), // 10.023204
+            Units.inchesToMeters(7.1374)), // 4.1374
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-30.0), // -120.0 + 91.0
+            Units.degreesToRadians(-14.7)) // 165.3224 + 180
     );
 
-    public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
-        new Translation3d(Units.inchesToMeters(-11.25), Units.inchesToMeters(-9.0), Units.inchesToMeters(6.0)),
-        new Rotation3d(Units.degreesToRadians(2.0), Units.degreesToRadians(-26.0), Units.degreesToRadians(-35.0 - 180))
+    public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(11.0351), //11.0351
+            Units.inchesToMeters(-10.023204), //-10.023204
+            Units.inchesToMeters(7.1374)), // 7.1374
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-30.0), // -30.0 - 1
+            Units.degreesToRadians(14.7)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        Units.radiansToDegrees(MAX_LINEAR_SPEED),
-        Units.radiansToDegrees(MAX_LINEAR_SPEED),
-        MAX_ANGULAR_SPEED,
-        MAX_ANGULAR_SPEED
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.25
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0),new PIDConstants(5.0),
-        DriveConstants.MAX_LINEAR_SPEED, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
+        new PIDConstants(7.5, 0.75), new PIDConstants(7.5, 0.75),
+        DriveConstants.MAX_LINEAR_SPEED * 0.25, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
@@ -120,7 +123,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.472168), // offset 0.457764
+            Units.rotationsToDegrees(-0.017822) + 180, // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -131,7 +134,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.046143),
+            Units.rotationsToDegrees(-0.453857) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -142,7 +145,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.073730),
+            Units.rotationsToDegrees(0.428467) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -153,7 +156,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.404297),
+            Units.rotationsToDegrees(-0.093750) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -174,12 +177,14 @@ public final class Constants {
     * than the lowest point the arm and wrist will move to , and then compensate for that in our encoder reset code */
     public static final double OFFSET_NUDGE = 45;
     public static final double ARM_OFFSET = -0.123779 + Units.degreesToRotations(OFFSET_NUDGE);
-    public static final double WRIST_OFFSET = -0.163330 + Units.degreesToRotations(OFFSET_NUDGE);
-    public static final double ARM_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
+    public static final double WRIST_OFFSET = 0.000000 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double ARM_SENSOR_MECHANISM_RATIO =
+        (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
     public static final double ARM_CANCODER_MECHANISM_RATIO = (26.0 / 36.0) * (64.0 / 24.0);
 
     // the pulley on the encoder is a 1:1
-    public static final double WRIST_SENSOR_MECHANISM_RATIO = (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
+    public static final double WRIST_SENSOR_MECHANISM_RATIO =
+        (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
     public static final double WRIST_CANCODER_MECHANISM_RATIO = (48.0 / 24.0);
 
     public static final double WRIST_KP = 108.0;
@@ -233,9 +238,11 @@ public final class Constants {
     public static final ArmPose STOW_SETPOINT = new
         ArmPose("ArmPoses/Stow", true, 0.0, 45.0);
     public static final ArmPose INTAKE_SETPOINT =
-        new ArmPose("ArmPoses/Intake", true, 0.0, 55.0);
+        new ArmPose("ArmPoses/Intake", true, -7.0, 55.0);
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
+
+    public static final ArmPose STATIC_SHOOTER = new ArmPose(0.0, 55.0);
 
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
 

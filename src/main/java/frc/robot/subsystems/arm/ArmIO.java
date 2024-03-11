@@ -1,7 +1,10 @@
 package frc.robot.subsystems.arm;
 
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ArmIO {
+  @AutoLog
   class ArmIOInputs {
     public double armPositionDegs = 0.0;
     public double wristPositionDegs = 0.0;
@@ -22,7 +25,7 @@ public interface ArmIO {
     public double wristCurrentDraw = 0.0;
   }
 
-  default void updateInputs(ArmIOInputs inputs) {}
+  default void updateInputs(ArmIOInputsAutoLogged inputs) {}
 
   default void setArmVoltage(double voltage) {}
 
