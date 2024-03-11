@@ -12,10 +12,14 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
+
 import frc.robot.Constants.ArmConstants;
 
 public class ArmIOKraken implements ArmIO {
@@ -67,12 +71,7 @@ public class ArmIOKraken implements ArmIO {
 
   public ArmIOKraken() {
     final String CANBUS = "canivore";
-    m_armMaster = new TalonFX(ArmConstants.ARM_MASTER_ID, CANBUS);
-    m_armFollower = new TalonFX(ArmConstants.ARM_FOLLOWER_ID, CANBUS);
     m_armEncoder = new CANcoder(ArmConstants.ARM_ENCODER_ID, CANBUS);
-
-    m_wristMaster = new TalonFX(ArmConstants.WRIST_MASTER_ID, CANBUS);
-    m_wristFollower = new TalonFX(ArmConstants.WRIST_FOLLOWER_ID, CANBUS);
     m_wristEncoder = new CANcoder(ArmConstants.WRIST_ENCODER_ID, CANBUS);
 
     // Arm Configuration
@@ -84,8 +83,8 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
-    m_armMaster.getConfigurator().apply(armConfig);
-    m_armFollower.getConfigurator().apply(armConfig);
+    m_armMaster = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
+    m_armFollower = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
@@ -95,8 +94,8 @@ public class ArmIOKraken implements ArmIO {
     wristConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     wristConfig.Feedback.SensorToMechanismRatio = ArmConstants.WRIST_SENSOR_MECHANISM_RATIO;
 
-    m_wristMaster.getConfigurator().apply(wristConfig);
-    m_wristFollower.getConfigurator().apply(wristConfig);
+    m_wristMaster = TalonFXFactory.createTalon(ArmConstants.WRIST_MASTER_ID, wristConfig);
+    m_wristFollower = TalonFXFactory.createTalon(ArmConstants.WRIST_FOLLOWER_ID, wristConfig);
 
     // Encoder Configuration
     CANcoderConfiguration armEncoderConfig = new CANcoderConfiguration();

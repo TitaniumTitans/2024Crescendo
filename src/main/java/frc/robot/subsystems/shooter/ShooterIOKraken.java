@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.playingwithfusion.TimeOfFlight;
+import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ShooterConstants;
@@ -58,10 +59,10 @@ public class ShooterIOKraken implements ShooterIO {
     m_kicker = new TalonFX(ShooterConstants.KICKER_ID, canbus);
     m_intake = new TalonFX(ShooterConstants.INTAKE_ID, canbus);
     m_indexer = new TalonFX(ShooterConstants.INDEXER_ID, canbus);
-
-//    m_tof = new TimeOfFlight(28);
-//    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
-
+    
+    m_tof = new TimeOfFlight(28);
+    m_tof.setRangingMode(TimeOfFlight.RangingMode.Short, 25);
+   
     // general motor configs
     TalonFXConfiguration shooterConfig = new TalonFXConfiguration();
     shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -72,16 +73,19 @@ public class ShooterIOKraken implements ShooterIO {
 
     // right shooter isn't inverted
     shooterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    m_leftTalon.getConfigurator().apply(shooterConfig);
+
+    m_leftTalon = TalonFXFactory.createTalon(ShooterConstants.TOP_LEFT_ID, shooterConfig);
 
     // everything else is
     shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    m_rightTalon.getConfigurator().apply(shooterConfig);
+
+    m_rightTalon = TalonFXFactory.createTalon(ShooterConstants.TOP_RIGHT_ID, shooterConfig);
 
     shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    m_indexer.getConfigurator().apply(shooterConfig);
-    m_kicker.getConfigurator().apply(shooterConfig);
-    m_intake.getConfigurator().apply(shooterConfig);
+
+    m_indexer = TalonFXFactory.createTalon(ShooterConstants.INDEXER_ID, shooterConfig);
+    m_intake = TalonFXFactory.createTalon(ShooterConstants.INTAKE_ID, shooterConfig);
+    m_kicker = TalonFXFactory.createTalon(ShooterConstants.KICKER_ID, shooterConfig);
 
     m_leftProperty = new Phoenix6PidPropertyBuilder("Shooter/Left PID", false, m_leftTalon, 0)
         .addP(ShooterConstants.SHOOTER_KP)
@@ -197,7 +201,7 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.intakeTemperature = m_intakeTemperatureSignal.getValueAsDouble();
     inputs.indexerTemperature = m_indexerTemperatureSignal.getValueAsDouble();
 
-//    inputs.tofDistanceIn = m_tof.getRange();
+   inputs.tofDistanceIn = m_tof.getRange();
 
     m_leftProperty.updateIfChanged();
     m_rightProperty.updateIfChanged();
@@ -205,13 +209,7 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public boolean hasPiece() {
-    double avgCurrentChange = (
-        m_prevKickerCurrent[0] +
-        m_prevKickerCurrent[1] +
-        m_prevKickerCurrent[2] +
-        m_prevKickerCurrent[3]
-        ) / 4.0;
-    return avgCurrentChange > 20;
+    return m_tof.getRange() < 60.0;
   }
 
   @Override
