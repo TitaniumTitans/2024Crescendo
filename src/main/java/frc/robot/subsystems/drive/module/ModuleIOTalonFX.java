@@ -99,8 +99,11 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // run configs on drive motor
     var driveConfig = new TalonFXConfiguration();
+    driveConfig.CurrentLimits.StatorCurrentLimit = 120.0;
+    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     driveConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    driveConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
@@ -121,8 +124,10 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // run configs on turning motor
     var turnConfig = new TalonFXConfiguration();
-    turnConfig.CurrentLimits.StatorCurrentLimit = 30.0;
+    turnConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    turnConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+    turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnConfig.MotorOutput.Inverted =
             moduleConstants.TURN_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
@@ -142,8 +147,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addI(m_moduleConstants.TURN_KI())
             .addD(m_moduleConstants.TURN_KD());
 
-    m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
-
+    m_posRequest = new PositionVoltage(0, 0, true, 0, 0, false, false, false);
 
     // Fancy multithreaded odometry update stuff
     // setup drive values
@@ -225,6 +229,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
 
+    inputs.odometryTimestamps =
+            timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
         .mapToDouble(Units::rotationsToRadians)
         .toArray());
@@ -239,7 +245,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void setDriveVelocityMPS(double mps) {
     double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
-    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0);
+    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0).withEnableFOC(true);
     m_driveTalon.setControl(velRequest.withVelocity(rps));
   }
 
