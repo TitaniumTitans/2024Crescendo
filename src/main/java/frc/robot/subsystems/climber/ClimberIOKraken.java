@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants.ClimberConstants;
+import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 
@@ -34,16 +35,15 @@ public class ClimberIOKraken implements ClimberIO {
   private final StatusSignal<Double> m_rightAppliedOutputSignal;
 
   public ClimberIOKraken() {
-    m_leftClimber = new TalonFX(ClimberConstants.LEFT_CLIMBER_ID, "canivore");
-    m_rightClimber = new TalonFX(ClimberConstants.RIGHT_CLIMBER_ID, "canivore");
-
     TalonFXConfiguration climberConfig = new TalonFXConfiguration();
     climberConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     climberConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    m_leftClimber.getConfigurator().apply(climberConfig);
+
+    m_leftClimber = TalonFXFactory.createTalon(ClimberConstants.LEFT_CLIMBER_ID, climberConfig);
 
     climberConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    m_rightClimber.getConfigurator().apply(climberConfig);
+
+    m_rightClimber = TalonFXFactory.createTalon(ClimberConstants.RIGHT_CLIMBER_ID, climberConfig);
 
     m_leftProperty = new Phoenix6PidPropertyBuilder("Climber/Left Climber", false, m_leftClimber, 0)
         .addP(ClimberConstants.CLIMBER_KP)

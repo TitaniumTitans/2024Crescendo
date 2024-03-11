@@ -7,6 +7,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import frc.robot.Constants.ClimberConstants;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
+import lib.factories.TalonFXFactory;
 
 public class ClimberIOPrototype implements ClimberIO {
   private final TalonFX m_leftTalon;
@@ -15,15 +16,16 @@ public class ClimberIOPrototype implements ClimberIO {
   private final PidPropertyPublic m_rightClimberPid;
 
   public ClimberIOPrototype() {
-    m_leftTalon = new TalonFX(ClimberConstants.LEFT_CLIMBER_ID);
-    m_rightTalon = new TalonFX(ClimberConstants.RIGHT_CLIMBER_ID);
+
 
     var rightTalonConfig = new TalonFXConfiguration();
     rightTalonConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    m_rightTalon.getConfigurator().apply(rightTalonConfig);
+
+    m_rightTalon = TalonFXFactory.createTalon(ClimberConstants.RIGHT_CLIMBER_ID, "canivore", rightTalonConfig);
 
     var leftTalonConfig = new TalonFXConfiguration();
-    m_leftTalon.getConfigurator().apply(leftTalonConfig);
+
+    m_leftTalon = TalonFXFactory.createTalon(ClimberConstants.LEFT_CLIMBER_ID, "canivore", leftTalonConfig);
 
     m_leftClimberPid = new Phoenix6PidPropertyBuilder(
         "Climber/Left PID",
