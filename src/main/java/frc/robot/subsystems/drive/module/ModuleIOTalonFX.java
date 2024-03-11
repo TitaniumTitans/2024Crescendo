@@ -14,7 +14,6 @@
 package frc.robot.subsystems.drive.module;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -65,7 +64,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> m_turnAbsolutePosition;
   private final StatusSignal<Double> m_turnPosition;
   private final Queue<Double> m_turnPositionQueue;
-  private final Queue<Double> timestampQueue;
+  private final Queue<Double> m_timestampQueue;
   private final StatusSignal<Double> m_turnVelocity;
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
@@ -173,7 +172,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnClosedLoopError = m_turnTalon.getClosedLoopError();
     m_turnClosedLoopReference = m_turnTalon.getClosedLoopReference();
 
-    timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
+    m_timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
     // setup refresh rates on all inputs
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -230,7 +229,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
 
     inputs.odometryTimestamps =
-            timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+            m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
         .mapToDouble(Units::rotationsToRadians)
         .toArray());
@@ -238,6 +237,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         .map(Rotation2d::fromRotations)
         .toArray(Rotation2d[]::new));
 
+    m_timestampQueue.clear();
     m_drivePositionQueue.clear();
     m_turnPositionQueue.clear();
   }

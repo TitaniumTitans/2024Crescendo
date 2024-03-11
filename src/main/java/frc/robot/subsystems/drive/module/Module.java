@@ -43,12 +43,6 @@ public class Module {
     Timer.delay(0.5);
 
     setBrakeMode(true);
-
-    DataLogUtil.getTable("Swerve").addDoubleArray("Module" + m_index + "/DriveCurrentDraw",
-            () -> m_inputs.driveCurrentAmps, false);
-    DataLogUtil.getTable("Swerve").addDoubleArray("Module" + m_index + "/TurnCurrentDraw",
-            () -> m_inputs.turnCurrentAmps, false);
-
   }
 
   /**

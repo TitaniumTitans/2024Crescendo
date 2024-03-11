@@ -32,7 +32,6 @@ public class VisionSubsystem {
   private AprilTagFieldLayout m_aprilTagFieldLayout;
   private final String m_name;
 
-  private Pose3d m_lastEstimatedPose = new Pose3d();
   private final double xyStdDevCoefficient = Units.inchesToMeters(8.0);
   private final double thetaStdDevCoefficient = Units.degreesToRadians(24.0);
 
@@ -69,18 +68,7 @@ public class VisionSubsystem {
     Logger.processInputs("Vision/" + m_name, inputs);
   }
 
-  public double getTagDistance(){
-    var latestResult = m_camera.getLatestResult();
-    if (latestResult.hasTargets()){
-      var bestTarget = latestResult.getBestTarget();
-      var camToTarget = bestTarget.getBestCameraToTarget();
-      return camToTarget.getX();
-    }
-    return -1;
-  }
-
   public Optional<PoseEstimator.TimestampedVisionUpdate> getPose(Pose2d prevEstimatedRobotPose) {
-
     m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
 
     PhotonPipelineResult camResult = m_camera.getLatestResult();
@@ -91,7 +79,6 @@ public class VisionSubsystem {
       return Optional.empty();
     } else {
       EstimatedRobotPose estPose = opPose.get();
-      m_lastEstimatedPose = estPose.estimatedPose;
 
       // find average distance to tags
       int numTags = 0;
@@ -107,19 +94,14 @@ public class VisionSubsystem {
         avgDist +=
             tagPose.get().toPose2d().getTranslation().getDistance(estPose.estimatedPose.toPose2d().getTranslation());
       }
-
-      avgDist /= numTags;
-
-      double xyStdDev;
-      double thetaStdDev;
-
-      if (estPose.strategy != PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-        xyStdDev = xyStdDevCoefficient * Math.pow(avgDist, 2.0);
-        thetaStdDev = thetaStdDevCoefficient * Math.pow(avgDist, 2.0);
+      if (numTags == 0.0) {
+        avgDist = 0.0;
       } else {
-        xyStdDev = xyStdDevMultiTagCoefficient * Math.pow(avgDist, 2.0);
-        thetaStdDev = thetaStdDevMultiTagCoefficient * Math.pow(avgDist, 2.0);
+        avgDist /= numTags;
       }
+
+      double xyStdDev = xyStdDevCoefficient * Math.pow(avgDist, 2.0);
+      double thetaStdDev = thetaStdDevCoefficient * Math.pow(avgDist, 2.0);
 
       Logger.recordOutput("Vision/" + m_name + "/Estimated Pose", estPose.estimatedPose);
 
@@ -146,41 +128,6 @@ public class VisionSubsystem {
     }
 
     return results;
-  }
-
-  public record VisionUpdate(Pose2d pose, Matrix<N3, N1> stdDevs, double timestamp) {
-    public Pose2d apply(Pose2d lastPose, Matrix<N3, N1> q) {
-      // Apply vision updates
-      // Calculate Kalman gains based on std devs
-      // (https://github.com/wpilibsuite/allwpilib/blob/main/wpimath/src/main/java/edu/wpi/first/math/estimator/)
-      Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
-      var r = new double[3];
-      for (int i = 0; i < 3; ++i) {
-        r[i] = this.stdDevs().get(i, 0) * this.stdDevs().get(i, 0);
-      }
-      for (int row = 0; row < 3; ++row) {
-        if (q.get(row, 0) == 0.0) {
-          visionK.set(row, row, 0.0);
-        } else {
-          visionK.set(
-              row, row, q.get(row, 0) / (q.get(row, 0) + Math.sqrt(q.get(row, 0) * r[row])));
-        }
-      }
-
-      // Calculate twist between current and vision pose
-      var visionTwist = lastPose.log(this.pose());
-
-      // Multiply by Kalman gain matrix
-      var twistMatrix =
-          visionK.times(VecBuilder.fill(visionTwist.dx, visionTwist.dy, visionTwist.dtheta));
-
-      // Apply twist
-      lastPose =
-          lastPose.exp(
-              new Twist2d(twistMatrix.get(0, 0), twistMatrix.get(1, 0), twistMatrix.get(2, 0)));
-
-      return lastPose;
-    }
   }
 }
 
