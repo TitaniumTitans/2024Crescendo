@@ -22,7 +22,7 @@ public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_intake;
   private final TalonFX m_indexer;
 
-//  private final TimeOfFlight m_tof;
+  private final TimeOfFlight m_tof;
 
   private final PidPropertyPublic m_leftProperty;
   private final PidPropertyPublic m_rightProperty;
