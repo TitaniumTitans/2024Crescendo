@@ -26,7 +26,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1;
+  public static final double DEADBAND = 0.1;
 
   private DriveCommands() {}
 

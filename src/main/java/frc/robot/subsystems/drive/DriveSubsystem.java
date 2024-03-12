@@ -395,4 +395,8 @@ public class DriveSubsystem extends SubsystemBase {
   public Command runSysidDynamic(SysIdRoutine.Direction direction) {
     return m_sysId.dynamic(direction);
   }
- }
+
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return kinematics.toChassisSpeeds(getModuleStates());
+  }
+}

@@ -35,10 +35,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FeedForwardCharacterization;
-import frc.robot.commands.IntakeControlCommand;
-import frc.robot.commands.ShooterAutoCommand;
+import frc.robot.commands.*;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -224,8 +221,13 @@ public class RobotContainer {
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
 
-    ampLineupTrigger.whileTrue(new ScheduleCommand(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP))
+    ampLineupTrigger.whileTrue(new alignmentDriveCommand(m_driveSubsystem,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX(),
+            () -> FieldConstants.AMP_LINEUP)
         .andThen(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
+    
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
