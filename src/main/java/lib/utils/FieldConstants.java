@@ -93,7 +93,7 @@ public class FieldConstants {
 
   public static final Translation3d CENTER_SPEAKER =
       new Translation3d(
-          (Units.inchesToMeters(18.055) / 2.0),
+          (Units.inchesToMeters(18.055) / 2.0) - Units.inchesToMeters(2.0),
           Units.inchesToMeters((238.815 + 197.765) / 2.0),
           (Units.inchesToMeters(83.091 + 78.324) / 2.0) - Units.inchesToMeters(1.0));
 
