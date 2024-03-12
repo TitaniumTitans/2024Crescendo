@@ -148,24 +148,6 @@ public class RobotContainer {
     configureNamedCommands();
     configureDashboard();
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-
-    // Set up feedforward characterization
-    autoChooser.addOption(
-        "Drive Quasistatic Forward",
-            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-            "Drive Quasistatic Backwards",
-            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-            "Drive Dynamic Forward",
-            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-            "Drive Dynamic Backwards",
-            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kReverse));
-
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-
     // Configure the button bindings
     configureButtonBindings();
   }

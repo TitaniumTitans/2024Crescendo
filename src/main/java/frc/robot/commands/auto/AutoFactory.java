@@ -1,30 +1,19 @@
 package frc.robot.commands.auto;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Map;
 
 public final class AutoFactory {
 
   public enum AutoModes {
-    FOUR_NOTE("FourNoteSpeaker"),
-    TWO_NOTE_LEFT_3("TwoNoteSpeakerLeft3"),
-    TWO_NOTE_LEFT_4("TwoNoteSpeakerLeft4"),
-    TWO_NOTE_MIDDLE_2("TwoNoteSpeakerMiddle2"),
-    TWO_NOTE_MIDDLE_5("TwoNoteSpeakerMiddle5"),
-    TWO_NOTE_MIDDLE_6("TwoNoteSpeakerMiddle6"),
-    TWO_NOTE_RIGHT_6("TwoNoteSpeakerRight6"),
-    TWO_NOTE_RIGHT_7("TwoNotesSpeakerRight7"),
-    LEAVE_WING("LeaveWing"),
-    PRELOAD_AND_LEAVE_WING("OneNoteSpeakerAndLeaveWing"),
-    PRELOAD_AND_SHOOT("JustShoot");
-
+    FRONT_WING_1("FrontWing1"),
+    FRONT_WING_2("FrontWing2"),
+    FRONT_WING_3("FrontWing3"),
+    FRONT_WING_3_CONTESTED_5("FrontWing3Contested5");
 
     public final String m_modeName;
 
@@ -33,7 +22,7 @@ public final class AutoFactory {
     }
   }
 
-  private static final AutoModes DEFAULT_MODE = AutoModes.TWO_NOTE_RIGHT_6;
+  private static final AutoModes DEFAULT_MODE = AutoModes.FRONT_WING_1;
 
   private final LoggedDashboardChooser<AutoModes> m_autonChooser;
 
