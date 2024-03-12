@@ -81,6 +81,15 @@ public class DriveSubsystem extends SubsystemBase {
       new SwerveModulePosition()
   };
 
+  private Rotation2d[] m_prevRotations = new Rotation2d[] {
+          new Rotation2d(),
+          new Rotation2d(),
+          new Rotation2d(),
+          new Rotation2d(),
+          new Rotation2d()
+  };
+  private Rotation2d m_avgRotationRads = new Rotation2d();
+
   private final VisionSubsystem[] m_cameras;
 
   private final PIDController m_thetaPid;
@@ -234,6 +243,24 @@ public class DriveSubsystem extends SubsystemBase {
         m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
 
+      // Update average heading, used for aiming
+      m_prevRotations = new Rotation2d[] {
+              m_rawGyroRotation,
+              m_prevRotations[1],
+              m_prevRotations[2],
+              m_prevRotations[3],
+              m_prevRotations[4]
+      };
+
+      double totalRotationRads = 0.0;
+
+      for (Rotation2d mPrevRotation : m_prevRotations) {
+        totalRotationRads += mPrevRotation.getRadians();
+      }
+
+      totalRotationRads /= m_prevRotations.length;
+      m_avgRotationRads = new Rotation2d(totalRotationRads);
+
       // Apply update
       m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
     }
@@ -291,7 +318,7 @@ public class DriveSubsystem extends SubsystemBase {
     double desiredRotation = Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
         + Units.degreesToRadians(90);
 
-    return m_thetaPid.calculate(getRotation().getRadians(), desiredRotation);
+    return m_thetaPid.calculate(m_avgRotationRads.getRadians(), desiredRotation);
   }
 
   /** Stops the drive. */

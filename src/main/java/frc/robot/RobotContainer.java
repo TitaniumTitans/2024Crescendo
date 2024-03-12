@@ -227,7 +227,7 @@ public class RobotContainer {
             () -> -controller.getRightX(),
             () -> FieldConstants.AMP_LINEUP)
         .andThen(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
-    
+
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
