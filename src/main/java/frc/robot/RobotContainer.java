@@ -19,8 +19,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -30,7 +28,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -221,7 +218,7 @@ public class RobotContainer {
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
 
-    ampLineupTrigger.whileTrue(new alignmentDriveCommand(m_driveSubsystem,
+    ampLineupTrigger.whileTrue(new AlignmentDriveCommand(m_driveSubsystem,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX(),

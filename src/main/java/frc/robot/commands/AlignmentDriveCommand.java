@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import static frc.robot.commands.DriveCommands.DEADBAND;
 
 
-public class alignmentDriveCommand extends Command {
+public class AlignmentDriveCommand extends Command {
   private final DriveSubsystem driveSubsystem;
   private final Supplier<Pose2d> pointSupplier;
   private Command alignmentCommand;
@@ -28,7 +28,7 @@ public class alignmentDriveCommand extends Command {
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier thetaSupplier;
 
-  public alignmentDriveCommand(DriveSubsystem driveSubsystem,
+  public AlignmentDriveCommand(DriveSubsystem driveSubsystem,
                                DoubleSupplier xSupplier,
                                DoubleSupplier ySupplier,
                                DoubleSupplier thetaSupplier,
@@ -111,6 +111,6 @@ public class alignmentDriveCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return false;
+    return alignmentCommand.isFinished();
   }
 }
