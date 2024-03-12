@@ -45,7 +45,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -87,35 +87,35 @@ public final class Constants {
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
             Units.inchesToMeters(11.0351), // 11.0351
-            Units.inchesToMeters(10.023204), // 10.023204
-            Units.inchesToMeters(7.1374)), // 4.1374
+            Units.inchesToMeters(10.023204 - 2.0), // 10.023204
+            Units.inchesToMeters(7.1374 - 3.5)), // 4.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(-30.0), // -120.0 + 91.0
-            Units.degreesToRadians(-14.7)) // 165.3224 + 180
+            Units.degreesToRadians(0.0 + 4.0),
+            Units.degreesToRadians(-30.0 - 1.0), // -120.0 + 91.0
+            Units.degreesToRadians(-14.7 - 6.5)) // 165.3224 + 180
     );
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
             Units.inchesToMeters(11.0351), //11.0351
             Units.inchesToMeters(-10.023204), //-10.023204
-            Units.inchesToMeters(7.1374)), // 7.1374
+            Units.inchesToMeters(7.1374 - 3.5)), // 7.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(-30.0), // -30.0 - 1
-            Units.degreesToRadians(14.7)) // 165.3224)
+            Units.degreesToRadians(0.0 + 7.0),
+            Units.degreesToRadians(-30.0 + 0.85), // -30.0 - 1
+            Units.degreesToRadians(14.7 - 12.5)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        MAX_LINEAR_SPEED * 0.25,
-        MAX_LINEAR_SPEED * 0.25,
-        MAX_ANGULAR_SPEED * 0.25,
-        MAX_ANGULAR_SPEED * 0.25
+        MAX_LINEAR_SPEED,
+        MAX_LINEAR_SPEED * 0.5,
+        MAX_ANGULAR_SPEED,
+        MAX_ANGULAR_SPEED * 0.5
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(7.5, 0.75), new PIDConstants(7.5, 0.75),
-        DriveConstants.MAX_LINEAR_SPEED * 0.25, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
+        new PIDConstants(4.5, 0.75), new PIDConstants(4.5, 0.75),
+        DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,

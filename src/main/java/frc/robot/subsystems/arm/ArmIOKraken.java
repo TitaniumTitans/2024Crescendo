@@ -21,6 +21,7 @@ import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 
 import frc.robot.Constants.ArmConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class ArmIOKraken implements ArmIO {
   // Physical devices
@@ -84,7 +85,7 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
     m_armMaster = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
-    m_armFollower = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
+    m_armFollower = TalonFXFactory.createTalon(ArmConstants.ARM_FOLLOWER_ID, armConfig);
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
@@ -242,6 +243,9 @@ public class ArmIOKraken implements ArmIO {
     m_armMaxVelDegS.updateIfChanged();
     m_wristMaxVelDegS.updateIfChanged();
     m_accelTimeSecs.updateIfChanged();
+
+    Logger.recordOutput("Arm Prev Vel Mult", m_prevArmVelocityMult);
+    Logger.recordOutput("Wrist Prev Vel Mult", m_prevWristVelocityMult);
   }
 
   @Override

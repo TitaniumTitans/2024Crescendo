@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -183,8 +184,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Trigger intakeTrigger = controller.y().and(controller.x().negate())
         .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate())
-        .debounce(0.1, Debouncer.DebounceType.kBoth);
+        .and(controller.b().negate());
 
     Trigger spinUpTrigger = controller.x().and(controller.y().negate())
         .and(controller.a().negate()) // make sure we don't amp
@@ -192,8 +192,7 @@ public class RobotContainer {
 
     Trigger shootTrigger = controller.x().and(controller.y())
         .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate())
-        .debounce(0.1, Debouncer.DebounceType.kBoth);
+        .and(controller.b().negate());
 
     Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
@@ -225,11 +224,15 @@ public class RobotContainer {
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
 
-    ampLineupTrigger.whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    ampLineupTrigger.whileTrue(new ScheduleCommand(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP))
+        .andThen(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
+
+    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25));
+    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25));
 
     controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
     controller.pov(180).whileTrue(m_driveSubsystem.pathfollowFactory(
@@ -258,14 +261,14 @@ public class RobotContainer {
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Run Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
+    NamedCommands.registerCommand("Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
     NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter)
         .raceWith(DriveCommands.alignmentDrive(
             m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
+            () -> 0.0,
+            () -> 0.0,
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
   }

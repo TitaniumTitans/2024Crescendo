@@ -58,7 +58,7 @@ public class Robot extends LoggedRobot {
 //    DriverStation.startDataLog(DataLogManager.getLog());
 
     SignalLogger.setPath(logPath);
-    SignalLogger.start();
+//    SignalLogger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.

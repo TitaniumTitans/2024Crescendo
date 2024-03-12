@@ -14,6 +14,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import lib.logger.DataLogUtil;
+import lib.utils.FieldConstants;
 import lib.utils.PoseEstimator;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
@@ -32,11 +33,11 @@ public class VisionSubsystem {
   private AprilTagFieldLayout m_aprilTagFieldLayout;
   private final String m_name;
 
-  private final double xyStdDevCoefficient = Units.inchesToMeters(8.0);
-  private final double thetaStdDevCoefficient = Units.degreesToRadians(24.0);
+  private final double xyStdDevCoefficient = Units.inchesToMeters(4.0);
+  private final double thetaStdDevCoefficient = Units.degreesToRadians(12.0);
 
-  private final double xyStdDevMultiTagCoefficient = Units.inchesToMeters(4.0);
-  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(12.0);
+  private final double xyStdDevMultiTagCoefficient = Units.inchesToMeters(2.0);
+  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(6.0);
 
   private final PhotonVisionIOInputsAutoLogged inputs = new PhotonVisionIOInputsAutoLogged();
 
@@ -47,12 +48,13 @@ public class VisionSubsystem {
     try {
       m_aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
       m_photonPoseEstimator = new PhotonPoseEstimator(
-          m_aprilTagFieldLayout,
+          FieldConstants.APRIL_TAG_FIELD_LAYOUT,
           PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
           m_camera,
           robotToCam);
 
-      m_photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+      m_photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
+
     } catch (IOException e){
       throw new IllegalStateException(e);
     }
@@ -102,6 +104,11 @@ public class VisionSubsystem {
 
       double xyStdDev = xyStdDevCoefficient * Math.pow(avgDist, 2.0);
       double thetaStdDev = thetaStdDevCoefficient * Math.pow(avgDist, 2.0);
+
+      if (camResult.getTargets().size() > 1.0) {
+        xyStdDev = xyStdDevMultiTagCoefficient * Math.pow(avgDist, 2.0);
+        thetaStdDev = thetaStdDevMultiTagCoefficient * Math.pow(avgDist, 2.0);
+      }
 
       Logger.recordOutput("Vision/" + m_name + "/Estimated Pose", estPose.estimatedPose);
 

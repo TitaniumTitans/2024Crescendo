@@ -145,8 +145,8 @@ public class DriveSubsystem extends SubsystemBase {
             Units.inchesToMeters(0.5),
             Units.degreesToRadians(0.75)),
         VecBuilder.fill(
-            Units.inchesToMeters(4.0),
-            Units.inchesToMeters(4.0),
+            Units.inchesToMeters(2.0),
+            Units.inchesToMeters(2.0),
             Units.degreesToRadians(25.0))
     );
 
@@ -239,9 +239,10 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // make sure we're not moving too fast before trying to update vision poses
-    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= Units.inchesToMeters(20))
-    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= Units.inchesToMeters(20))
-    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= Units.degreesToRadians(60))) {
+    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= Units.inchesToMeters(30))
+    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= Units.inchesToMeters(30))
+    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= Units.degreesToRadians(60))
+    || DriverStation.isTeleop()) {
       for (VisionSubsystem camera : m_cameras) {
         camera.updateInputs();
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
@@ -255,12 +256,6 @@ public class DriveSubsystem extends SubsystemBase {
     m_thetaPidProperty.updateIfChanged();
 
     m_field.setRobotPose(getVisionPose());
-
-    Logger.recordOutput("Swerve/LeftCamPose",
-        new Pose3d(getVisionPose()).plus(DriveConstants.LEFT_CAMERA_TRANSFORMATION));
-
-    Logger.recordOutput("Swerve/RightCamPose",
-        new Pose3d(getVisionPose()).plus(DriveConstants.RIGHT_CAMERA_TRANSFORMATION));
   }
 
   /**
@@ -352,7 +347,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns the robot pose with vision updates */
-  @AutoLogOutput(key = "Odometry/RobotVision")
+  @AutoLogOutput(key = "Odometry/RobotPose")
   public Pose2d getVisionPose() {
     return m_wpiPoseEstimator.getEstimatedPosition();
   }
@@ -380,7 +375,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Command pathfollowFactory(Pose2d pose) {
     return AutoBuilder.pathfindToPoseFlipped(
-        pose, DriveConstants.DEFAULT_CONSTRAINTS);
+        pose, DriveConstants.DEFAULT_CONSTRAINTS).withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf);
   }
 
   /** Returns an array of module translations. */

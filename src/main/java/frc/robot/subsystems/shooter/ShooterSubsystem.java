@@ -27,8 +27,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
-  private double m_leftSpeedSetpoint = 0.0;
-  private double m_rightSpeedSetpoint = 0.0;
+  private double m_leftSpeedSetpoint = 3800.0;
+  private double m_rightSpeedSetpoint = 3800.0;
 
   private final GosDoubleProperty m_leftPower = new
       GosDoubleProperty(false, "Shooter/Left RPM", 3600);
