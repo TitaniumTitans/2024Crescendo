@@ -293,16 +293,16 @@ public class DriveSubsystem extends SubsystemBase {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] m_setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(m_setpointStates, DriveConstants.MAX_LINEAR_SPEED);
+    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
       // The module returns the optimized state, useful for logging
-      m_optimizedStates[i] = modules[i].runSetpoint(m_setpointStates[i]);
+      m_optimizedStates[i] = modules[i].runSetpoint(setpointStates[i]);
     }
 
-    Logger.recordOutput("SwerveStates/Setpoints", m_setpointStates);
+    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveStates/Optimized", m_optimizedStates);
   }
 
