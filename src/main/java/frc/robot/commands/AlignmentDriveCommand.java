@@ -61,6 +61,8 @@ public class AlignmentDriveCommand extends Command {
             0.0,
             driveSubsystem
     );
+
+    alignmentCommand.initialize();
   }
 
   @Override
@@ -112,5 +114,10 @@ public class AlignmentDriveCommand extends Command {
   @Override
   public boolean isFinished() {
     return alignmentCommand.isFinished();
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    alignmentCommand.end(interrupted);
   }
 }
