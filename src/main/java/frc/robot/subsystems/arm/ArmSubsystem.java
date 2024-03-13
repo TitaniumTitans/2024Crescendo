@@ -176,10 +176,10 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
       case MANUAL_WRIST -> {
-        m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
+        m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();
 
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
-        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
+        m_desiredArmPoseDegs = Math.max(m_desiredArmPoseDegs, ArmSetpoints.STATIC_SHOOTER.armAngle());
       }
       default -> {
         m_armVelocityMult = 1.0;

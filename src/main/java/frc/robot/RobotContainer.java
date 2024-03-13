@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.*;
+import frc.robot.commands.auto.AutoFactory;
 import frc.robot.commands.auto.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
@@ -66,7 +67,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
-//  private final AutoFactory m_autonFactory = new AutoFactory();
+  private final AutoFactory m_autonFactory;
   private final LoggedDashboardNumber m_leftRPM = new LoggedDashboardNumber("Shooter/LeftRPM", 3600);
   private final LoggedDashboardNumber m_rightRPM = new LoggedDashboardNumber("Shooter/RightRPM", 3600);
 
@@ -147,6 +148,8 @@ public class RobotContainer {
     configureNamedCommands();
     configureDashboard();
 
+    m_autonFactory = new AutoFactory();
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -201,16 +204,14 @@ public class RobotContainer {
         )));
 
     ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
-        .finallyDo(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP)))
-        .onFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
+        .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
+        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
-//    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25));
-//    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25));
 
     controller.leftBumper().whileTrue(
         m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get())
@@ -263,6 +264,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new InstantCommand();
+    return m_autonFactory.getSelectedAutonomous();
   }
 }
