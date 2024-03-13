@@ -38,6 +38,7 @@ public class AimbotUtils {
 //    m_rightSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
   }
 
+  /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
     return m_angleLerpTable.get(distance);
   }
@@ -48,6 +49,22 @@ public class AimbotUtils {
 
   public static double getRightSpeed(double distance) {
     return m_rightSpeedLerpTable.get(distance);
+  }
+
+  /** Gets the distance from the drivebase to the speaker in meters */
+  public static double getDistanceFromSpeaker(Pose2d drivePose) {
+    return FieldConstants.CENTER_SPEAKER.toTranslation2d().getDistance(drivePose.getTranslation());
+  }
+
+  /** Gets the angle the drivebase should be at to aim at the speaker */
+  public static Rotation2d getDrivebaseAimingAngle(Pose2d drivePose) {
+    Transform3d robotToPoint =
+        new Transform3d(
+            new Pose3d(new Pose2d(drivePose.getTranslation(), new Rotation2d())),
+            new Pose3d(FieldConstants.CENTER_SPEAKER, new Rotation3d()));
+
+    return new Rotation2d(Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
+        + Units.degreesToRadians(90));
   }
 
   /** Gets the top point of the shooter for checking limits*/

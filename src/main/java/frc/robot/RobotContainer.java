@@ -13,8 +13,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.SignalLogger;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,16 +22,14 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.*;
-import frc.robot.commands.auto.AutoFactory;
+import frc.robot.commands.auto.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -69,7 +65,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
-  private final AutoFactory m_autonFactory = new AutoFactory();
+//  private final AutoFactory m_autonFactory = new AutoFactory();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -201,12 +197,9 @@ public class RobotContainer {
             () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
         )));
 
-    ampLineupTrigger.whileTrue(new AlignmentDriveCommand(m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX(),
-            () -> FieldConstants.AMP_LINEUP)
-        .andThen(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
+    ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+        .finallyDo(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP)))
+        .onFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
@@ -216,10 +209,7 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25));
     controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25));
 
-    controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
-    controller.pov(180).whileTrue(m_driveSubsystem.pathfollowFactory(
-        FieldConstants.AMP_LINEUP
-    ));
+    controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -246,7 +236,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter)
+    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem)
         .raceWith(DriveCommands.alignmentDrive(
             m_driveSubsystem,
             () -> 0.0,
@@ -268,6 +258,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return m_autonFactory.getSelectedAutonomous();
+    return new InstantCommand();
   }
 }

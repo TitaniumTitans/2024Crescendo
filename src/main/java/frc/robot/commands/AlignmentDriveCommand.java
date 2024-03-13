@@ -7,20 +7,22 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import lib.utils.AllianceFlipUtil;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import static frc.robot.commands.DriveCommands.DEADBAND;
-
 
 public class AlignmentDriveCommand extends Command {
+  private static final double DEADBAND = 0.25;
   private final DriveSubsystem driveSubsystem;
+  private final ArmSubsystem armSubsystem;
   private final Supplier<Pose2d> pointSupplier;
   private Command alignmentCommand;
 
@@ -28,15 +30,17 @@ public class AlignmentDriveCommand extends Command {
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier thetaSupplier;
 
+  private boolean reinit = false;
+
   public AlignmentDriveCommand(DriveSubsystem driveSubsystem,
+                               ArmSubsystem armSubsystem,
                                DoubleSupplier xSupplier,
                                DoubleSupplier ySupplier,
                                DoubleSupplier thetaSupplier,
                                Supplier<Pose2d> point) {
     this.driveSubsystem = driveSubsystem;
+    this.armSubsystem = armSubsystem;
     this.pointSupplier = point;
-
-
 
     this.xSupplier = xSupplier;
     this.ySupplier =ySupplier;
@@ -44,7 +48,7 @@ public class AlignmentDriveCommand extends Command {
 
     // each subsystem used by the command must be passed into the
     // addRequirements() method (which takes a vararg of Subsystem)
-    addRequirements(this.driveSubsystem);
+    addRequirements(this.driveSubsystem, this.armSubsystem);
   }
 
   @Override
@@ -99,6 +103,9 @@ public class AlignmentDriveCommand extends Command {
         heading = driveSubsystem.getRotation();
       }
 
+      // Mark that we should re-check auto alignment
+//      reinit = true;
+
       // Convert to field relative speeds & send command
       driveSubsystem.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -107,17 +114,31 @@ public class AlignmentDriveCommand extends Command {
                       omega * driveSubsystem.getMaxAngularSpeedRadPerSec(),
                       heading));
     } else {
+      // if we've driven in the last loop cycle recheck auto alignment, and we're not too close to our goal
+      if (reinit
+      && driveSubsystem.getVisionPose().getTranslation().getDistance(pointSupplier.get().getTranslation())
+          > Units.inchesToMeters(5.0)) {
+        alignmentCommand.initialize();
+      }
+
       alignmentCommand.execute();
+    }
+
+    // if we've finished auto aligning move arm to amp
+    if (alignmentCommand.isFinished()) {
+      armSubsystem.setDesiredState(ArmSubsystem.ArmState.AMP);
     }
   }
 
   @Override
   public boolean isFinished() {
-    return alignmentCommand.isFinished();
+    // finishing is handled by the "whileTrue" trigger method
+    return false;
   }
 
   @Override
   public void end(boolean interrupted) {
     alignmentCommand.end(interrupted);
+    armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
   }
 }

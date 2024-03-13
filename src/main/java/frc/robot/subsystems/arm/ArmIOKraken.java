@@ -82,8 +82,11 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
-    m_armMaster = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
-    m_armFollower = TalonFXFactory.createTalon(ArmConstants.ARM_FOLLOWER_ID, armConfig);
+    m_armMaster = new TalonFX(ArmConstants.ARM_MASTER_ID, CANBUS);
+    m_armFollower = new TalonFX(ArmConstants.ARM_FOLLOWER_ID, CANBUS);
+
+    m_armMaster.getConfigurator().apply(armConfig);
+    m_armFollower.getConfigurator().apply(armConfig);
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
@@ -280,10 +283,12 @@ public class ArmIOKraken implements ArmIO {
     m_armMaster.setPosition(
         (m_armEncoder.getAbsolutePosition().getValueAsDouble() - Units.degreesToRotations(ArmConstants.OFFSET_NUDGE))
             / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
+    m_armFollower.setPosition(m_armMaster.getPosition().getValueAsDouble());
 
     m_wristMaster.setPosition(
         (m_wristEncoder.getAbsolutePosition().getValueAsDouble() - Units.degreesToRotations(ArmConstants.OFFSET_NUDGE))
             / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
+    m_wristFollower.setPosition(m_wristMaster.getPosition().getValueAsDouble());
   }
 
   @Override

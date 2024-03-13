@@ -26,11 +26,11 @@ public final class AutoFactory {
 
   private final LoggedDashboardChooser<AutoModes> m_autonChooser;
 
-  private final EnumMap<AutoModes, Command> m_modes;
+  private final HashMap<AutoModes, Command> m_modes;
 
   public AutoFactory() {
     m_autonChooser = new LoggedDashboardChooser<>("Auto Chooser");
-    m_modes = new EnumMap<>(new HashMap<>());
+    m_modes = new HashMap<>();
 
     for (AutoModes mode : AutoModes.values()) {
       if (mode == DEFAULT_MODE) {

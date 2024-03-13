@@ -107,10 +107,10 @@ public final class Constants {
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        MAX_LINEAR_SPEED,
         MAX_LINEAR_SPEED * 0.5,
-        MAX_ANGULAR_SPEED,
-        MAX_ANGULAR_SPEED * 0.5
+        MAX_LINEAR_SPEED * 0.25,
+        MAX_ANGULAR_SPEED * 0.5,
+        MAX_ANGULAR_SPEED * 0.25
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
@@ -169,8 +169,8 @@ public final class Constants {
     public static final int WRIST_MASTER_ID = 21;
     public static final int WRIST_FOLLOWER_ID = 22;
     public static final int WRIST_ENCODER_ID = 23;
-    public static final int ARM_MASTER_ID = 18;
-    public static final int ARM_FOLLOWER_ID = 19;
+    public static final int ARM_MASTER_ID = 19;
+    public static final int ARM_FOLLOWER_ID = 18;
     public static final int ARM_ENCODER_ID = 20;
 
     /* Because the absolute encoders are on a 2/1 ratio, we have to move our offset down a little into a rotation lower
