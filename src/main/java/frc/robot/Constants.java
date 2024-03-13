@@ -107,14 +107,14 @@ public final class Constants {
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        MAX_LINEAR_SPEED * 0.5,
-        MAX_LINEAR_SPEED * 0.25,
-        MAX_ANGULAR_SPEED * 0.5,
-        MAX_ANGULAR_SPEED * 0.25
+        MAX_LINEAR_SPEED * 0.75,
+        MAX_LINEAR_SPEED * 0.45,
+        MAX_ANGULAR_SPEED * 0.75,
+        MAX_ANGULAR_SPEED * 0.45
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(4.5, 0.75), new PIDConstants(4.5, 0.75),
+        new PIDConstants(4.0, 0.0), new PIDConstants(4.0, 0.0),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(

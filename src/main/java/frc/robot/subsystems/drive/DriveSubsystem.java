@@ -52,6 +52,7 @@ import java.util.function.Supplier;
 
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
+import lib.utils.AimbotUtils;
 import lib.utils.AllianceFlipUtil;
 import lib.utils.LocalADStarAK;
 import lib.utils.PoseEstimator;
@@ -282,6 +283,11 @@ public class DriveSubsystem extends SubsystemBase {
     m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 
+    Logger.recordOutput("Drive/DistanceToTarget",
+        Units.inchesToMeters(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
+    Logger.recordOutput("Drive/AngleToTarget",
+        AimbotUtils.getDrivebaseAimingAngle(getVisionPose()).getDegrees());
+
     m_field.setRobotPose(getVisionPose());
   }
 
@@ -307,18 +313,12 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Calculates theta output to align to an arbitrary point
+   * Calculates theta output to align to an arbitrary angle
    *
-   * @param point the desired point to align to
+   * @param angle the desired angle to hold relative to the field
    */
-  public double alignToPoint(Pose3d point) {
-    Transform3d robotToPoint = new Transform3d(new Pose3d(
-        new Pose2d(m_wpiPoseEstimator.getEstimatedPosition().getTranslation(), new Rotation2d())), point);
-
-    double desiredRotation = Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
-        + Units.degreesToRadians(90);
-
-    return m_thetaPid.calculate(m_avgRotationRads.getRadians(), desiredRotation);
+  public double alignToAngle(Rotation2d angle) {
+    return m_thetaPid.calculate(getVisionPose().getRotation().getRadians(), angle.getRadians());
   }
 
   /** Stops the drive. */

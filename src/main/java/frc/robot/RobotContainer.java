@@ -47,6 +47,7 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.AllianceFlipUtil;
 import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -66,6 +67,8 @@ public class RobotContainer {
 
   // Dashboard inputs
 //  private final AutoFactory m_autonFactory = new AutoFactory();
+  private final LoggedDashboardNumber m_leftRPM = new LoggedDashboardNumber("Shooter/LeftRPM", 3600);
+  private final LoggedDashboardNumber m_rightRPM = new LoggedDashboardNumber("Shooter/RightRPM", 3600);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -209,7 +212,9 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25));
     controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25));
 
-    controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    controller.pov(180).whileTrue(
+        m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -236,13 +241,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem)
-        .raceWith(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> 0.0,
-            () -> 0.0,
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        )));
+    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem));
   }
 
   private void configureDashboard() {

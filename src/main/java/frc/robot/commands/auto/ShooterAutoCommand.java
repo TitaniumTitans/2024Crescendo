@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
+import lib.utils.AimbotUtils;
 import lib.utils.FieldConstants;
 
 
@@ -43,7 +44,7 @@ public class ShooterAutoCommand extends Command {
   @Override
   public void execute() {
     // Calculate output to align to speaker
-    double omega = m_driveSubsystem.alignToPoint(new Pose3d(FieldConstants.CENTER_SPEAKER, new Rotation3d()));
+    double omega = m_driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose()));
     m_driveSubsystem.runVelocity(new ChassisSpeeds(0.0, 0.0, omega));
 
     // only actually shoot if we're aligned close enough to speaker and flywheels are at speed

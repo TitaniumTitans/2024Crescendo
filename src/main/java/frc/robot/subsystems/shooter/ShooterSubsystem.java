@@ -73,16 +73,20 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
+    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+    Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
+    double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
+
+    m_leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
+    m_rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
+
+    return runShooterVelocity(runKicker, m_leftSpeedSetpoint, m_rightSpeedSetpoint);
+  }
+
+  public Command runShooterVelocity(boolean runKicker, double leftRPM, double rightRPM) {
     return runEnd(() -> {
-//          m_io.setLeftVelocityRpm(m_leftPower.getValue());
-//          m_io.setRightVelocityRpm(m_rightPower.getValue());
-
-          Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
-          Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
-          double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
-
-          m_leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
-          m_rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
+          m_leftSpeedSetpoint = leftRPM;
+          m_rightSpeedSetpoint = rightRPM;
 
           m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
           m_io.setRightVelocityRpm(m_rightSpeedSetpoint);

@@ -61,10 +61,21 @@ public class AimbotUtils {
     Transform3d robotToPoint =
         new Transform3d(
             new Pose3d(new Pose2d(drivePose.getTranslation(), new Rotation2d())),
-            new Pose3d(FieldConstants.CENTER_SPEAKER, new Rotation3d()));
+            new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d()));
 
-    return new Rotation2d(Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
+    Rotation2d angle = Rotation2d.fromRadians(Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
         + Units.degreesToRadians(90));
+
+    // normalize rotation between +/-180 degrees
+    while (angle.getDegrees() > 180) {
+      angle = Rotation2d.fromDegrees(angle.getDegrees() - 180.0);
+    }
+
+    while (angle.getDegrees() < 180) {
+      angle = Rotation2d.fromDegrees(angle.getDegrees() + 180.0);
+    }
+
+    return angle;
   }
 
   /** Gets the top point of the shooter for checking limits*/

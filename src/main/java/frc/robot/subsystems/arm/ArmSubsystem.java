@@ -30,7 +30,8 @@ public class ArmSubsystem extends SubsystemBase {
     TRANSITION_AMP,
     SOURCE,
     TRANSITION_SOURCE,
-    DISABLED
+    DISABLED,
+    MANUAL_WRIST
   }
 
   private final ArmIO m_io;
@@ -169,6 +170,12 @@ public class ArmSubsystem extends SubsystemBase {
 
         m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
+      }
+      case MANUAL_WRIST -> {
+        m_desiredWristPoseDegs = ArmSetpoints.WRIST_ANGLE.getValue();
+
+        m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
+        m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
       }
       default -> {
         m_armVelocityMult = 1.0;
