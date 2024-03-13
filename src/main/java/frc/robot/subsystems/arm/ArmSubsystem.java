@@ -266,26 +266,5 @@ public class ArmSubsystem extends SubsystemBase {
         },
         () -> m_io.setWristVoltage(0.0));
   }
-
-  /** Logging util */
-  public void setupLogging() {
-    logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
-    logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
-
-    logUtil.addDouble("ArmSetpointDegs", () -> m_desiredArmPoseDegs, true);
-    logUtil.addDouble("WristSetpointDegs", () -> m_desiredWristPoseDegs, true);
-
-    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
-    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
-
-    logUtil.addDouble("ArmClosedLoopOutput", () -> m_inputs.armClosedLoopOutput, false);
-    logUtil.addDouble("WristClosedLoopOutput", () -> m_inputs.wristClosedLoopOutput, false);
-
-    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
-    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
-
-    logUtil.addDouble("WristArmGap", () -> m_wristGap, true);
-    logUtil.addString("Arm Current State", () -> m_desiredState.toString(), true);
-  }
 }
 
