@@ -284,7 +284,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_thetaPidProperty.updateIfChanged();
 
     Logger.recordOutput("Drive/DistanceToTarget",
-        Units.inchesToMeters(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
+        Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
     Logger.recordOutput("Drive/AngleToTarget",
         AimbotUtils.getDrivebaseAimingAngle(getVisionPose()).getDegrees());
 

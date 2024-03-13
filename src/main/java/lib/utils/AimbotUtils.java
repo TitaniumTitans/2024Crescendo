@@ -53,7 +53,7 @@ public class AimbotUtils {
 
   /** Gets the distance from the drivebase to the speaker in meters */
   public static double getDistanceFromSpeaker(Pose2d drivePose) {
-    return FieldConstants.CENTER_SPEAKER.toTranslation2d().getDistance(drivePose.getTranslation());
+    return AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER).toTranslation2d().getDistance(drivePose.getTranslation());
   }
 
   /** Gets the angle the drivebase should be at to aim at the speaker */

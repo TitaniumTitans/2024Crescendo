@@ -125,8 +125,8 @@ public class ArmSubsystem extends SubsystemBase {
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_inputs.armPositionDegs > 67.5 && m_currentState == ArmState.AMP) {
-          m_wristVelocityMult = 0.35;
+        if (m_inputs.armPositionDegs > 60.0 && m_currentState == ArmState.AMP) {
+          m_wristVelocityMult = 0.15;
           m_armVelocityMult = 1.0;
         } else {
           m_currentState = ArmState.STOW;
@@ -149,6 +149,10 @@ public class ArmSubsystem extends SubsystemBase {
 
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
         m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
+      }
+      case ANTI_DEFENSE -> {
+        m_desiredArmPoseDegs = 45.0;
+        m_desiredWristPoseDegs = 35.0;
       }
       case INTAKE -> {
         m_armVelocityMult = 1.0;

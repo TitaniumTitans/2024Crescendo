@@ -209,12 +209,18 @@ public class RobotContainer {
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
-    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25));
-    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25));
+//    controller.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.25));
+//    controller.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.25));
 
-    controller.pov(180).whileTrue(
+    controller.leftBumper().whileTrue(
+        m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get())
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE)));
+
+    controller.rightBumper().whileTrue(
         m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE)));
+
+    controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
