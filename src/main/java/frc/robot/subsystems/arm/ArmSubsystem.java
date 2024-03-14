@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -143,7 +144,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
         Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
-        double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
+        double groundDistance = Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(m_poseSupplier.get()));
 
         m_desiredWristPoseDegs = AimbotUtils.getWristAngle(groundDistance);
 

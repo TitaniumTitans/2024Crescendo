@@ -6,12 +6,16 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.subsystems.arm.ArmPose;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class AimbotUtils {
 
   private static final InterpolatingDoubleTreeMap m_angleLerpTable = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap m_leftSpeedLerpTable = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap m_rightSpeedLerpTable = new InterpolatingDoubleTreeMap();
+
+  private static final LoggedDashboardNumber m_offsetNudge =
+      new LoggedDashboardNumber("Wrist Angle Nudge", 0.015);
 
   static {
     // angle measurements, meters -> degrees
@@ -42,7 +46,7 @@ public class AimbotUtils {
   /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
 //    return m_angleLerpTable.get(distance);
-    return 52.409 + -0.1224 * distance;
+    return 52.409 - ((0.1224 + m_offsetNudge.get()) * distance);
   }
 
   public static double getLeftSpeed(double distance) {
