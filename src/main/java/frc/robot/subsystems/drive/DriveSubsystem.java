@@ -137,7 +137,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(-Math.PI, Math.PI);
-    m_thetaPid.setTolerance(Units.degreesToRadians(4));
+    m_thetaPid.setTolerance(Units.degreesToRadians(6));
 
     m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
         .addP(0.5)
@@ -159,7 +159,7 @@ public class DriveSubsystem extends SubsystemBase {
         VecBuilder.fill(
             Units.inchesToMeters(2.0),
             Units.inchesToMeters(2.0),
-            Units.degreesToRadians(30.0))
+            Units.degreesToRadians(35.0))
     );
 
     // Configure AutoBuilder for PathPlanner

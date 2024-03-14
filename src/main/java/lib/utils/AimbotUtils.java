@@ -15,7 +15,7 @@ public class AimbotUtils {
   private static final InterpolatingDoubleTreeMap m_rightSpeedLerpTable = new InterpolatingDoubleTreeMap();
 
   private static final LoggedDashboardNumber m_offsetNudge =
-      new LoggedDashboardNumber("Wrist Angle Nudge", 0.015);
+      new LoggedDashboardNumber("Wrist Angle Nudge", 0.01);
 
   static {
     // angle measurements, meters -> degrees
