@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import com.fasterxml.jackson.core.SerializableString;
 import edu.wpi.first.math.geometry.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
@@ -275,6 +276,9 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
+    public static final GosDoubleProperty ACCEL_COMP_FACTOR =
+        new GosDoubleProperty(false, "Shooter/Acceleration Compensation", 0.100);
+
     private ShooterConstants() {
       throw new IllegalStateException("Static classes should not be constructed");
     }

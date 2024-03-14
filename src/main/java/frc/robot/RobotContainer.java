@@ -185,23 +185,26 @@ public class RobotContainer {
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-        .alongWith(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        )));
+//    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+//        .alongWith(DriveCommands.alignmentDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+//        )));
+    spinUpTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), false));
 
-    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-        .alongWith(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        )));
+//    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+//        .alongWith(DriveCommands.alignmentDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+//        )));
+
+    shootTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), true));
 
     ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))

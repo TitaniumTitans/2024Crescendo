@@ -4,17 +4,22 @@ import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import lib.utils.AimbotUtils;
+import lib.utils.FieldConstants;
+import lib.utils.FieldRelativeAccel;
+import lib.utils.FieldRelativeSpeed;
 
 
 public class AimbotCommand extends Command {
@@ -72,8 +77,35 @@ public class AimbotCommand extends Command {
     m_smallProperty.updateIfChanged();
     m_fastProperty.updateIfChanged();
 
+    // get the robots velocity and acceleration
+    FieldRelativeSpeed fieldRelativeSpeed = m_driveSubsystem.getFieldRelativeVelocity();
+    FieldRelativeAccel fieldRelativeAccel = m_driveSubsystem.getFieldRelativeAcceleration();
+
+    // TODO make an actual equation for shot time based on distance
+    double shotTime = 0.5;
+
+    Translation2d target = FieldConstants.CENTER_SPEAKER.toTranslation2d();
+    Translation2d movingTarget = new Translation2d();
+
+    // loop over movement calcs to better adjust for acceleration
+    if (false) {
+      for (int i = 0; i < 5; i++) {
+        double virtualGoalX = target.getX()
+            - shotTime * (fieldRelativeSpeed.vx + fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue());
+        double virtualGoalY = target.getY()
+            - shotTime * (fieldRelativeSpeed.vy + fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue());
+
+        movingTarget = new Translation2d(virtualGoalX, virtualGoalY);
+      }
+    } else {
+      movingTarget = target;
+    }
+
     // get our desired rotation and error from it
-    double desiredRotationDegs = AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose()).getDegrees();
+    double desiredRotationDegs =
+        AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(),
+            new Translation3d(movingTarget.getX(), movingTarget.getY(), 0.0))
+            .getDegrees();
     double error = Math.abs(desiredRotationDegs - m_driveSubsystem.getRotation().getDegrees());
 
     // if we're far from our setpoint, move faster

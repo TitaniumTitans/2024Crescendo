@@ -52,10 +52,7 @@ import java.util.function.Supplier;
 
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
-import lib.utils.AimbotUtils;
-import lib.utils.AllianceFlipUtil;
-import lib.utils.LocalADStarAK;
-import lib.utils.PoseEstimator;
+import lib.utils.*;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -89,7 +86,6 @@ public class DriveSubsystem extends SubsystemBase {
           new Rotation2d(),
           new Rotation2d()
   };
-  private Rotation2d m_avgRotationRads = new Rotation2d();
 
   private final VisionSubsystem[] m_cameras;
 
@@ -105,6 +101,9 @@ public class DriveSubsystem extends SubsystemBase {
       new SwerveModuleState()
   };
 
+  private FieldRelativeSpeed m_fieldRelVel = new FieldRelativeSpeed();
+  private FieldRelativeSpeed m_lastFieldRelVel = new FieldRelativeSpeed();
+  private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
 
   public DriveSubsystem(
       GyroIO gyroIO,
@@ -246,24 +245,6 @@ public class DriveSubsystem extends SubsystemBase {
         m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
 
-      // Update average heading, used for aiming
-      m_prevRotations = new Rotation2d[] {
-              m_rawGyroRotation,
-              m_prevRotations[1],
-              m_prevRotations[2],
-              m_prevRotations[3],
-              m_prevRotations[4]
-      };
-
-      double totalRotationRads = 0.0;
-
-      for (Rotation2d mPrevRotation : m_prevRotations) {
-        totalRotationRads += mPrevRotation.getRadians();
-      }
-
-      totalRotationRads /= m_prevRotations.length;
-      m_avgRotationRads = new Rotation2d(totalRotationRads);
-
       // Apply update
       m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
     }
@@ -291,6 +272,11 @@ public class DriveSubsystem extends SubsystemBase {
         -AimbotUtils.getDrivebaseAimingAngle(getVisionPose()).getDegrees());
 
     m_field.setRobotPose(getVisionPose());
+
+    // calculate field relative velocities and acceleration
+    m_fieldRelVel = new FieldRelativeSpeed(kinematics.toChassisSpeeds(getModuleStates()), getRotation());
+    m_fieldRelAccel = new FieldRelativeAccel(m_fieldRelVel, m_lastFieldRelVel, 0.02);
+    m_lastFieldRelVel = m_fieldRelVel;
   }
 
   /**
@@ -384,6 +370,16 @@ public class DriveSubsystem extends SubsystemBase {
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
     return m_wpiPoseEstimator.getEstimatedPosition().getRotation();
+  }
+
+  /** Returns the robot's field relative velocity, used for shoot on move */
+  public FieldRelativeSpeed getFieldRelativeVelocity() {
+    return m_fieldRelVel;
+  }
+
+  /** Returns the robot's field relative acceleration, used for shoot on move */
+  public FieldRelativeAccel getFieldRelativeAcceleration() {
+    return m_fieldRelAccel;
   }
 
   /** Resets the current odometry pose. */
