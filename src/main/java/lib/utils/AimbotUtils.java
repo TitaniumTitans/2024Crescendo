@@ -46,7 +46,8 @@ public class AimbotUtils {
   /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
 //    return m_angleLerpTable.get(distance);
-    return 52.409 - ((0.1224 + m_offsetNudge.get()) * distance);
+//    return 52.409 - ((0.1224 + m_offsetNudge.get()) * distance);
+    return 48.903-(0.09001 * distance);
   }
 
   public static double getLeftSpeed(double distance) {
@@ -63,12 +64,17 @@ public class AimbotUtils {
         .getDistance(drivePose.getTranslation());
   }
 
-  /** Gets the angle the drivebase should be at to aim at the speaker */
+  /** Gets the angle the drivebase should be at with a default of the speaker */
   public static Rotation2d getDrivebaseAimingAngle(Pose2d drivePose) {
+    return getDrivebaseAimingAngle(drivePose, FieldConstants.CENTER_SPEAKER);
+  }
+
+  /** Gets the angle the drivebase should be at to aim at the speaker */
+  public static Rotation2d getDrivebaseAimingAngle(Pose2d drivePose, Translation3d target) {
     Transform3d robotToPoint =
         new Transform3d(
             new Pose3d(new Pose2d(drivePose.getTranslation(), new Rotation2d())),
-            new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d()));
+            new Pose3d(AllianceFlipUtil.apply(target), new Rotation3d()));
 
     return Rotation2d.fromRadians(
         MathUtil.angleModulus(
