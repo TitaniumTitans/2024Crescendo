@@ -77,10 +77,10 @@ public class ShooterSubsystem extends SubsystemBase {
     Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
     double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
 
-    m_leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
-    m_rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
+    double leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
+    double rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
 
-    return runShooterVelocity(runKicker, m_leftSpeedSetpoint, m_rightSpeedSetpoint);
+    return runShooterVelocity(runKicker, 3750, 4500);
   }
 
   public Command runShooterVelocity(boolean runKicker, double leftRPM, double rightRPM) {
@@ -88,8 +88,8 @@ public class ShooterSubsystem extends SubsystemBase {
           m_leftSpeedSetpoint = leftRPM;
           m_rightSpeedSetpoint = rightRPM;
 
-          m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
-          m_io.setRightVelocityRpm(m_rightSpeedSetpoint);
+          m_io.setLeftVelocityRpm(m_leftPower.getValue());
+          m_io.setRightVelocityRpm(m_rightPower.getValue());
 
           if (runKicker) {
             m_io.setKickerVoltage(12.0);
@@ -136,6 +136,8 @@ public class ShooterSubsystem extends SubsystemBase {
         () -> {
           setIntakePower(0.0);
           setKickerPower(0.0);
+          setShooterPowerRight(0.0);
+          setShooterPowerLeft(0.0);
         });
   }
 

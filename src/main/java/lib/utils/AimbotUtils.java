@@ -1,5 +1,6 @@
 package lib.utils;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
@@ -40,7 +41,8 @@ public class AimbotUtils {
 
   /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
-    return m_angleLerpTable.get(distance);
+//    return m_angleLerpTable.get(distance);
+    return 52.409 + -0.1224 * distance;
   }
 
   public static double getLeftSpeed(double distance) {
@@ -53,7 +55,8 @@ public class AimbotUtils {
 
   /** Gets the distance from the drivebase to the speaker in meters */
   public static double getDistanceFromSpeaker(Pose2d drivePose) {
-    return AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER).toTranslation2d().getDistance(drivePose.getTranslation());
+    return AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER).toTranslation2d()
+        .getDistance(drivePose.getTranslation());
   }
 
   /** Gets the angle the drivebase should be at to aim at the speaker */
@@ -63,19 +66,11 @@ public class AimbotUtils {
             new Pose3d(new Pose2d(drivePose.getTranslation(), new Rotation2d())),
             new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d()));
 
-    Rotation2d angle = Rotation2d.fromRadians(Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
-        + Units.degreesToRadians(90));
-
-    // normalize rotation between +/-180 degrees
-    while (angle.getDegrees() > 180) {
-      angle = Rotation2d.fromDegrees(angle.getDegrees() - 180.0);
-    }
-
-    while (angle.getDegrees() < 180) {
-      angle = Rotation2d.fromDegrees(angle.getDegrees() + 180.0);
-    }
-
-    return angle;
+    return Rotation2d.fromRadians(
+        MathUtil.angleModulus(
+            Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
+                + Units.degreesToRadians(90)
+        ));
   }
 
   /** Gets the top point of the shooter for checking limits*/

@@ -34,10 +34,10 @@ public class VisionSubsystem {
   private final String m_name;
 
   private final double xyStdDevCoefficient = Units.inchesToMeters(4.0);
-  private final double thetaStdDevCoefficient = Units.degreesToRadians(12.0);
+  private final double thetaStdDevCoefficient = Units.degreesToRadians(14.0);
 
   private final double xyStdDevMultiTagCoefficient = Units.inchesToMeters(2.0);
-  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(6.0);
+  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(7.0);
 
   private final PhotonVisionIOInputsAutoLogged inputs = new PhotonVisionIOInputsAutoLogged();
 

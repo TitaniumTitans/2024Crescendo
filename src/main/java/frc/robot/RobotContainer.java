@@ -215,11 +215,11 @@ public class RobotContainer {
 
     controller.leftBumper().whileTrue(
         m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE)));
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
 
     controller.rightBumper().whileTrue(
         m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE)));
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
 
     controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
 

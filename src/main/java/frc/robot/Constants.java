@@ -88,22 +88,22 @@ public final class Constants {
         new Translation3d(
             Units.inchesToMeters(11.0351), // 11.0351
             Units.inchesToMeters(10.023204 - 2.0), // 10.023204
-            Units.inchesToMeters(7.1374 - 3.5)), // 4.1374
+            Units.inchesToMeters(7.1374 - 2.0)), // 4.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0 + 4.0),
-            Units.degreesToRadians(-30.0 - 1.0), // -120.0 + 91.0
-            Units.degreesToRadians(-14.7 - 6.5)) // 165.3224 + 180
+            Units.degreesToRadians(0.0 + 1.0),
+            Units.degreesToRadians(-30.0 + 4.0), // -120.0 + 91.0
+            Units.degreesToRadians(-14.7 - 3.0)) // 165.3224 + 180
     );
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
             Units.inchesToMeters(11.0351), //11.0351
             Units.inchesToMeters(-10.023204), //-10.023204
-            Units.inchesToMeters(7.1374 - 3.5)), // 7.1374
+            Units.inchesToMeters(7.1374 - 0.0)), // 7.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0 + 7.0),
-            Units.degreesToRadians(-30.0 + 0.85), // -30.0 - 1
-            Units.degreesToRadians(14.7 - 12.5)) // 165.3224)
+            Units.degreesToRadians(0.0 + 0.5),
+            Units.degreesToRadians(-30.0 - 2.5), // -30.0 - 1
+            Units.degreesToRadians(14.7 - 3.0)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(

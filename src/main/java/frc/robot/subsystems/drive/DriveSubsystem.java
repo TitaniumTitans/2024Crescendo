@@ -157,7 +157,7 @@ public class DriveSubsystem extends SubsystemBase {
         VecBuilder.fill(
             Units.inchesToMeters(2.0),
             Units.inchesToMeters(2.0),
-            Units.degreesToRadians(25.0))
+            Units.degreesToRadians(30.0))
     );
 
     // Configure AutoBuilder for PathPlanner
@@ -267,10 +267,10 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // make sure we're not moving too fast before trying to update vision poses
-    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= Units.inchesToMeters(30))
-    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= Units.inchesToMeters(30))
-    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= Units.degreesToRadians(60))
-    || DriverStation.isTeleop()) {
+    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED / 2.0)
+    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED / 2.0)
+    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED / 2.0)
+    /* || DriverStation.isTeleop() */) {
       for (VisionSubsystem camera : m_cameras) {
         camera.updateInputs();
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
@@ -286,7 +286,7 @@ public class DriveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/DistanceToTarget",
         Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
     Logger.recordOutput("Drive/AngleToTarget",
-        AimbotUtils.getDrivebaseAimingAngle(getVisionPose()).getDegrees());
+        -AimbotUtils.getDrivebaseAimingAngle(getVisionPose()).getDegrees());
 
     m_field.setRobotPose(getVisionPose());
   }
@@ -356,7 +356,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns the module states (turn angles and drive velocities) for all the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
+//  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
