@@ -73,8 +73,8 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS));
-          m_shooter = new ShooterSubsystem(new ShooterIOPrototype());
-          m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
+          m_shooter = new ShooterSubsystem(new ShooterIO() {});
+          m_armSubsystem = new ArmSubsystem(new ArmIO() {});
         }
     case PROTO_ARM -> {
           m_driveSubsystem = new DriveSubsystem(
