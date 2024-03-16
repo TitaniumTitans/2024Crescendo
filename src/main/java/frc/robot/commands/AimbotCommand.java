@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import com.gos.lib.properties.pid.PidProperty;
 import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -36,6 +37,8 @@ public class AimbotCommand extends Command {
 
   private boolean m_runKicker;
 
+  private static final double TOLERENCE_DEGREES = 10.0;
+
   public AimbotCommand(ArmSubsystem armSubsystem,
                        DriveSubsystem driveSubsystem,
                        ShooterSubsystem shooterSubsystem,
@@ -48,6 +51,9 @@ public class AimbotCommand extends Command {
 
     m_smallController = new PIDController(0.0, 0.0, 0.0);
     m_fastController = new PIDController(0.0, 0.0, 0.0);
+
+    m_smallController.enableContinuousInput(-180, 180);
+    m_fastController.enableContinuousInput(-180, 180);
 
     m_smallProperty = new WpiPidPropertyBuilder("Drive/Aimbot Small", false, m_smallController)
             .addP(1.0)
@@ -82,18 +88,19 @@ public class AimbotCommand extends Command {
     FieldRelativeAccel fieldRelativeAccel = m_driveSubsystem.getFieldRelativeAcceleration();
 
     // TODO make an actual equation for shot time based on distance
-    double shotTime = 0.5;
+    double distance = AimbotUtils.getDistanceFromSpeaker(m_driveSubsystem.getVisionPose());
+    double shotTime = 1.05;
 
     Translation2d target = FieldConstants.CENTER_SPEAKER.toTranslation2d();
     Translation2d movingTarget = new Translation2d();
 
     // loop over movement calcs to better adjust for acceleration
-    if (false) {
+    if (true) {
       for (int i = 0; i < 5; i++) {
         double virtualGoalX = target.getX()
-            - shotTime * (fieldRelativeSpeed.vx + fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue());
+            + shotTime * (fieldRelativeSpeed.vx + fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue());
         double virtualGoalY = target.getY()
-            - shotTime * (fieldRelativeSpeed.vy + fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue());
+            + shotTime * (fieldRelativeSpeed.vy + fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue());
 
         movingTarget = new Translation2d(virtualGoalX, virtualGoalY);
       }
@@ -103,46 +110,53 @@ public class AimbotCommand extends Command {
 
     // get our desired rotation and error from it
     double desiredRotationDegs =
-        AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(),
-            new Translation3d(movingTarget.getX(), movingTarget.getY(), 0.0))
+        AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose())
             .getDegrees();
     double error = Math.abs(desiredRotationDegs - m_driveSubsystem.getRotation().getDegrees());
 
     // if we're far from our setpoint, move faster
-    double omega;
-    if (error > 15.0) {
+    double omega;// = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);;
+    if (error > 5.0) {
       omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
     } else {
       omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
     }
 
+    // add a feedforward component to compensate for horizontal movement
+    Translation2d linearFieldVelocity = new Translation2d(fieldRelativeSpeed.vx, fieldRelativeSpeed.vy);
+    Translation2d tangentalVelocity = linearFieldVelocity
+        .rotateBy(Rotation2d.fromDegrees(-desiredRotationDegs).unaryMinus());
+    double tangentalComponent = tangentalVelocity.getX();
+
     double x = -DriveCommands.setSensitivity(-m_driverController.getLeftY(), 0.25);
     double y = -DriveCommands.setSensitivity(-m_driverController.getLeftX(), 0.25);
 
+    x = MathUtil.applyDeadband(x, 0.1);
+    y = MathUtil.applyDeadband(y, 0.1);
 
     Rotation2d heading;
 
     // if red change heading goal
     if (DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      heading = m_driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
-    } else {
       heading = m_driveSubsystem.getRotation();
+    } else {
+      heading = m_driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
     }
 
     // Convert to field relative speeds & send command
     m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
             x * Constants.DriveConstants.MAX_LINEAR_SPEED,
             y * Constants.DriveConstants.MAX_LINEAR_SPEED,
-            omega * Constants.DriveConstants.MAX_ANGULAR_SPEED,
+            omega + tangentalComponent * 0.5,
             heading
     ));
 
     m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
-    m_shooterSubsystem.runShooterVelocity(m_runKicker);
+    m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
 
     // set shooter speeds and rumble controller
-    if (m_shooterSubsystem.atSpeed() && error < 10.0) {
+    if (m_shooterSubsystem.atSpeed() && error < 15.0) {
       m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
     } else {
       m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
@@ -152,7 +166,9 @@ public class AimbotCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     m_driveSubsystem.stopWithX();
-    m_shooterSubsystem.runShooterVelocity(false, 0.0, 0.0);
+    m_shooterSubsystem.setShooterPowerLeft(0.0);
+    m_shooterSubsystem.setShooterPowerRight(0.0);
+    m_shooterSubsystem.setKickerPower(0.0);
     m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
     m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
   }

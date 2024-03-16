@@ -225,6 +225,13 @@ public class RobotContainer {
             .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
 
     controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    controller.rightTrigger().whileTrue(m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get()));
+    controller.leftTrigger().whileTrue(m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get()));
+    controller.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+
+    // 96.240234375
+    // 60.029296875
+    // 2250
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(

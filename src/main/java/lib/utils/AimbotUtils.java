@@ -47,7 +47,8 @@ public class AimbotUtils {
   public static double getWristAngle(double distance) {
 //    return m_angleLerpTable.get(distance);
 //    return 52.409 - ((0.1224 + m_offsetNudge.get()) * distance);
-    return 48.903-(0.09001 * distance);
+//    return 48.903-(0.09001 * distance);
+    return 50.218 - (0.1108 * distance);
   }
 
   public static double getLeftSpeed(double distance) {

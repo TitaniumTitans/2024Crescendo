@@ -152,8 +152,8 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
       }
       case ANTI_DEFENSE -> {
-        m_desiredArmPoseDegs = 45.0;
-        m_desiredWristPoseDegs = 35.0;
+        m_desiredArmPoseDegs = 68.0;
+        m_desiredWristPoseDegs = 65.0;
       }
       case INTAKE -> {
         m_armVelocityMult = 1.0;
