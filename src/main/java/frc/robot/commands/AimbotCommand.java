@@ -21,6 +21,7 @@ import lib.utils.AimbotUtils;
 import lib.utils.FieldConstants;
 import lib.utils.FieldRelativeAccel;
 import lib.utils.FieldRelativeSpeed;
+import org.littletonrobotics.junction.Logger;
 
 
 public class AimbotCommand extends Command {
@@ -144,11 +145,13 @@ public class AimbotCommand extends Command {
       heading = m_driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
     }
 
+    Logger.recordOutput("Aimbot/Tangental Velocity",  tangentalComponent);
+
     // Convert to field relative speeds & send command
     m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
             x * Constants.DriveConstants.MAX_LINEAR_SPEED,
             y * Constants.DriveConstants.MAX_LINEAR_SPEED,
-            omega + tangentalComponent * 0.5,
+            omega + tangentalComponent,
             heading
     ));
 

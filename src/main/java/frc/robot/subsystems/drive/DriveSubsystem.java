@@ -344,7 +344,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns the module states (turn angles and drive velocities) for all the modules. */
-//  @AutoLogOutput(key = "SwerveStates/Measured")
+  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {

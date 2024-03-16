@@ -50,14 +50,13 @@ public class AimbotUtils {
 //    return m_angleLerpTable.get(distance);
 //    return 52.409 - ((0.1224 + m_offsetNudge.get()) * distance);
 //    return 48.903-(0.09001 * distance);
-//    return 50.218 - (0.1108 * distance);
-    if (distance <= 100.0) {
-      return 49.319 + (1.427 * Y_TARGET) + (-0.1059 * distance);
-    } else if (100.0 < distance && distance <= 150) {
-      return 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance);
-    } else {
-      return 50.951 - (0.117 * distance);
-    }
+//    if (distance <= 100.0) {
+//      return 50.218 - (0.1108 * distance);
+//    } else if (100.0 < distance && distance <= 150) {
+    return 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance);
+//    } else {
+//      return 50.951 - (0.117 * distance);
+//    }
   }
 
   public static double getLeftSpeed(double distance) {

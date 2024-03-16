@@ -88,8 +88,8 @@ public class ShooterSubsystem extends SubsystemBase {
           m_leftSpeedSetpoint = leftRPM;
           m_rightSpeedSetpoint = rightRPM;
 
-          m_io.setLeftVelocityRpm(m_leftPower.getValue());
-          m_io.setRightVelocityRpm(m_rightPower.getValue());
+          m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
+          m_io.setRightVelocityRpm(m_rightSpeedSetpoint);
 
           if (runKicker) {
             m_io.setKickerVoltage(12.0);

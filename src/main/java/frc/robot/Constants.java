@@ -73,7 +73,7 @@ public final class Constants {
 
     public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.8);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.6);
-    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(20.6);
+    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(18.6);
     public static final double DRIVE_BASE_RADIUS =
         Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
@@ -124,7 +124,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.017822) + 180, // offset 0.457764
+            Units.rotationsToDegrees(-0.019775) + 180, // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -135,7 +135,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.453857) + 180,
+            Units.rotationsToDegrees(-0.451416) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -146,7 +146,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.428467) + 180,
+            Units.rotationsToDegrees(0.429688) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -157,7 +157,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.093750) + 180,
+            Units.rotationsToDegrees(-0.092285) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
