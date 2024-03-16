@@ -163,15 +163,25 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Trigger intakeTrigger = controller.y().and(controller.x().negate())
         .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate());
+        .and(controller.b().negate())
+        .and(controller.leftTrigger().negate());
 
     Trigger spinUpTrigger = controller.x().and(controller.y().negate())
         .and(controller.a().negate()) // make sure we don't amp
         .and(controller.b().negate());
 
+    Trigger passSpinUpTrigger = controller.leftTrigger()
+        .and(spinUpTrigger.negate())
+        .and(controller.y().negate());
+
+    Trigger passTrigger = controller.leftTrigger()
+        .and(spinUpTrigger.negate())
+        .and(controller.y());
+
     Trigger shootTrigger = controller.x().and(controller.y())
         .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate());
+        .and(controller.b().negate())
+        .and(controller.leftTrigger().negate());
 
     Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
@@ -224,9 +234,23 @@ public class RobotContainer {
         m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
             .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
 
+    passSpinUpTrigger.whileTrue(
+        m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
+            .alongWith(m_shooter.runShooterVelocity(false, 4500, 4500)));
+
+    passTrigger.whileTrue(
+        m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
+            .alongWith(m_shooter.runShooterVelocity(true, 3500, 3500)));
+
+    passTrigger.whileTrue(new AimbotCommand(
+        m_armSubsystem,
+        m_driveSubsystem,
+        m_shooter,
+        controller.getHID(),
+        true,
+        true));
+
     controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    controller.rightTrigger().whileTrue(m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get()));
-    controller.leftTrigger().whileTrue(m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get()));
     controller.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
     // 96.240234375

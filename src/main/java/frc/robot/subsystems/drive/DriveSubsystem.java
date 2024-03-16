@@ -250,9 +250,9 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // make sure we're not moving too fast before trying to update vision poses
-    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED / 2.0)
-    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED / 2.0)
-    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED / 2.0)
+    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED)
+    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED)
+    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED)
     /* || DriverStation.isTeleop() */) {
       for (VisionSubsystem camera : m_cameras) {
         camera.updateInputs();

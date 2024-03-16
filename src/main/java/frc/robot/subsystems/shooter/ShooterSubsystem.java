@@ -124,7 +124,7 @@ public class ShooterSubsystem extends SubsystemBase {
             setKickerPower(kickerPower);
             timer.restart();
           } else if (!timer.hasElapsed(timeout)) {
-            setKickerPower(-0.1);
+            setKickerPower(-0.13);
             setIntakePower(0.0);
           } else {
             setShooterPowerRight(0.0);
@@ -170,7 +170,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean atSpeed() {
-    return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 100
-        && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 100;
+    return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 75
+        && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 75;
   }
 }

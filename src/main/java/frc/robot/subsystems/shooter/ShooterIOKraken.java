@@ -166,8 +166,8 @@ public class ShooterIOKraken implements ShooterIO {
         m_indexerTemperatureSignal
     );
 
-    inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() * 60.0;
-    inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() * 60.0;
+    inputs.tlVelocityRPM = m_leftVelSignal.refresh().getValueAsDouble() * 60.0;
+    inputs.trVelocityRPM = m_rightVelSignal.refresh().getValueAsDouble() * 60.0;
 
     inputs.tlAppliedVolts = m_leftVoltOutSignal.getValueAsDouble();
     inputs.trAppliedVolts = m_rightVoltOutSignal.getValueAsDouble();

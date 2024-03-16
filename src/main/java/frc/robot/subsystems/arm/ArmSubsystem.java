@@ -31,6 +31,7 @@ public class ArmSubsystem extends SubsystemBase {
     TRANSITION_AMP,
     SOURCE,
     TRANSITION_SOURCE,
+    PASS,
     DISABLED,
     MANUAL_WRIST
   }
@@ -175,6 +176,10 @@ public class ArmSubsystem extends SubsystemBase {
 
         m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
+      }
+      case PASS ->  {
+        m_desiredWristPoseDegs = 50.0;
+        m_desiredArmPoseDegs = 0.0;
       }
       case MANUAL_WRIST -> {
         m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();

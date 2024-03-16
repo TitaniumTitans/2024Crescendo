@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2263859510421753,
-      "y": 5.594110488891602
+      "x": 0.8210453391075134,
+      "y": 4.576303482055664
     },
-    "rotation": 179.96604345059157
+    "rotation": 120.96374169030298
   },
   "command": {
     "type": "sequential",
@@ -18,7 +18,7 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -28,41 +28,16 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "FrontWing3Contested5.1"
+                        "pathName": "SourceContested1.1"
                       }
                     },
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.1
+                        "waitTime": 0.5
                       }
                     }
                   ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AimAndShoot"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "FrontWing3Contested5.2"
                 }
               },
               {
@@ -72,7 +47,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 2.0
+                        "waitTime": 0.5
                       }
                     },
                     {
@@ -85,6 +60,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "SourceContested1.2"
           }
         },
         {

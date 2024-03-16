@@ -136,5 +136,9 @@ public class VisionSubsystem {
 
     return results;
   }
+
+  public boolean apriltagConnected() {
+    return m_camera.isConnected() && m_camera.getPipelineIndex() == 0;
+  }
 }
 

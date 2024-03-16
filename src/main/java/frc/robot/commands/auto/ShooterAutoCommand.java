@@ -1,6 +1,7 @@
 package frc.robot.commands.auto;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
@@ -10,6 +11,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import lib.utils.AimbotUtils;
 import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.Logger;
 
 
 public class ShooterAutoCommand extends Command {
@@ -44,12 +46,16 @@ public class ShooterAutoCommand extends Command {
   @Override
   public void execute() {
     // Calculate output to align to speaker
-    double omega = m_driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose()));
+    Rotation2d desiredAngle = AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose());
+    double omega = m_driveSubsystem.alignToAngle(desiredAngle);
     m_driveSubsystem.runVelocity(new ChassisSpeeds(0.0, 0.0, omega));
+
+    double error = Math.abs(desiredAngle.getDegrees() - m_driveSubsystem.getRotation().getDegrees());
+    Logger.recordOutput("Shooter/Auto Error", error);
 
     // only actually shoot if we're aligned close enough to speaker and flywheels are at speed
     m_shooterSubsystem.runShooterVelocity(m_shooterSubsystem.atSpeed()
-        && omega < 1).execute();
+        && error < 10.0 && m_armSubsystem.wristAtSetpoint()).execute();
     m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
 
     // check to see if the state of having a note has changed, mark if it has
@@ -67,7 +73,7 @@ public class ShooterAutoCommand extends Command {
 
     // too long check may change as system gets tuned
     return (!m_shooterSubsystem.hasPiece() && m_hasChanged
-        && m_timer.hasElapsed(0.5)) || m_timer.hasElapsed(5.0);
+        && m_timer.hasElapsed(0.75)) || m_timer.hasElapsed(5.0);
   }
 
   @Override
@@ -75,4 +81,5 @@ public class ShooterAutoCommand extends Command {
     m_shooterSubsystem.setShooterPowerFactory(0.0, 0.0, 0.0).execute();
     m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
   }
+
 }

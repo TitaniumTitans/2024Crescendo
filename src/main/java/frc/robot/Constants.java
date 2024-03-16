@@ -115,7 +115,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(4.0, 0.0), new PIDConstants(4.0, 0.0),
+        new PIDConstants(5.0, 0.4), new PIDConstants(5.0, 0.8),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
@@ -230,6 +230,8 @@ public final class Constants {
   }
 
   public static class ArmSetpoints {
+    public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
+
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
