@@ -236,22 +236,17 @@ public class RobotContainer {
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, 4500, 4500)));
+            .alongWith(m_shooter.runShooterVelocity(false, 3500, 3500)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
             .alongWith(m_shooter.runShooterVelocity(true, 3500, 3500)));
 
-    passTrigger.whileTrue(new AimbotCommand(
-        m_armSubsystem,
-        m_driveSubsystem,
-        m_shooter,
-        controller.getHID(),
-        true,
-        true));
-
     controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     controller.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+
+    controller.pov(90).whileTrue(m_shooter.intakeCommand(-0.75, -0.75, 0.0))
+        .whileFalse(m_shooter.intakeCommand(0.0, 0.0, 0.0));
 
     // 96.240234375
     // 60.029296875

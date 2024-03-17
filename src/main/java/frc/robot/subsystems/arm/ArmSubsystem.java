@@ -33,7 +33,7 @@ public class ArmSubsystem extends SubsystemBase {
     TRANSITION_SOURCE,
     PASS,
     DISABLED,
-    MANUAL_WRIST
+    BACKUP_SHOT, MANUAL_WRIST
   }
 
   private final ArmIO m_io;
@@ -178,6 +178,10 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
       case PASS ->  {
+        m_desiredWristPoseDegs = 45.0;
+        m_desiredArmPoseDegs = 0.0;
+      }
+      case BACKUP_SHOT -> {
         m_desiredWristPoseDegs = 50.0;
         m_desiredArmPoseDegs = 0.0;
       }

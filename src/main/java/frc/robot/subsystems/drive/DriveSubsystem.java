@@ -45,6 +45,7 @@ import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.PhoenixOdometryThread;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -343,6 +344,11 @@ public class DriveSubsystem extends SubsystemBase {
     return driveVelocityAverage / 4.0;
   }
 
+  /** Returns whether there are connected april tag cameras */
+  public boolean hasAprilTagCams() {
+    return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected));
+  }
+
   /** Returns the module states (turn angles and drive velocities) for all the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
@@ -400,7 +406,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Command pathfollowFactory(Pose2d pose) {
     return AutoBuilder.pathfindToPoseFlipped(
-        pose, DriveConstants.DEFAULT_CONSTRAINTS).withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf);
+        pose, DriveConstants.DEFAULT_CONSTRAINTS).withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf)
+        .unless(() -> !hasAprilTagCams());
   }
 
   /** Returns an array of module translations. */

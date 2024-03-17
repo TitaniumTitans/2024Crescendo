@@ -48,12 +48,13 @@ public class AimbotUtils {
   /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
     double angle = 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance);
-    if (100.0 >= distance && distance > 60.0) {
+    if (100.0 >= distance && distance > 55.0) {
       return angle;
     } else if (150.0 >= distance && distance > 100.0) {
       return angle - 1.75;
-    } else if (175.0 >= distance && distance > 150.0) {
-      return angle - 3.5;
+    } else if ((175.0 >= distance && distance > 150.0)
+        || (200.0 >= distance && distance > 175.0)) {
+      return angle - 3.0;
     } else if (distance > 175.0) {
       return angle;
     } else {

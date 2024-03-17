@@ -95,110 +95,125 @@ public class AimbotCommand extends Command {
 
   @Override
   public void execute() {
-    m_smallProperty.updateIfChanged();
-    m_fastProperty.updateIfChanged();
-
-    // get the robots velocity and acceleration
-    FieldRelativeSpeed fieldRelativeSpeed = m_driveSubsystem.getFieldRelativeVelocity();
-    FieldRelativeAccel fieldRelativeAccel = m_driveSubsystem.getFieldRelativeAcceleration();
-
-    // TODO make an actual equation for shot time based on distance
-    double shotTime = 0.5;
-
-    Translation3d target = FieldConstants.CENTER_SPEAKER;
-    Translation3d movingTarget = new Translation3d();
-
-    // loop over movement calcs to better adjust for acceleration
-    if (true) {
-      for (int i = 0; i < 1; i++) {
-        double virtualGoalX = target.getX()
-            - shotTime * (
-            MathUtil.applyDeadband(fieldRelativeSpeed.vx, 0.15)
-                + MathUtil.applyDeadband(
-                    fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
-
-        double virtualGoalY = target.getY()
-            - shotTime * (
-            MathUtil.applyDeadband(fieldRelativeSpeed.vy, 0.15)
-                + MathUtil.applyDeadband(
-                    fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
-
-        movingTarget = new Translation3d(virtualGoalX, virtualGoalY, 0.0);
-      }
-    } else {
-      movingTarget = target;
-    }
-
-    Logger.recordOutput("Aimbot/Target",target);
-    Logger.recordOutput("Aimbot/Moving Target", movingTarget);
-
-    Logger.recordOutput("Aimbot/Field Relative Velocity",
-        new ChassisSpeeds(
-            fieldRelativeSpeed.vx,
-            fieldRelativeSpeed.vy,
-            fieldRelativeSpeed.omega
-        ));
-
-    // get our desired rotation and error from it
-    double desiredRotationDegs =
-        AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget)
-            .getDegrees();
-    double error = Math.abs(desiredRotationDegs - m_driveSubsystem.getRotation().getDegrees());
-
-    // if we're far from our setpoint, move faster
-    double omega;// = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);;
-    if (error > 5.0) {
-      omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
-    } else {
-      omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
-    }
-
-    // add a feedforward component to compensate for horizontal movement
-    Translation2d linearFieldVelocity = new Translation2d(fieldRelativeSpeed.vx, fieldRelativeSpeed.vy);
-    Translation2d tangentalVelocity = linearFieldVelocity
-        .rotateBy(Rotation2d.fromDegrees(desiredRotationDegs).unaryMinus());
-    double tangentalComponent = tangentalVelocity.getX();
-
     double x = -DriveCommands.setSensitivity(-m_driverController.getLeftY(), 0.25);
     double y = -DriveCommands.setSensitivity(-m_driverController.getLeftX(), 0.25);
-
-    Translation2d linearSpeedVector = new Translation2d(x, y);
-    double omegaFF = linearSpeedVector.getY() * Constants.DriveConstants.MAX_ANGULAR_SPEED * 0.5;
 
     x = MathUtil.applyDeadband(x, 0.1);
     y = MathUtil.applyDeadband(y, 0.1);
 
-    x = MathUtil.clamp(x, -0.25, 0.25);
-    y = MathUtil.clamp(y, -0.25, 0.25);
+    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15);
+    o = MathUtil.applyDeadband(0, 0.1);
 
     Rotation2d heading;
 
     // if red change heading goal
     if (DriverStation.getAlliance().isPresent()
-            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+        && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       heading = m_driveSubsystem.getRotation();
     } else {
       heading = m_driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
     }
 
-    Logger.recordOutput("Aimbot/Linear Speed", omegaFF);
+    if (m_driveSubsystem.hasAprilTagCams()) {
+      m_smallProperty.updateIfChanged();
+      m_fastProperty.updateIfChanged();
 
-    // Convert to field relative speeds & send command
-    m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-            x * Constants.DriveConstants.MAX_LINEAR_SPEED,
-            y * Constants.DriveConstants.MAX_LINEAR_SPEED,
-            omega,// - (omegaFF * 0.25),
-            heading
-    ));
+      // get the robots velocity and acceleration
+      FieldRelativeSpeed fieldRelativeSpeed = m_driveSubsystem.getFieldRelativeVelocity();
+      FieldRelativeAccel fieldRelativeAccel = m_driveSubsystem.getFieldRelativeAcceleration();
 
-    m_armSubsystem.setDesiredState(m_pass ? ArmSubsystem.ArmState.PASS : ArmSubsystem.ArmState.AUTO_AIM);
-    m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
+      // TODO make an actual equation for shot time based on distance
+      double shotTime = 0.5;
 
-    // set shooter speeds and rumble controller
-    if (m_shooterSubsystem.atSpeed() && error < 15.0) {
-      m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
+      Translation3d target = FieldConstants.CENTER_SPEAKER;
+      Translation3d movingTarget = new Translation3d();
+
+      // loop over movement calcs to better adjust for acceleration
+      if (true) {
+        for (int i = 0; i < 1; i++) {
+          double virtualGoalX = target.getX()
+              - shotTime * (
+              MathUtil.applyDeadband(fieldRelativeSpeed.vx, 0.15)
+                  + MathUtil.applyDeadband(
+                  fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
+
+          double virtualGoalY = target.getY()
+              - shotTime * (
+              MathUtil.applyDeadband(fieldRelativeSpeed.vy, 0.15)
+                  + MathUtil.applyDeadband(
+                  fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
+
+          movingTarget = new Translation3d(virtualGoalX, virtualGoalY, 0.0);
+        }
+      } else {
+        movingTarget = target;
+      }
+
+      Logger.recordOutput("Aimbot/Target", target);
+      Logger.recordOutput("Aimbot/Moving Target", movingTarget);
+
+      Logger.recordOutput("Aimbot/Field Relative Velocity",
+          new ChassisSpeeds(
+              fieldRelativeSpeed.vx,
+              fieldRelativeSpeed.vy,
+              fieldRelativeSpeed.omega
+          ));
+
+      // get our desired rotation and error from it
+      double desiredRotationDegs =
+          AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget)
+              .getDegrees();
+      double error = Math.abs(desiredRotationDegs - m_driveSubsystem.getRotation().getDegrees());
+
+      x = MathUtil.clamp(x, -0.25, 0.25);
+      y = MathUtil.clamp(y, -0.25, 0.25);
+
+      // if we're far from our setpoint, move faster
+      double omega;// = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);;
+      if (error > 5.0) {
+        omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
+      } else {
+        omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
+      }
+
+      // add a feedforward component to compensate for horizontal movement
+      Translation2d linearFieldVelocity = new Translation2d(fieldRelativeSpeed.vx, fieldRelativeSpeed.vy);
+      Translation2d tangentalVelocity = linearFieldVelocity
+          .rotateBy(Rotation2d.fromDegrees(desiredRotationDegs).unaryMinus());
+      double tangentalComponent = tangentalVelocity.getX();
+
+      Translation2d linearSpeedVector = new Translation2d(x, y);
+      double omegaFF = linearSpeedVector.getY() * Constants.DriveConstants.MAX_ANGULAR_SPEED * 0.5;
+
+      Logger.recordOutput("Aimbot/Linear Speed", omegaFF);
+
+      // Convert to field relative speeds & send command
+      m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+          x * Constants.DriveConstants.MAX_LINEAR_SPEED,
+          y * Constants.DriveConstants.MAX_LINEAR_SPEED,
+          omega,// - (omegaFF * 0.25),
+          heading
+      ));
+
+      m_armSubsystem.setDesiredState(m_pass ? ArmSubsystem.ArmState.PASS : ArmSubsystem.ArmState.AUTO_AIM);
+      m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
+
+      // set shooter speeds and rumble controller
+      if (m_shooterSubsystem.atSpeed() && error < 15.0) {
+        m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
+      } else {
+        m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+      }
     } else {
-      m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+      m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+          x,
+          y,
+          o,
+          heading
+      ));
+
+      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.BACKUP_SHOT);
+      m_shooterSubsystem.runShooterVelocity(m_runKicker);
     }
   }
 
