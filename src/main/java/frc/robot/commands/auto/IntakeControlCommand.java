@@ -39,7 +39,7 @@ public class IntakeControlCommand extends Command {
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
     } else if (m_shooterSubsystem.hasPiece() && m_timer.hasElapsed(0.000001)){
       m_shooterSubsystem.setIntakePower(0.0);
-      m_shooterSubsystem.setKickerPower(-0.08);
+      m_shooterSubsystem.setKickerPower(-0.1);
       m_shooterSubsystem.setShooterPowerLeft(0.0);
       m_shooterSubsystem.setShooterPowerRight(0.0);
     }

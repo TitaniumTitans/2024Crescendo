@@ -209,7 +209,7 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public boolean wristAtSetpoint() {
-    return Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) < 2.5;
+    return Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) < 5.5;
   }
 
   public boolean bothAtSetpoint() {
