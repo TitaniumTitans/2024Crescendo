@@ -16,6 +16,7 @@ public final class AutoFactory {
     FRONT_WING_3_CONTESTED_5("FrontWing3Contested5"),
     AMP_WING_3("AmpWing3"),
     AMP_WING_3_CONTESTED_5("AmpWing3Contested5"),
+    AMP_WING_1_2_3("AmpWing123"),
     SOURCE_WING_1("SourceWing1"),
     SOURCE_CONTESTED_1("SourceContested1"),
     SOURCE_WING_1_CONTESTED_1("SourceWing1Contested1");
