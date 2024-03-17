@@ -41,6 +41,8 @@ public class ShooterAutoCommand extends Command {
   public void initialize() {
     m_timer.restart();
     m_previousHadPiece = m_shooterSubsystem.hasPiece();
+
+    m_hasChanged = false;
   }
 
   @Override
@@ -55,7 +57,7 @@ public class ShooterAutoCommand extends Command {
 
     // only actually shoot if we're aligned close enough to speaker and flywheels are at speed
     m_shooterSubsystem.runShooterVelocity(m_shooterSubsystem.atSpeed()
-        && error < 10.0 && m_armSubsystem.wristAtSetpoint()).execute();
+        && error < 15.0 && m_armSubsystem.wristAtSetpoint()).execute();
     m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
 
     // check to see if the state of having a note has changed, mark if it has
@@ -73,7 +75,7 @@ public class ShooterAutoCommand extends Command {
 
     // too long check may change as system gets tuned
     return (!m_shooterSubsystem.hasPiece() && m_hasChanged
-        && m_timer.hasElapsed(0.75)) || m_timer.hasElapsed(5.0);
+        && m_timer.hasElapsed(1.25)) || m_timer.hasElapsed(5.0);
   }
 
   @Override

@@ -123,7 +123,7 @@ public class ArmIOKraken implements ArmIO {
         .withSlot(0);
 
     // config pid and properties
-    m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", false, m_armMaster, 0)
+    m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", true, m_armMaster, 0)
         .addP(ArmConstants.ARM_KP)
         .addI(ArmConstants.ARM_KI)
         .addD(ArmConstants.ARM_KD)
@@ -132,7 +132,7 @@ public class ArmIOKraken implements ArmIO {
         .addKG(ArmConstants.ARM_KG, GravityTypeValue.Arm_Cosine)
         .build();
 
-    m_wristProperty = new Phoenix6PidPropertyBuilder("Arm/Wrist PID", false, m_wristMaster, 0)
+    m_wristProperty = new Phoenix6PidPropertyBuilder("Arm/Wrist PID", true, m_wristMaster, 0)
         .addP(ArmConstants.WRIST_KP)
         .addI(ArmConstants.WRIST_KI)
         .addD(ArmConstants.WRIST_KD)

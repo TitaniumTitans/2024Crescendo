@@ -37,9 +37,9 @@ public class IntakeControlCommand extends Command {
       m_shooterSubsystem.setShooterPowerLeft(-0.1);
       m_shooterSubsystem.setShooterPowerRight(-0.1);
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
-    } else {
+    } else if (m_shooterSubsystem.hasPiece() && m_timer.hasElapsed(0.000001)){
       m_shooterSubsystem.setIntakePower(0.0);
-      m_shooterSubsystem.setKickerPower(0.0);
+      m_shooterSubsystem.setKickerPower(-0.08);
       m_shooterSubsystem.setShooterPowerLeft(0.0);
       m_shooterSubsystem.setShooterPowerRight(0.0);
     }
@@ -51,7 +51,7 @@ public class IntakeControlCommand extends Command {
 
   @Override
   public boolean isFinished() {
-    return m_shooterSubsystem.hasPiece() && m_timer.hasElapsed(0.25);
+    return m_shooterSubsystem.hasPiece() && m_timer.hasElapsed(0.2);
   }
 
   @Override

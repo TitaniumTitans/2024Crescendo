@@ -103,6 +103,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     driveConfig.Voltage.SupplyVoltageTimeConstant = 0.02;
+    driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
@@ -114,7 +115,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     // setup pid gains for drive motor
     m_drivePid = new Phoenix6PidPropertyBuilder(
             "Drive/Module" + m_moduleConstants.MODULE_INDEX() + "/Drive Pid Property",
-            false, m_driveTalon, 0)
+            true, m_driveTalon, 0)
             .addP(m_moduleConstants.DRIVE_KP())
             .addI(m_moduleConstants.DRIVE_KI())
             .addD(m_moduleConstants.DRIVE_KD())

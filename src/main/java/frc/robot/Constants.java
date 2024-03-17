@@ -87,7 +87,7 @@ public final class Constants {
 
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(11.0351), // 11.0351
+            Units.inchesToMeters(11.0351 + 0.25), // 11.0351
             Units.inchesToMeters(10.023204 - 2.0), // 10.023204
             Units.inchesToMeters(7.1374 - 2.0)), // 4.1374
         new Rotation3d(
@@ -98,7 +98,7 @@ public final class Constants {
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(11.0351), //11.0351
+            Units.inchesToMeters(11.0351 + 0.25), //11.0351
             Units.inchesToMeters(-10.023204), //-10.023204
             Units.inchesToMeters(7.1374 - 0.0)), // 7.1374
         new Rotation3d(
@@ -126,7 +126,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0, 0.4), new PIDConstants(5.0, 0.8),
+        new PIDConstants(6.25, 0.8), new PIDConstants(6.0, 0.8),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
@@ -199,14 +199,14 @@ public final class Constants {
         (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
     public static final double WRIST_CANCODER_MECHANISM_RATIO = (48.0 / 24.0);
 
-    public static final double WRIST_KP = 108.0;
-    public static final double WRIST_KI = 3.0;
+    public static final double WRIST_KP = 350.0;
+    public static final double WRIST_KI = 6.0;
     public static final double WRIST_KD = 3.0;
     public static final double WRIST_KS = 0.375;
     public static final double WRIST_KV = 0.0;
     public static final double WRIST_KG = 0.35;
 
-    public static final double ARM_KP = 72.0;
+    public static final double ARM_KP = 350.0;
     public static final double ARM_KI = 6.0;
     public static final double ARM_KD = 3.0;
     public static final double ARM_KS = 0.375;

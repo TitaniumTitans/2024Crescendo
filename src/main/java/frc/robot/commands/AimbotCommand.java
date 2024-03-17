@@ -70,14 +70,14 @@ public class AimbotCommand extends Command {
     m_fastController.setTolerance(10.0);
 
     m_smallProperty = new WpiPidPropertyBuilder("Drive/Aimbot Small", false, m_smallController)
-            .addP(1.0)
-            .addI(0.0)
-            .addD(0.0)
+            .addP(0.035)
+            .addI(0.001)
+            .addD(0.004)
             .build();
     m_fastProperty = new WpiPidPropertyBuilder("Drive/Aimbot Fast", false, m_fastController)
-            .addP(3.0)
+            .addP(0.1)
             .addI(0.0)
-            .addD(0.0)
+            .addD(0.002)
             .build();
 
     m_runKicker = runKicker;
@@ -133,15 +133,15 @@ public class AimbotCommand extends Command {
         for (int i = 0; i < 1; i++) {
           double virtualGoalX = target.getX()
               - shotTime * (
-              MathUtil.applyDeadband(fieldRelativeSpeed.vx, 0.15)
+              MathUtil.applyDeadband(fieldRelativeSpeed.vx, 0.25)
                   + MathUtil.applyDeadband(
-                  fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
+                  fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.25));
 
           double virtualGoalY = target.getY()
               - shotTime * (
-              MathUtil.applyDeadband(fieldRelativeSpeed.vy, 0.15)
+              MathUtil.applyDeadband(fieldRelativeSpeed.vy, 0.25)
                   + MathUtil.applyDeadband(
-                  fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
+                  fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.25));
 
           movingTarget = new Translation3d(virtualGoalX, virtualGoalY, 0.0);
         }
