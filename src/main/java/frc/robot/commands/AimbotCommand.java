@@ -5,7 +5,6 @@ import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -94,7 +93,7 @@ public class AimbotCommand extends Command {
     x = MathUtil.applyDeadband(x, 0.1);
     y = MathUtil.applyDeadband(y, 0.1);
 
-    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15);
+    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15) * 0.65;
     o = MathUtil.applyDeadband(o, 0.1);
 
     Rotation2d heading;
@@ -107,7 +106,7 @@ public class AimbotCommand extends Command {
       heading = m_driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
     }
 
-    if (m_driveSubsystem.hasAprilTagCams()) {
+    if (m_driveSubsystem.useAutoControl()) {
       m_smallProperty.updateIfChanged();
       m_fastProperty.updateIfChanged();
 

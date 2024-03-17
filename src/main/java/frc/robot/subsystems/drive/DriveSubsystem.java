@@ -336,7 +336,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns whether there are connected april tag cameras */
-  public boolean hasAprilTagCams() {
+  public boolean useAutoControl() {
     return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected));
   }
 
@@ -398,7 +398,7 @@ public class DriveSubsystem extends SubsystemBase {
   public Command pathfollowFactory(Pose2d pose) {
     return AutoBuilder.pathfindToPoseFlipped(
         pose, DriveConstants.DEFAULT_CONSTRAINTS).withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf)
-        .unless(() -> !hasAprilTagCams());
+        .unless(() -> !useAutoControl());
   }
 
   /** Returns an array of module translations. */

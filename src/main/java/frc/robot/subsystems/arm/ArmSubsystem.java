@@ -222,14 +222,14 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public Command incrementArmManual(double increment) {
-    return run(() -> {
+    return runOnce(() -> {
       m_desiredState = ArmState.MANUAL_CONTROL;
       m_armIncremental += increment;
     });
   }
 
   public Command incrementWristManual(double increment) {
-    return run(() -> {
+    return runOnce(() -> {
       m_desiredState = ArmState.MANUAL_CONTROL;
       m_wristIncremental += increment;
     });
