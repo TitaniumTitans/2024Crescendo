@@ -44,7 +44,7 @@ public class IntakeControlCommand extends Command {
       m_shooterSubsystem.setShooterPowerRight(0.0);
     }
 
-    if (m_shooterSubsystem.hasPiece()) {
+    if (m_shooterSubsystem.hasPiece() && !m_timer.hasElapsed(0.00000001)) {
       m_timer.restart();
     }
   }
