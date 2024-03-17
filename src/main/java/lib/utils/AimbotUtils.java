@@ -1,10 +1,12 @@
 package lib.utils;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.subsystems.arm.ArmPose;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class AimbotUtils {
 
@@ -12,33 +14,52 @@ public class AimbotUtils {
   private static final InterpolatingDoubleTreeMap m_leftSpeedLerpTable = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap m_rightSpeedLerpTable = new InterpolatingDoubleTreeMap();
 
+  private static final LoggedDashboardNumber m_offsetNudge =
+      new LoggedDashboardNumber("Wrist Angle Nudge", 0.01);
+
+  private static final double Y_TARGET = 0.2;
+
   static {
     // angle measurements, meters -> degrees
-    m_angleLerpTable.put(Units.inchesToMeters(18.0), 57.0);
-    m_angleLerpTable.put(Units.inchesToMeters(46.0), 45.0);
-    m_angleLerpTable.put(Units.inchesToMeters(97.0), 33.5);
-    m_angleLerpTable.put(Units.inchesToMeters(116.0), 29.75);
-    m_angleLerpTable.put(Units.inchesToMeters(155.0), 24.65);
+    m_angleLerpTable.put(Units.inchesToMeters(18.0), 57.0 + 3.0);
+    m_angleLerpTable.put(Units.inchesToMeters(46.0), 45.0 + 3.0);
+    m_angleLerpTable.put(Units.inchesToMeters(97.0), 33.5 + 2.5);
+    m_angleLerpTable.put(Units.inchesToMeters(116.0), 29.75 + 2.5);
+    m_angleLerpTable.put(Units.inchesToMeters(155.0), 24.65 + 1.5);
+
 //    m_angleLerpTable.put(Units.inchesToMeters(229.0), 0.0);
 
     //flywheel measurements, meters -> RPM
     m_leftSpeedLerpTable.put(Units.inchesToMeters(18.0), 3600.0);
-    m_leftSpeedLerpTable.put(Units.inchesToMeters(46.0), 3600.0);
-    m_leftSpeedLerpTable.put(Units.inchesToMeters(97.0), 3600.0);
-    m_leftSpeedLerpTable.put(Units.inchesToMeters(116.0), 3800.0);
+    m_leftSpeedLerpTable.put(Units.inchesToMeters(46.0), 3700.0);
+    m_leftSpeedLerpTable.put(Units.inchesToMeters(97.0), 3800.0);
+    m_leftSpeedLerpTable.put(Units.inchesToMeters(116.0), 4000.0);
     m_leftSpeedLerpTable.put(Units.inchesToMeters(155.0), 5000.0);
 //    m_leftSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
 
     m_rightSpeedLerpTable.put(Units.inchesToMeters(18.0), 3600.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(46.0), 3600.0);
-    m_rightSpeedLerpTable.put(Units.inchesToMeters(97.0), 3600.0);
+    m_rightSpeedLerpTable.put(Units.inchesToMeters(97.0), 3700.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(116.0), 3800.0);
     m_rightSpeedLerpTable.put(Units.inchesToMeters(155.0), 4600.0);
 //    m_rightSpeedLerpTable.put(Units.inchesToMeters(229.0), 0.0);
   }
 
+  /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
-    return m_angleLerpTable.get(distance);
+    double angle = 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance);
+    if (100.0 >= distance && distance > 55.0) {
+      return angle;
+    } else if (150.0 >= distance && distance > 100.0) {
+      return angle - 1.75;
+    } else if ((175.0 >= distance && distance > 150.0)
+        || (200.0 >= distance && distance > 175.0)) {
+      return angle - 3.0;
+    } else if (distance > 175.0) {
+      return angle;
+    } else {
+      return 55.0;
+    }
   }
 
   public static double getLeftSpeed(double distance) {
@@ -47,6 +68,31 @@ public class AimbotUtils {
 
   public static double getRightSpeed(double distance) {
     return m_rightSpeedLerpTable.get(distance);
+  }
+
+  /** Gets the distance from the drivebase to the speaker in meters */
+  public static double getDistanceFromSpeaker(Pose2d drivePose) {
+    return AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER).toTranslation2d()
+        .getDistance(drivePose.getTranslation());
+  }
+
+  /** Gets the angle the drivebase should be at with a default of the speaker */
+  public static Rotation2d getDrivebaseAimingAngle(Pose2d drivePose) {
+    return getDrivebaseAimingAngle(drivePose, FieldConstants.CENTER_SPEAKER);
+  }
+
+  /** Gets the angle the drivebase should be at to aim at the speaker */
+  public static Rotation2d getDrivebaseAimingAngle(Pose2d drivePose, Translation3d target) {
+    Transform3d robotToPoint =
+        new Transform3d(
+            new Pose3d(new Pose2d(drivePose.getTranslation(), new Rotation2d())),
+            new Pose3d(AllianceFlipUtil.apply(target), new Rotation3d()));
+
+    return Rotation2d.fromRadians(
+        MathUtil.angleModulus(
+            Math.PI * 2 - (Math.atan2(robotToPoint.getX(), robotToPoint.getY()))
+                + Units.degreesToRadians(90)
+        ));
   }
 
   /** Gets the top point of the shooter for checking limits*/

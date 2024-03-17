@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,7 +31,9 @@ public class ArmSubsystem extends SubsystemBase {
     TRANSITION_AMP,
     SOURCE,
     TRANSITION_SOURCE,
-    DISABLED
+    PASS,
+    DISABLED,
+    BACKUP_SHOT, MANUAL_WRIST
   }
 
   private final ArmIO m_io;
@@ -44,7 +47,6 @@ public class ArmSubsystem extends SubsystemBase {
 
   private ArmState m_desiredState = ArmState.STOW;
   private ArmState m_currentState = ArmState.DISABLED;
-
 
   private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
 
@@ -124,8 +126,8 @@ public class ArmSubsystem extends SubsystemBase {
   public void handleState() {
     switch(m_desiredState) {
       case STOW -> {
-        if (m_inputs.armPositionDegs > 67.5 && m_currentState == ArmState.AMP) {
-          m_wristVelocityMult = 0.35;
+        if (m_inputs.armPositionDegs > 60.0 && m_currentState == ArmState.AMP) {
+          m_wristVelocityMult = 0.15;
           m_armVelocityMult = 1.0;
         } else {
           m_currentState = ArmState.STOW;
@@ -142,12 +144,16 @@ public class ArmSubsystem extends SubsystemBase {
 
         Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
         Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
-        double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
+        double groundDistance = Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(m_poseSupplier.get()));
 
         m_desiredWristPoseDegs = AimbotUtils.getWristAngle(groundDistance);
 
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
         m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
+      }
+      case ANTI_DEFENSE -> {
+        m_desiredArmPoseDegs = 68.0;
+        m_desiredWristPoseDegs = 65.0;
       }
       case INTAKE -> {
         m_armVelocityMult = 1.0;
@@ -169,6 +175,20 @@ public class ArmSubsystem extends SubsystemBase {
 
         m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
+      }
+      case PASS ->  {
+        m_desiredWristPoseDegs = 45.0;
+        m_desiredArmPoseDegs = 0.0;
+      }
+      case BACKUP_SHOT -> {
+        m_desiredWristPoseDegs = 50.0;
+        m_desiredArmPoseDegs = 0.0;
+      }
+      case MANUAL_WRIST -> {
+        m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();
+
+        m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
+        m_desiredArmPoseDegs = Math.max(m_desiredArmPoseDegs, ArmSetpoints.STATIC_SHOOTER.armAngle());
       }
       default -> {
         m_armVelocityMult = 1.0;
@@ -255,26 +275,4 @@ public class ArmSubsystem extends SubsystemBase {
         },
         () -> m_io.setWristVoltage(0.0));
   }
-
-  /** Logging util */
-  public void setupLogging() {
-    logUtil.addDouble("ArmAngleDegs", () -> m_inputs.armPositionDegs, true);
-    logUtil.addDouble("WristAngleDegs", () -> m_inputs.wristPositionDegs, true);
-
-    logUtil.addDouble("ArmSetpointDegs", () -> m_desiredArmPoseDegs, true);
-    logUtil.addDouble("WristSetpointDegs", () -> m_desiredWristPoseDegs, true);
-
-    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
-    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
-
-    logUtil.addDouble("ArmClosedLoopOutput", () -> m_inputs.armClosedLoopOutput, false);
-    logUtil.addDouble("WristClosedLoopOutput", () -> m_inputs.wristClosedLoopOutput, false);
-
-    logUtil.addDouble("ArmAppliedOutput", () -> m_inputs.armAppliedOutput, false);
-    logUtil.addDouble("WristAppliedOutput", () -> m_inputs.wristAppliedOutput, false);
-
-    logUtil.addDouble("WristArmGap", () -> m_wristGap, true);
-    logUtil.addString("Arm Current State", () -> m_desiredState.toString(), true);
-  }
 }
-

@@ -32,7 +32,7 @@ public class FieldConstants {
   public static final Pose2d AMP_LINEUP =
     AllianceFlipUtil.apply(new Pose2d(
         AMP_CENTER.getX(),
-        AMP_CENTER.getY() - Units.inchesToMeters(20),
+        AMP_CENTER.getY() - Units.inchesToMeters(18.5),
         Rotation2d.fromDegrees(90)
     ));
 
@@ -93,9 +93,9 @@ public class FieldConstants {
 
   public static final Translation3d CENTER_SPEAKER =
       new Translation3d(
-          (Units.inchesToMeters(18.055) / 2.0),
-          Units.inchesToMeters((238.815 + 197.765) / 2.0),
-          (Units.inchesToMeters(83.091 + 78.324) / 2.0) - Units.inchesToMeters(1.0));
+          0.0, // - Units.inchesToMeters(2.0),
+          FIELD_WIDTH - Units.inchesToMeters(104.0),
+          (Units.inchesToMeters(83.091 + 78.324) / 2.0));// - Units.inchesToMeters(1.0));
 
   public static final double APRIL_TAG_WIDTH = Units.inchesToMeters(6.50);
   public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT;

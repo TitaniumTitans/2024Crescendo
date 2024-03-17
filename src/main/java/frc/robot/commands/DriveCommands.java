@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import lib.utils.AimbotUtils;
 import org.opencv.core.Mat;
 
 import java.util.function.DoubleSupplier;
@@ -42,7 +43,7 @@ public class DriveCommands {
         () -> {
           double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
           double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
-          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0);
+          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0) * 0.75;
 
           // Apply deadband
           double linearMagnitude =
@@ -96,7 +97,7 @@ public class DriveCommands {
           new Rotation2d(xInput, yInput);
 
       // Calculate omega
-      double omega = driveSubsystem.alignToPoint(new Pose3d(point.get(), new Rotation3d()));
+      double omega = driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()));
 
       // Calcaulate new linear velocity
       Translation2d linearVelocity =

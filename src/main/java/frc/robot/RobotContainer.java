@@ -13,31 +13,24 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.SignalLogger;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.FeedForwardCharacterization;
-import frc.robot.commands.IntakeControlCommand;
-import frc.robot.commands.ShooterAutoCommand;
+import frc.robot.commands.*;
+import frc.robot.commands.auto.AutoFactory;
+import frc.robot.commands.auto.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -55,6 +48,7 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.AllianceFlipUtil;
 import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -73,7 +67,9 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
-  private final SendableChooser<Command> autoChooser;
+  private final AutoFactory m_autonFactory;
+  private final LoggedDashboardNumber m_leftRPM = new LoggedDashboardNumber("Shooter/LeftRPM", 3600);
+  private final LoggedDashboardNumber m_rightRPM = new LoggedDashboardNumber("Shooter/RightRPM", 3600);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -152,23 +148,7 @@ public class RobotContainer {
     configureNamedCommands();
     configureDashboard();
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-
-    // Set up feedforward characterization
-    autoChooser.addOption(
-        "Drive Quasistatic Forward",
-            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-            "Drive Quasistatic Backwards",
-            m_driveSubsystem.runSysidQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-            "Drive Dynamic Forward",
-            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-            "Drive Dynamic Backwards",
-            m_driveSubsystem.runSysidDynamic(SysIdRoutine.Direction.kReverse));
-
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    m_autonFactory = new AutoFactory();
 
     // Configure the button bindings
     configureButtonBindings();
@@ -184,16 +164,24 @@ public class RobotContainer {
     Trigger intakeTrigger = controller.y().and(controller.x().negate())
         .and(controller.a().negate()) // make sure we don't amp
         .and(controller.b().negate())
-        .debounce(0.1, Debouncer.DebounceType.kBoth);
+        .and(controller.leftTrigger().negate());
 
     Trigger spinUpTrigger = controller.x().and(controller.y().negate())
         .and(controller.a().negate()) // make sure we don't amp
         .and(controller.b().negate());
 
+    Trigger passSpinUpTrigger = controller.leftTrigger()
+        .and(spinUpTrigger.negate())
+        .and(controller.y().negate());
+
+    Trigger passTrigger = controller.leftTrigger()
+        .and(spinUpTrigger.negate())
+        .and(controller.y());
+
     Trigger shootTrigger = controller.x().and(controller.y())
         .and(controller.a().negate()) // make sure we don't amp
         .and(controller.b().negate())
-        .debounce(0.1, Debouncer.DebounceType.kBoth);
+        .and(controller.leftTrigger().negate());
 
     Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
@@ -207,34 +195,62 @@ public class RobotContainer {
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-        .alongWith(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        )));
+//    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+//        .alongWith(DriveCommands.alignmentDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+//        )));
+    spinUpTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), false));
 
-    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-        .alongWith(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        )));
+//    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
+//        .alongWith(DriveCommands.alignmentDrive(
+//            m_driveSubsystem,
+//            () -> -controller.getLeftY(),
+//            () -> -controller.getLeftX(),
+//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
+//        )));
 
-    ampLineupTrigger.whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    shootTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), true));
+
+    ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+        .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
+        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
+
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
-    controller.pov(0).onTrue(Commands.runOnce(SignalLogger::stop));
-    controller.pov(180).whileTrue(m_driveSubsystem.pathfollowFactory(
-        FieldConstants.AMP_LINEUP
-    ));
+
+    controller.leftBumper().whileTrue(
+        m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get())
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
+
+    controller.rightBumper().whileTrue(
+        m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
+            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
+
+    passSpinUpTrigger.whileTrue(
+        m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
+            .alongWith(m_shooter.runShooterVelocity(false, 3500, 3500)));
+
+    passTrigger.whileTrue(
+        m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
+            .alongWith(m_shooter.runShooterVelocity(true, 3500, 3500)));
+
+    controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    controller.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+
+    controller.pov(90).whileTrue(m_shooter.intakeCommand(-0.75, -0.75, 0.0))
+        .whileFalse(m_shooter.intakeCommand(0.0, 0.0, 0.0));
+
+    // 96.240234375
+    // 60.029296875
+    // 2250
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -258,16 +274,10 @@ public class RobotContainer {
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Run Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
+    NamedCommands.registerCommand("Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter)
-        .raceWith(DriveCommands.alignmentDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-        )));
+    NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem));
   }
 
   private void configureDashboard() {
@@ -283,6 +293,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return m_autonFactory.getSelectedAutonomous();
   }
 }

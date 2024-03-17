@@ -77,7 +77,7 @@ public class ShooterIOKraken implements ShooterIO {
     shooterConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     m_indexer = TalonFXFactory.createTalon(ShooterConstants.INDEXER_ID, shooterConfig);
-    m_intake = TalonFXFactory.createTalon(ShooterConstants.INTAKE_ID, shooterConfig);
+    m_intake = TalonFXFactory.createTalon(ShooterConstants.INTAKE_ID, "rio", shooterConfig);
     m_kicker = TalonFXFactory.createTalon(ShooterConstants.KICKER_ID, shooterConfig);
 
     m_leftProperty = new Phoenix6PidPropertyBuilder("Shooter/Left PID", false, m_leftTalon, 0)
@@ -166,8 +166,8 @@ public class ShooterIOKraken implements ShooterIO {
         m_indexerTemperatureSignal
     );
 
-    inputs.tlVelocityRPM = m_leftVelSignal.getValueAsDouble() * 60.0;
-    inputs.trVelocityRPM = m_rightVelSignal.getValueAsDouble() * 60.0;
+    inputs.tlVelocityRPM = m_leftVelSignal.refresh().getValueAsDouble() * 60.0;
+    inputs.trVelocityRPM = m_rightVelSignal.refresh().getValueAsDouble() * 60.0;
 
     inputs.tlAppliedVolts = m_leftVoltOutSignal.getValueAsDouble();
     inputs.trAppliedVolts = m_rightVoltOutSignal.getValueAsDouble();

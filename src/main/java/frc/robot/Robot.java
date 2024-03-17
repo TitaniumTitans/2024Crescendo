@@ -58,7 +58,7 @@ public class Robot extends LoggedRobot {
 //    DriverStation.startDataLog(DataLogManager.getLog());
 
     SignalLogger.setPath(logPath);
-    SignalLogger.start();
+//    SignalLogger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -114,7 +114,7 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    TalonFXFactory.handleFaults();
+//    TalonFXFactory.handleFaults();
 //    DataLogUtil.updateTables();
   }
 

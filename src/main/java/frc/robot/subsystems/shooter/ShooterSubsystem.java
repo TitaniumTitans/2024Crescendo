@@ -27,8 +27,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
 
-  private double m_leftSpeedSetpoint = 0.0;
-  private double m_rightSpeedSetpoint = 0.0;
+  private double m_leftSpeedSetpoint = 3800.0;
+  private double m_rightSpeedSetpoint = 3800.0;
 
   private final GosDoubleProperty m_leftPower = new
       GosDoubleProperty(false, "Shooter/Left RPM", 3600);
@@ -73,16 +73,20 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
+    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
+    Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
+    double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
+
+    double leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
+    double rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
+
+    return runShooterVelocity(runKicker, 3750, 4500);
+  }
+
+  public Command runShooterVelocity(boolean runKicker, double leftRPM, double rightRPM) {
     return runEnd(() -> {
-//          m_io.setLeftVelocityRpm(m_leftPower.getValue());
-//          m_io.setRightVelocityRpm(m_rightPower.getValue());
-
-          Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
-          Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
-          double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
-
-          m_leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
-          m_rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
+          m_leftSpeedSetpoint = leftRPM;
+          m_rightSpeedSetpoint = rightRPM;
 
           m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
           m_io.setRightVelocityRpm(m_rightSpeedSetpoint);
@@ -120,7 +124,7 @@ public class ShooterSubsystem extends SubsystemBase {
             setKickerPower(kickerPower);
             timer.restart();
           } else if (!timer.hasElapsed(timeout)) {
-            setKickerPower(-0.1);
+            setKickerPower(-0.13);
             setIntakePower(0.0);
           } else {
             setShooterPowerRight(0.0);
@@ -132,6 +136,8 @@ public class ShooterSubsystem extends SubsystemBase {
         () -> {
           setIntakePower(0.0);
           setKickerPower(0.0);
+          setShooterPowerRight(0.0);
+          setShooterPowerLeft(0.0);
         });
   }
 

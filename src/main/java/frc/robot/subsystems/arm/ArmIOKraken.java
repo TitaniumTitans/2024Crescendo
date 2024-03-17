@@ -21,6 +21,7 @@ import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 
 import frc.robot.Constants.ArmConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class ArmIOKraken implements ArmIO {
   // Physical devices
@@ -40,8 +41,8 @@ public class ArmIOKraken implements ArmIO {
   private final HeavyDoubleProperty m_wristMaxVelDegS;
   private final HeavyDoubleProperty m_accelTimeSecs;
 
-  private final MotionMagicConfigs m_armMMConfigs = new MotionMagicConfigs();
-  private final MotionMagicConfigs m_wristMMConfigs = new MotionMagicConfigs();
+  private double m_armMaxVel;
+  private double m_wristMaxVel;
 
   // Control outputs
   private final DynamicMotionMagicVoltage m_wristDynMMRequest;
@@ -49,8 +50,6 @@ public class ArmIOKraken implements ArmIO {
   private final Follower m_armFollowerRequest;
   private final Follower m_wristFollowerRequest;
   private final NeutralOut m_stopRequest;
-
-  private boolean m_tracking = false;
 
   private double m_prevArmVelocityMult = 0.0;
   private double m_prevWristVelocityMult = 0.0;
@@ -83,8 +82,11 @@ public class ArmIOKraken implements ArmIO {
     armConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     armConfig.Feedback.SensorToMechanismRatio = ArmConstants.ARM_SENSOR_MECHANISM_RATIO;
 
-    m_armMaster = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
-    m_armFollower = TalonFXFactory.createTalon(ArmConstants.ARM_MASTER_ID, armConfig);
+    m_armMaster = new TalonFX(ArmConstants.ARM_MASTER_ID, CANBUS);
+    m_armFollower = new TalonFX(ArmConstants.ARM_FOLLOWER_ID, CANBUS);
+
+    m_armMaster.getConfigurator().apply(armConfig);
+    m_armFollower.getConfigurator().apply(armConfig);
 
     // Wrist Configuration
     TalonFXConfiguration wristConfig = new TalonFXConfiguration();
@@ -140,16 +142,16 @@ public class ArmIOKraken implements ArmIO {
         .build();
 
     m_armMaxVelDegS = new HeavyDoubleProperty(
-        (double maxVel) -> m_armDynMMRequest.Velocity = Units.degreesToRotations(maxVel),
+        (double maxVel) -> m_armMaxVel = Units.degreesToRotations(maxVel),
         new GosDoubleProperty(false, "Arm/Arm Max Vel DegsS", 120));
 
     m_wristMaxVelDegS = new HeavyDoubleProperty(
-        (double maxVel) -> m_wristDynMMRequest.Velocity = Units.degreesToRotations(maxVel),
+        (double maxVel) -> m_wristMaxVel = Units.degreesToRotations(maxVel),
         new GosDoubleProperty(false, "Arm/Wrist Max Vel DegsS", 120));
 
     m_accelTimeSecs = new HeavyDoubleProperty((double accel) -> {
-      m_armDynMMRequest.Acceleration = m_armDynMMRequest.Velocity / accel;
-      m_wristDynMMRequest.Acceleration = m_wristDynMMRequest.Velocity / accel;
+      m_armDynMMRequest.Acceleration = m_armMaxVel / accel;
+      m_wristDynMMRequest.Acceleration = m_wristMaxVel / accel;
     }, new GosDoubleProperty(false, "Arm/Acceleration Time Secs", 1));
 
     m_armMaxVelDegS.updateIfChanged(true);
@@ -242,6 +244,9 @@ public class ArmIOKraken implements ArmIO {
     m_armMaxVelDegS.updateIfChanged();
     m_wristMaxVelDegS.updateIfChanged();
     m_accelTimeSecs.updateIfChanged();
+
+    Logger.recordOutput("Arm Prev Vel Mult", m_prevArmVelocityMult);
+    Logger.recordOutput("Wrist Prev Vel Mult", m_prevWristVelocityMult);
   }
 
   @Override
@@ -252,11 +257,7 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setArmAngle(double degrees, double velocityMult) {
-    if (m_prevArmVelocityMult != velocityMult) {
-      m_armMaxVelDegS.updateIfChanged(true);
-    }
-    m_prevArmVelocityMult = velocityMult;
-    m_armDynMMRequest.Velocity = m_armDynMMRequest.Velocity * velocityMult;
+    m_armDynMMRequest.Velocity = m_armMaxVel * velocityMult;
 
     m_armMaster.setControl(m_armDynMMRequest.withPosition(degrees / 360));
     m_armFollower.setControl(m_armFollowerRequest);
@@ -270,11 +271,7 @@ public class ArmIOKraken implements ArmIO {
 
   @Override
   public void setWristAngle(double degrees, double velocityMult) {
-    if (m_prevWristVelocityMult != velocityMult) {
-      m_wristMaxVelDegS.updateIfChanged(true);
-    }
-    m_prevWristVelocityMult = velocityMult;
-    m_wristDynMMRequest.Velocity = m_wristDynMMRequest.Velocity * velocityMult;
+    m_wristDynMMRequest.Velocity = m_wristMaxVel * velocityMult;
 
     m_wristMaster.setControl(m_wristDynMMRequest.withPosition(degrees / 360));
     m_wristFollower.setControl(m_wristFollowerRequest);
@@ -286,10 +283,12 @@ public class ArmIOKraken implements ArmIO {
     m_armMaster.setPosition(
         (m_armEncoder.getAbsolutePosition().getValueAsDouble() - Units.degreesToRotations(ArmConstants.OFFSET_NUDGE))
             / ArmConstants.ARM_CANCODER_MECHANISM_RATIO);
+    m_armFollower.setPosition(m_armMaster.getPosition().getValueAsDouble());
 
     m_wristMaster.setPosition(
         (m_wristEncoder.getAbsolutePosition().getValueAsDouble() - Units.degreesToRotations(ArmConstants.OFFSET_NUDGE))
             / ArmConstants.WRIST_CANCODER_MECHANISM_RATIO);
+    m_wristFollower.setPosition(m_wristMaster.getPosition().getValueAsDouble());
   }
 
   @Override

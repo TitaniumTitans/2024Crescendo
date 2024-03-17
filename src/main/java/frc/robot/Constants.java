@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+import com.fasterxml.jackson.core.SerializableString;
 import edu.wpi.first.math.geometry.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
@@ -45,7 +46,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -87,35 +88,35 @@ public final class Constants {
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
             Units.inchesToMeters(11.0351), // 11.0351
-            Units.inchesToMeters(10.023204), // 10.023204
-            Units.inchesToMeters(7.1374)), // 4.1374
+            Units.inchesToMeters(10.023204 - 2.0), // 10.023204
+            Units.inchesToMeters(7.1374 - 2.0)), // 4.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(-30.0), // -120.0 + 91.0
-            Units.degreesToRadians(-14.7)) // 165.3224 + 180
+            Units.degreesToRadians(0.0 + 1.0),
+            Units.degreesToRadians(-30.0 + 4.0), // -120.0 + 91.0
+            Units.degreesToRadians(-14.7 - 3.0)) // 165.3224 + 180
     );
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
             Units.inchesToMeters(11.0351), //11.0351
             Units.inchesToMeters(-10.023204), //-10.023204
-            Units.inchesToMeters(7.1374)), // 7.1374
+            Units.inchesToMeters(7.1374 - 0.0)), // 7.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(-30.0), // -30.0 - 1
-            Units.degreesToRadians(14.7)) // 165.3224)
+            Units.degreesToRadians(0.0 + 0.5),
+            Units.degreesToRadians(-30.0 - 2.5), // -30.0 - 1
+            Units.degreesToRadians(14.7 - 3.0)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        MAX_LINEAR_SPEED * 0.25,
-        MAX_LINEAR_SPEED * 0.25,
-        MAX_ANGULAR_SPEED * 0.25,
-        MAX_ANGULAR_SPEED * 0.25
+        MAX_LINEAR_SPEED * 0.75,
+        MAX_LINEAR_SPEED * 0.45,
+        MAX_ANGULAR_SPEED * 0.75,
+        MAX_ANGULAR_SPEED * 0.45
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(7.5, 0.75), new PIDConstants(7.5, 0.75),
-        DriveConstants.MAX_LINEAR_SPEED * 0.25, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
+        new PIDConstants(5.0, 0.4), new PIDConstants(5.0, 0.8),
+        DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
             0,
@@ -123,7 +124,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.017822) + 180, // offset 0.457764
+            Units.rotationsToDegrees(-0.019775) + 180, // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -134,7 +135,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.453857) + 180,
+            Units.rotationsToDegrees(-0.451416) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -145,7 +146,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.428467) + 180,
+            Units.rotationsToDegrees(0.429688) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -156,7 +157,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.093750) + 180,
+            Units.rotationsToDegrees(-0.092285) + 180,
             true,
             ModuleConstants.GearRatios.L3_KRAKEN
     );
@@ -169,8 +170,8 @@ public final class Constants {
     public static final int WRIST_MASTER_ID = 21;
     public static final int WRIST_FOLLOWER_ID = 22;
     public static final int WRIST_ENCODER_ID = 23;
-    public static final int ARM_MASTER_ID = 18;
-    public static final int ARM_FOLLOWER_ID = 19;
+    public static final int ARM_MASTER_ID = 19;
+    public static final int ARM_FOLLOWER_ID = 18;
     public static final int ARM_ENCODER_ID = 20;
 
     /* Because the absolute encoders are on a 2/1 ratio, we have to move our offset down a little into a rotation lower
@@ -229,6 +230,8 @@ public final class Constants {
   }
 
   public static class ArmSetpoints {
+    public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
+
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
@@ -242,7 +245,7 @@ public final class Constants {
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
 
-    public static final ArmPose STATIC_SHOOTER = new ArmPose(0.0, 55.0);
+    public static final ArmPose STATIC_SHOOTER = new ArmPose("ArmPoses/ShooterTesting", false, 0.0, 55.0);
 
     public static final GosDoubleProperty WRIST_ANGLE = new GosDoubleProperty(false, "Wrist Angle", 45.0);
 
@@ -275,6 +278,9 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
+    public static final GosDoubleProperty ACCEL_COMP_FACTOR =
+        new GosDoubleProperty(false, "Shooter/Acceleration Compensation", 0.100);
+
     private ShooterConstants() {
       throw new IllegalStateException("Static classes should not be constructed");
     }
