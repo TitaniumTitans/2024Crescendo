@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoFactory;
+import frc.robot.commands.auto.IntakeControlCommand;
 import frc.robot.commands.auto.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
@@ -274,8 +275,7 @@ public class RobotContainer {
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
+    NamedCommands.registerCommand("Intake", new IntakeControlCommand(m_armSubsystem, m_shooter));
 
     NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem));
   }
