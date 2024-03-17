@@ -95,29 +95,6 @@ public class RobotContainer {
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
-      case PROTO_ARM -> {
-        m_driveSubsystem = new DriveSubsystem(
-            new GyroIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-      }
-      case PROTO_SHOOTER -> {
-        m_driveSubsystem = new DriveSubsystem(
-            new GyroIO() {
-            },
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
-      }
       case SIM -> {
 //       Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =

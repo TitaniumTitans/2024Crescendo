@@ -51,8 +51,6 @@ public final class Constants {
   public enum Mode {
     /** Running on a real robot. */
     REAL,
-    PROTO_SHOOTER,
-    PROTO_ARM,
 
     /** Running a physics simulator. */
     SIM,
