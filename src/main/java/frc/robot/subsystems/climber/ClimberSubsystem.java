@@ -27,5 +27,25 @@ public class ClimberSubsystem extends SubsystemBase {
   public Command setClimberPowerFactory(double power) {
     return runEnd(() -> setClimberPower(power), () -> setClimberPower(0.0));
   }
+
+  public Command setLeftClimberPowerFactory(double power) {
+    return runEnd(() -> m_io.setLeftVoltage(power * 12.0), () -> setClimberPower(0.0));
+  }
+
+  public Command setRightClimberPowerFactory(double power) {
+    return runEnd(() -> m_io.setRightVoltage(power * 12.0), () -> setClimberPower(0.0));
+  }
+
+  public Command setClimberPosition(double degrees) {
+    return runEnd(() -> {
+          m_io.setLeftPosition(degrees);
+          m_io.setRightPosition(degrees);
+        },
+        () -> setClimberPower(0.0));
+  }
+
+  public Command resetClimber() {
+    return runOnce(m_io::resetPosition);
+  }
 }
 

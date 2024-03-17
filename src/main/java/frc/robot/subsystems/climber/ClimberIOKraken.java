@@ -143,4 +143,10 @@ public class ClimberIOKraken implements ClimberIO {
     m_leftClimber.setControl(new NeutralOut());
     m_rightClimber.setControl(new NeutralOut());
   }
+
+  @Override
+  public void resetPosition() {
+    m_leftClimber.setPosition(0);
+    m_rightClimber.setPosition(0);
+  }
 }

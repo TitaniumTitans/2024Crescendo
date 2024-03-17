@@ -256,6 +256,16 @@ public class RobotContainer {
         m_shooter.runShooterVelocity(false, m_leftPower.get(), m_rightPower.get()));
     m_operatorController.rightTrigger().whileTrue(
         m_shooter.runShooterVelocity(true, m_leftPower.get(), m_rightPower.get()));
+
+    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(10));
+    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(720));
+
+    m_operatorController.pov(0).whileTrue(m_climber.setLeftClimberPowerFactory(0.5));
+    m_operatorController.pov(90).whileTrue(m_climber.setLeftClimberPowerFactory(-0.5));
+    m_operatorController.pov(180).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
+    m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
+
+    m_operatorController.start().onTrue(m_climber.resetClimber());
   }
 
   /**
