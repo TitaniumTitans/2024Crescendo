@@ -86,9 +86,7 @@ public class Robot extends LoggedRobot {
         // Save outputs to a new log
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(replayLog, "_sim")));
       }
-      default -> {
-        Logger.addDataReceiver(new WPILOGWriter(logPath));
-      }
+      default -> Logger.addDataReceiver(new WPILOGWriter(logPath));
     }
 
 // Logger.disableDeterministicTimestamps() // See "Deterministic Timestamps" in the "Understanding Data Flow" page

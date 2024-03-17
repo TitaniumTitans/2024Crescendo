@@ -3,8 +3,6 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import lib.logger.DataLogUtil;
-import lib.logger.DataLogUtil.DataLogTable;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterSubsystem extends SubsystemBase {
