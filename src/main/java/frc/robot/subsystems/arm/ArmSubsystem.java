@@ -48,7 +48,6 @@ public class ArmSubsystem extends SubsystemBase {
   private ArmState m_desiredState = ArmState.STOW;
   private ArmState m_currentState = ArmState.DISABLED;
 
-
   private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
 
   private final ArmVisualizer m_setpointVisualizer;
@@ -277,4 +276,3 @@ public class ArmSubsystem extends SubsystemBase {
         () -> m_io.setWristVoltage(0.0));
   }
 }
-
