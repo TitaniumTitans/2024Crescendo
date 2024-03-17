@@ -74,7 +74,7 @@ public class Robot extends LoggedRobot {
     }
 
     switch (Constants.currentMode) {
-      case REAL, default -> {
+      case REAL -> {
         Logger.addDataReceiver(new WPILOGWriter(logPath)); // Log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
       }
@@ -85,6 +85,9 @@ public class Robot extends LoggedRobot {
         Logger.setReplaySource(new WPILOGReader(replayLog)); // Read replay log
         // Save outputs to a new log
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(replayLog, "_sim")));
+      }
+      default -> {
+        Logger.addDataReceiver(new WPILOGWriter(logPath));
       }
     }
 
