@@ -107,6 +107,17 @@ public final class Constants {
             Units.degreesToRadians(14.7 - 3.0)) // 165.3224)
     );
 
+    public static final Transform3d INTAKE_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(-16.5), //11.0351
+            Units.inchesToMeters(-9.25), //-10.023204
+            Units.inchesToMeters(10.0)), // 7.1374
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-3.0), // -30.0 - 1
+            Units.degreesToRadians(180.0)) // 165.3224)
+    );
+
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
         MAX_LINEAR_SPEED * 0.75,
         MAX_LINEAR_SPEED * 0.45,

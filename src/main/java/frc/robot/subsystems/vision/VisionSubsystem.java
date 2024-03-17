@@ -102,6 +102,10 @@ public class VisionSubsystem {
         avgDist /= numTags;
       }
 
+      if (avgDist > 20) {
+        return Optional.empty();
+      }
+
       double xyStdDev = xyStdDevCoefficient * Math.pow(avgDist, 2.0);
       double thetaStdDev = thetaStdDevCoefficient * Math.pow(avgDist, 2.0);
 
