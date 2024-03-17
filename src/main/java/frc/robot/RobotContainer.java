@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
@@ -64,12 +63,15 @@ public class RobotContainer {
   private final ClimberSubsystem m_climber;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController m_driverController = new CommandXboxController(0);
+  private final CommandXboxController m_operatorController = new CommandXboxController(1);
+
+  private final LoggedDashboardNumber m_armIncrement = new LoggedDashboardNumber("Arm/Increment value", 1);
+  private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
+  private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
-  private final LoggedDashboardNumber m_leftRPM = new LoggedDashboardNumber("Shooter/LeftRPM", 3600);
-  private final LoggedDashboardNumber m_rightRPM = new LoggedDashboardNumber("Shooter/RightRPM", 3600);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -161,32 +163,32 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Trigger intakeTrigger = controller.y().and(controller.x().negate())
-        .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate())
-        .and(controller.leftTrigger().negate());
+    Trigger intakeTrigger = m_driverController.y().and(m_driverController.x().negate())
+        .and(m_driverController.a().negate()) // make sure we don't amp
+        .and(m_driverController.b().negate())
+        .and(m_driverController.leftTrigger().negate());
 
-    Trigger spinUpTrigger = controller.x().and(controller.y().negate())
-        .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate());
+    Trigger spinUpTrigger = m_driverController.x().and(m_driverController.y().negate())
+        .and(m_driverController.a().negate()) // make sure we don't amp
+        .and(m_driverController.b().negate());
 
-    Trigger passSpinUpTrigger = controller.leftTrigger()
+    Trigger passSpinUpTrigger = m_driverController.leftTrigger()
         .and(spinUpTrigger.negate())
-        .and(controller.y().negate());
+        .and(m_driverController.y().negate());
 
-    Trigger passTrigger = controller.leftTrigger()
+    Trigger passTrigger = m_driverController.leftTrigger()
         .and(spinUpTrigger.negate())
-        .and(controller.y());
+        .and(m_driverController.y());
 
-    Trigger shootTrigger = controller.x().and(controller.y())
-        .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate())
-        .and(controller.leftTrigger().negate());
+    Trigger shootTrigger = m_driverController.x().and(m_driverController.y())
+        .and(m_driverController.a().negate()) // make sure we don't amp
+        .and(m_driverController.b().negate())
+        .and(m_driverController.leftTrigger().negate());
 
-    Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
+    Trigger ampLineupTrigger = m_driverController.b().and(m_driverController.a().negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
 
-    Trigger ampDepositeTrigger = controller.b().and(controller.a())
+    Trigger ampDepositeTrigger = m_driverController.b().and(m_driverController.a())
         .and(spinUpTrigger.negate()) // make sure we don't amp while trying to do anything else
         .and(shootTrigger.negate())
         .and(intakeTrigger.negate())
@@ -195,26 +197,10 @@ public class RobotContainer {
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-//    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-//        .alongWith(DriveCommands.alignmentDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-//        )));
-    spinUpTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), false));
-
-//    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-//        .alongWith(DriveCommands.alignmentDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-//        )));
-
-    shootTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), true));
+    spinUpTrigger.whileTrue(
+        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), false));
+    shootTrigger.whileTrue(
+        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), true));
 
     ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
@@ -225,15 +211,6 @@ public class RobotContainer {
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
-
-    controller.leftBumper().whileTrue(
-        m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
-
-    controller.rightBumper().whileTrue(
-        m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
-
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
             .alongWith(m_shooter.runShooterVelocity(false, 3500, 3500)));
@@ -242,10 +219,10 @@ public class RobotContainer {
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
             .alongWith(m_shooter.runShooterVelocity(true, 3500, 3500)));
 
-    controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    controller.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
-    controller.pov(90).whileTrue(m_shooter.intakeCommand(-0.75, -0.75, 0.0))
+    m_driverController.pov(90).whileTrue(m_shooter.intakeCommand(-0.75, -0.75, 0.0))
         .whileFalse(m_shooter.intakeCommand(0.0, 0.0, 0.0));
 
     // 96.240234375
@@ -255,10 +232,10 @@ public class RobotContainer {
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
             m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    controller
+            () -> -m_driverController.getLeftY(),
+            () -> -m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()));
+    m_driverController
         .start()
         .onTrue(
             Commands.runOnce(
@@ -268,6 +245,17 @@ public class RobotContainer {
                             Rotation2d.fromDegrees(180.0)))),
                     m_driveSubsystem)
                 .ignoringDisable(true));
+
+    m_operatorController.a().onTrue(m_armSubsystem.incrementArmManual(m_armIncrement.get()));
+    m_operatorController.b().onTrue(m_armSubsystem.incrementArmManual(-m_armIncrement.get()));
+
+    m_operatorController.x().onTrue(m_armSubsystem.incrementWristManual(m_armIncrement.get()));
+    m_operatorController.y().onTrue(m_armSubsystem.incrementWristManual(-m_armIncrement.get()));
+
+    m_operatorController.leftTrigger().whileTrue(
+        m_shooter.runShooterVelocity(false, m_leftPower.get(), m_rightPower.get()));
+    m_operatorController.rightTrigger().whileTrue(
+        m_shooter.runShooterVelocity(true, m_leftPower.get(), m_rightPower.get()));
   }
 
   /**

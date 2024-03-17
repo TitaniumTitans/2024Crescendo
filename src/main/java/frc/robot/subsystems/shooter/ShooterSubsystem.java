@@ -30,11 +30,6 @@ public class ShooterSubsystem extends SubsystemBase {
   private double m_leftSpeedSetpoint = 3800.0;
   private double m_rightSpeedSetpoint = 3800.0;
 
-  private final GosDoubleProperty m_leftPower = new
-      GosDoubleProperty(false, "Shooter/Left RPM", 3600);
-  private final GosDoubleProperty m_rightPower = new
-      GosDoubleProperty(false, "Shooter/Right RPM", 3600);
-
   public ShooterSubsystem(ShooterIO io) {
     this(io, Pose2d::new);
   }

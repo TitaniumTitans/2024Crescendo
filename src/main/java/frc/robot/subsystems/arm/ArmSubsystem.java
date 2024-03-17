@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
-import lib.logger.DataLogUtil;
 import org.littletonrobotics.junction.Logger;
 import lib.utils.AimbotUtils;
 import lib.utils.AllianceFlipUtil;
@@ -33,7 +32,8 @@ public class ArmSubsystem extends SubsystemBase {
     TRANSITION_SOURCE,
     PASS,
     DISABLED,
-    BACKUP_SHOT, MANUAL_WRIST
+    BACKUP_SHOT,
+    MANUAL_CONTROL
   }
 
   private final ArmIO m_io;
@@ -41,14 +41,14 @@ public class ArmSubsystem extends SubsystemBase {
   private double m_desiredArmPoseDegs;
   private double m_armVelocityMult = 0;
   private double m_desiredWristPoseDegs;
-  private double m_wristGap;
   private double m_wristVelocityMult = 0;
   private boolean m_disabledBrakeMode = true;
 
   private ArmState m_desiredState = ArmState.STOW;
   private ArmState m_currentState = ArmState.DISABLED;
 
-  private final DataLogUtil.DataLogTable logUtil = DataLogUtil.getTable("Arm");
+  private double m_wristIncremental = 45.0;
+  private double m_armIncremental = 0.0;
 
   private final ArmVisualizer m_setpointVisualizer;
   private final ArmVisualizer m_poseVisualizer;
@@ -184,11 +184,9 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = 50.0;
         m_desiredArmPoseDegs = 0.0;
       }
-      case MANUAL_WRIST -> {
-        m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();
-
-        m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
-        m_desiredArmPoseDegs = Math.max(m_desiredArmPoseDegs, ArmSetpoints.STATIC_SHOOTER.armAngle());
+      case MANUAL_CONTROL -> {
+        m_desiredWristPoseDegs = m_wristIncremental;
+        m_desiredArmPoseDegs = m_armIncremental;
       }
       default -> {
         m_armVelocityMult = 1.0;
@@ -231,48 +229,17 @@ public class ArmSubsystem extends SubsystemBase {
     return runOnce(m_io::resetPosition).ignoringDisable(true);
   }
 
-  public Command setArmPowerFactory(double power) {
-    return runEnd(() -> {
-          // let arm know it's in manual control
-          m_io.enableBrakeMode(true);
-          m_desiredArmPoseDegs = Double.NEGATIVE_INFINITY;
-
-          double finalPower = power;
-          // limiting code for arm
-          if (m_inputs.armPositionDegs > ArmConstants.ARM_UPPER_LIMIT.getValue()) {
-            finalPower = MathUtil.clamp(power, -1.0, 0.0);
-          } else if (m_inputs.armPositionDegs < ArmConstants.ARM_LOWER_LIMIT.getValue()) {
-            finalPower = MathUtil.clamp(power, 0.0, 1.0);
-          }
-          m_io.setArmVoltage(finalPower * 12.0);
-
-          // check to see if wrist is too close, if it is back drive it
-          if (m_inputs.armPositionDegs + m_inputs.wristPositionDegs < ArmConstants.WRIST_ARM_GAP.getValue()) {
-            m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
-            m_io.setWristVoltage(Math.abs(finalPower));
-          }
-        },
-        () -> m_io.setArmVoltage(0.0));
+  public Command incrementArmManual(double increment) {
+    return run(() -> {
+      m_desiredState = ArmState.MANUAL_CONTROL;
+      m_armIncremental += increment;
+    });
   }
 
-  public Command setWristPowerFactory(double power) {
-    return runEnd(() -> {
-          // let wrist know it's in manual control mode
-          m_io.enableBrakeMode(true);
-          m_desiredWristPoseDegs = Double.NEGATIVE_INFINITY;
-
-          // limiting code for wrist
-          final double outPower;
-          if (m_inputs.wristPositionDegs > ArmConstants.WRIST_UPPER_LIMIT.getValue()) {
-            outPower = MathUtil.clamp(power, -1.0, 0.0);
-          } else if (m_inputs.wristPositionDegs < ArmConstants.WRIST_LOWER_LIMIT.getValue()
-              || m_inputs.wristPositionDegs + m_inputs.armPositionDegs < ArmConstants.WRIST_ARM_GAP.getValue()) {
-            outPower = MathUtil.clamp(power, 0.0, 1.0);
-          } else {
-            outPower = power;
-          }
-          m_io.setWristVoltage(outPower * 12.0);
-        },
-        () -> m_io.setWristVoltage(0.0));
+  public Command incrementWristManual(double increment) {
+    return run(() -> {
+      m_desiredState = ArmState.MANUAL_CONTROL;
+      m_wristIncremental += increment;
+    });
   }
 }
