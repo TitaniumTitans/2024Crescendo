@@ -61,7 +61,8 @@ public class ArmIOSim implements ArmIO{
   @Override
   public void setWristAngle(double degrees, double velocity) {
     double setpointRots = Units.degreesToRotations(degrees);
-    m_wristAppliedOutput = m_wristController.calculate(Units.radiansToRotations(m_wristSim.getAngleRads()), setpointRots);
+    m_wristAppliedOutput =
+        m_wristController.calculate(Units.radiansToRotations(m_wristSim.getAngleRads()), setpointRots);
     m_wristAppliedOutput = MathUtil.clamp(m_wristAppliedOutput, -12.0, 12.0);
     m_wristSim.setInputVoltage(m_wristAppliedOutput);
   }

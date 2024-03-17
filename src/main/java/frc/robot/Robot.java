@@ -15,16 +15,9 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.PropertyManager;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.StringLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import lib.factories.TalonFXFactory;
-import lib.logger.DataLogUtil;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -54,11 +47,7 @@ public class Robot extends LoggedRobot {
 
     String logPath = "/media/sda1/aoide";
 
-//    DataLogManager.start(logPath);
-//    DriverStation.startDataLog(DataLogManager.getLog());
-
     SignalLogger.setPath(logPath);
-//    SignalLogger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
@@ -85,13 +74,11 @@ public class Robot extends LoggedRobot {
     }
 
     switch (Constants.currentMode) {
-      case REAL -> {
+      case REAL, default -> {
         Logger.addDataReceiver(new WPILOGWriter(logPath)); // Log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
       }
-      case SIM -> {
-        Logger.addDataReceiver(new NT4Publisher());
-      }
+      case SIM -> Logger.addDataReceiver(new NT4Publisher());
       case REPLAY -> {
         setUseTiming(false); // Run as fast as possible
         String replayLog = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)

@@ -2,9 +2,6 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
@@ -12,10 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
-import org.littletonrobotics.junction.Logger;
 import lib.utils.AimbotUtils;
-import lib.utils.AllianceFlipUtil;
-import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -70,7 +65,6 @@ public class ArmSubsystem extends SubsystemBase {
 
     m_poseSupplier = supplier;
 
-//    setupLogging();
     m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
     m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
   }
@@ -142,8 +136,6 @@ public class ArmSubsystem extends SubsystemBase {
         m_armVelocityMult = 1.0;
         m_wristVelocityMult = 1.0;
 
-        Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
-        Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
         double groundDistance = Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(m_poseSupplier.get()));
 
         m_desiredWristPoseDegs = AimbotUtils.getWristAngle(groundDistance);

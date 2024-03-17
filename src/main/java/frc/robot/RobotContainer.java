@@ -96,7 +96,7 @@ public class RobotContainer {
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
       }
       case SIM -> {
-//       Sim robot, instantiate physics sim IO implementations
+      // Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
             new DriveSubsystem(
                 new GyroIO() {},
