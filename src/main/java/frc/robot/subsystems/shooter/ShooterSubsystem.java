@@ -1,46 +1,25 @@
 package frc.robot.subsystems.shooter;
 
-import com.gos.lib.properties.GosDoubleProperty;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import lib.logger.DataLogUtil;
 import lib.logger.DataLogUtil.DataLogTable;
 import org.littletonrobotics.junction.Logger;
-import lib.utils.AimbotUtils;
-import lib.utils.AllianceFlipUtil;
-import lib.utils.FieldConstants;
-
-import java.util.function.Supplier;
 
 public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterIO m_io;
   private final ShooterIOInputsAutoLogged m_inputs;
 
-  private final Supplier<Pose2d> m_poseSupplier;
-
-  private final DataLogTable m_logTable = DataLogUtil.getTable("Shooter");
-
   private double m_leftSpeedSetpoint = 3800.0;
   private double m_rightSpeedSetpoint = 3800.0;
 
   public ShooterSubsystem(ShooterIO io) {
-    this(io, Pose2d::new);
-  }
-
-  public ShooterSubsystem(ShooterIO io, Supplier<Pose2d> poseSupplier) {
     m_io = io;
     m_inputs = new ShooterIOInputsAutoLogged();
 
-    m_poseSupplier = poseSupplier;
     // turn on logging
-    setupLogging();
   }
 
   @Override
@@ -68,13 +47,6 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    Pose3d speakerPose = new Pose3d(AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER), new Rotation3d());
-    Translation2d speakerPoseGround = speakerPose.getTranslation().toTranslation2d();
-    double groundDistance = m_poseSupplier.get().getTranslation().getDistance(speakerPoseGround);
-
-    double leftSpeedSetpoint = AimbotUtils.getLeftSpeed(groundDistance);
-    double rightSpeedSetpoint = AimbotUtils.getRightSpeed(groundDistance);
-
     return runShooterVelocity(runKicker, 3750, 4500);
   }
 
@@ -143,25 +115,6 @@ public class ShooterSubsystem extends SubsystemBase {
       setKickerPower(intake);
       setIntakePower(intake);
     });
-  }
-
-  public void setupLogging() {
-    m_logTable.addDouble("LeftVelocity", () -> m_inputs.tlVelocityRPM, true);
-    m_logTable.addDouble("RightVelocity", () -> m_inputs.trVelocityRPM, true);
-
-    m_logTable.addDouble("LeftSetpoint", () -> m_leftSpeedSetpoint, true);
-    m_logTable.addDouble("RightSetpoint", () -> m_rightSpeedSetpoint, true);
-
-    m_logTable.addDouble("LeftAppliedVolts", () -> m_inputs.tlAppliedVolts, true);
-    m_logTable.addDouble("RightAppliedVolts", () -> m_inputs.trAppliedVolts, true);
-
-    m_logTable.addDouble("LeftCurrentDraw", () -> m_inputs.tlCurrentDraw, false);
-    m_logTable.addDouble("RightCurrentDraw", () -> m_inputs.trCurrentDraw, false);
-
-    m_logTable.addDouble("LeftTemperature", () -> m_inputs.tlTemperature, false);
-    m_logTable.addDouble("RightTemperature", () -> m_inputs.trTemperature, false);
-
-    m_logTable.addDouble("IntakeCurrent", () -> m_inputs.intakeCurrentDraw, true);
   }
 
   public boolean atSpeed() {
