@@ -190,11 +190,11 @@ public class RobotContainer {
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, 3500, 3500)));
+            .alongWith(m_shooter.runShooterVelocity(false, () -> 3500, () -> 3500)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, 3500, 3500)));
+            .alongWith(m_shooter.runShooterVelocity(true, () -> 3500, () -> 3500)));
 
     m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
@@ -230,15 +230,19 @@ public class RobotContainer {
     m_operatorController.y().onTrue(m_armSubsystem.incrementWristManual(-m_armIncrement.get()));
 
     m_operatorController.leftTrigger().whileTrue(
-        m_shooter.runShooterVelocity(false, m_leftPower.get(), m_rightPower.get()));
+        m_shooter.runShooterVelocity(false, m_leftPower::get, m_rightPower::get));
     m_operatorController.rightTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, m_leftPower.get(), m_rightPower.get()));
+        m_shooter.runShooterVelocity(true, m_leftPower::get, m_rightPower::get));
 
-    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(10));
-    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(720));
+    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(10.0));
+    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(360.0 * 10.0));
 
-    m_operatorController.pov(0).whileTrue(m_climber.setLeftClimberPowerFactory(0.5));
-    m_operatorController.pov(90).whileTrue(m_climber.setLeftClimberPowerFactory(-0.5));
+    // arm 45.0
+    // wrist 123.5]\[
+    
+
+    m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
+    m_operatorController.pov(90).whileTrue(m_climber.setClimberPowerFactory(-0.5));
     m_operatorController.pov(180).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
     m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
 

@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.DoubleSupplier;
+
 public class ShooterSubsystem extends SubsystemBase {
 
   private final ShooterIO m_io;
@@ -45,13 +47,13 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    return runShooterVelocity(runKicker, 3750, 4500);
+    return runShooterVelocity(runKicker, () -> 3750, () -> 4500);
   }
 
-  public Command runShooterVelocity(boolean runKicker, double leftRPM, double rightRPM) {
+  public Command runShooterVelocity(boolean runKicker, DoubleSupplier leftRPM, DoubleSupplier rightRPM) {
     return runEnd(() -> {
-          m_leftSpeedSetpoint = leftRPM;
-          m_rightSpeedSetpoint = rightRPM;
+          m_leftSpeedSetpoint = leftRPM.getAsDouble();
+          m_rightSpeedSetpoint = rightRPM.getAsDouble();
 
           m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
           m_io.setRightVelocityRpm(m_rightSpeedSetpoint);
