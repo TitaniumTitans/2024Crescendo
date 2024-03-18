@@ -12,6 +12,7 @@ import frc.robot.Constants.ArmSetpoints;
 import lib.utils.AimbotUtils;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class ArmSubsystem extends SubsystemBase {
@@ -22,9 +23,10 @@ public class ArmSubsystem extends SubsystemBase {
     AUTO_AIM,
     ANTI_DEFENSE,
     AMP,
-    TRANSITION_AMP,
     SOURCE,
     TRANSITION_SOURCE,
+    PREPARE_TRAP,
+    SCORE_TRAP,
     PASS,
     DISABLED,
     BACKUP_SHOT,
@@ -49,12 +51,13 @@ public class ArmSubsystem extends SubsystemBase {
   private final ArmVisualizer m_poseVisualizer;
 
   private final Supplier<Pose2d> m_poseSupplier;
+  private final BooleanSupplier m_climberLock;
 
   public ArmSubsystem(ArmIO io) {
-    this(io, Pose2d::new);
+    this(io, Pose2d::new, () -> false);
   }
 
-  public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier) {
+  public ArmSubsystem(ArmIO io, Supplier<Pose2d> supplier, BooleanSupplier climberLock) {
     m_io = io;
     m_inputs = new ArmIOInputsAutoLogged();
 
@@ -64,6 +67,7 @@ public class ArmSubsystem extends SubsystemBase {
     m_io.resetPosition();
 
     m_poseSupplier = supplier;
+    m_climberLock = climberLock;
 
     m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
     m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
@@ -106,6 +110,9 @@ public class ArmSubsystem extends SubsystemBase {
       m_io.setArmAngle(m_desiredArmPoseDegs, m_armVelocityMult);
     }
 
+    Logger.recordOutput("Arm/Desired State", m_desiredState);
+    Logger.recordOutput("Arm/Current State", m_currentState);
+
     Logger.recordOutput("Arm/Arm Setpoint", m_desiredArmPoseDegs);
     Logger.recordOutput("Arm/Wrist Setpoint", m_desiredWristPoseDegs);
 
@@ -118,9 +125,26 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void handleState() {
+    // handle climber locks
+    if (m_climberLock.getAsBoolean()
+    && m_currentState != ArmState.PREPARE_TRAP
+    && m_currentState != ArmState.SCORE_TRAP) {
+      m_desiredState = ArmState.STOW;
+    } else if (m_climberLock.getAsBoolean()
+        && m_desiredState != ArmState.PREPARE_TRAP
+        && m_desiredState != ArmState.SCORE_TRAP) {
+      m_desiredState = ArmState.PREPARE_TRAP;
+    }
+
+    if (m_currentState == ArmState.SCORE_TRAP &&
+        (m_desiredState != ArmState.SCORE_TRAP && m_desiredState != ArmState.PREPARE_TRAP)) {
+      m_desiredState = ArmState.PREPARE_TRAP;
+    }
+
     switch(m_desiredState) {
       case STOW -> {
-        if (m_inputs.armPositionDegs > 60.0 && m_currentState == ArmState.AMP) {
+        if (m_inputs.armPositionDegs > 60.0 &&
+            (m_currentState == ArmState.AMP || m_currentState == ArmState.PREPARE_TRAP)) {
           m_wristVelocityMult = 0.15;
           m_armVelocityMult = 1.0;
         } else {
@@ -142,10 +166,13 @@ public class ArmSubsystem extends SubsystemBase {
 
         m_desiredArmPoseDegs = ArmConstants.WRIST_ARM_GAP.getValue() - m_desiredWristPoseDegs;
         m_desiredArmPoseDegs = m_desiredArmPoseDegs >= 0 ? m_desiredArmPoseDegs : 0;
+
+        m_currentState = ArmState.AUTO_AIM;
       }
       case ANTI_DEFENSE -> {
         m_desiredArmPoseDegs = 68.0;
         m_desiredWristPoseDegs = 65.0;
+        m_currentState = ArmState.ANTI_DEFENSE;
       }
       case INTAKE -> {
         m_armVelocityMult = 1.0;
@@ -156,7 +183,7 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristAngle();
       }
       case AMP -> {
-        if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5) {
+        if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5.0) {
           m_armVelocityMult = 0.5;
         } else {
           m_armVelocityMult = 1.0;
@@ -168,19 +195,59 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
         m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
       }
+      case PREPARE_TRAP -> {
+        m_desiredArmPoseDegs = ArmSetpoints.TRAP_PREPARE.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.TRAP_PREPARE.wristAngle();
+
+        if (m_currentState == ArmState.SCORE_TRAP) {
+          m_wristVelocityMult = m_inputs.armPositionDegs < 60.0 ?
+              0.0 : 0.45;
+          m_armVelocityMult = 0.45;
+
+          if (bothAtSetpoint()) {
+            m_currentState = ArmState.PREPARE_TRAP;
+          }
+        } else {
+          if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5.0) {
+            m_armVelocityMult = 0.5;
+          } else {
+            m_armVelocityMult = 1.0;
+          }
+          m_wristVelocityMult = 1.0;
+          m_currentState = ArmState.PREPARE_TRAP;
+        }
+      }
+      case SCORE_TRAP -> {
+        if (m_currentState != ArmState.PREPARE_TRAP && m_currentState != ArmState.SCORE_TRAP) {
+          m_desiredState = ArmState.STOW;
+          handleState();
+        }
+
+        m_wristVelocityMult = 0.25;
+        m_armVelocityMult = 0.25;
+
+        m_currentState = ArmState.SCORE_TRAP;
+
+        m_desiredArmPoseDegs = ArmSetpoints.TRAP_SCORE.armAngle();
+        m_desiredWristPoseDegs = ArmSetpoints.TRAP_SCORE.wristAngle();
+      }
       case PASS ->  {
         m_desiredWristPoseDegs = 45.0;
         m_desiredArmPoseDegs = 0.0;
+        m_currentState = ArmState.PASS;
       }
       case BACKUP_SHOT -> {
         m_desiredWristPoseDegs = 50.0;
         m_desiredArmPoseDegs = 0.0;
+        m_currentState = ArmState.BACKUP_SHOT;
       }
       case MANUAL_CONTROL -> {
         m_desiredWristPoseDegs = m_wristIncremental;
         m_desiredArmPoseDegs = m_armIncremental;
+        m_currentState = ArmState.MANUAL_CONTROL;
       }
       default -> {
+        m_currentState = ArmState.DISABLED;
         m_armVelocityMult = 1.0;
         m_wristVelocityMult = 1.0;
 
@@ -195,11 +262,11 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public boolean armAtSetpoint() {
-    return Math.abs(m_inputs.armPositionDegs - m_desiredArmPoseDegs) < 5.0;
+    return Math.abs(m_inputs.armPositionDegs - m_desiredArmPoseDegs) < 2.5;
   }
 
   public boolean wristAtSetpoint() {
-    return Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) < 5.0;
+    return Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) < 2.5;
   }
 
   public boolean bothAtSetpoint() {

@@ -713,7 +713,8 @@
     "type": "double",
     "value": 120.0,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {
@@ -721,7 +722,8 @@
     "type": "double",
     "value": 120.0,
     "properties": {
-      "persistent": true
+      "persistent": true,
+      "retained": true
     }
   },
   {

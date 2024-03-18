@@ -37,6 +37,7 @@ public class ClimberIOKraken implements ClimberIO {
   public ClimberIOKraken() {
     TalonFXConfiguration climberConfig = new TalonFXConfiguration();
     climberConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    climberConfig.Feedback.SensorToMechanismRatio = 1.0 / 36.0;
     climberConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     m_leftClimber = TalonFXFactory.createTalon(ClimberConstants.LEFT_CLIMBER_ID, climberConfig);

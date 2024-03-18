@@ -92,8 +92,9 @@ public class RobotContainer {
             }
             );
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
+            m_driveSubsystem::getVisionPose, m_climber::getClimberLock);
       }
       case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -105,8 +106,8 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
-        m_armSubsystem = new ArmSubsystem(new ArmIOSim());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getVisionPose, m_climber::getClimberLock);
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -140,6 +141,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    /** trigger setup */
     Trigger intakeTrigger = m_driverController.y().and(m_driverController.x().negate())
         .and(m_driverController.a().negate()) // make sure we don't amp
         .and(m_driverController.b().negate())
@@ -170,6 +172,8 @@ public class RobotContainer {
         .and(shootTrigger.negate())
         .and(intakeTrigger.negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
+
+    /** driver controller */
 
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
@@ -223,28 +227,27 @@ public class RobotContainer {
                     m_driveSubsystem)
                 .ignoringDisable(true));
 
-    m_operatorController.a().onTrue(m_armSubsystem.incrementArmManual(m_armIncrement.get()));
-    m_operatorController.b().onTrue(m_armSubsystem.incrementArmManual(-m_armIncrement.get()));
 
-    m_operatorController.x().onTrue(m_armSubsystem.incrementWristManual(m_armIncrement.get()));
-    m_operatorController.y().onTrue(m_armSubsystem.incrementWristManual(-m_armIncrement.get()));
-
+    /** Operator controller */
     m_operatorController.leftTrigger().whileTrue(
-        m_shooter.runShooterVelocity(false, m_leftPower::get, m_rightPower::get));
+        m_shooter.runShooterVelocity(false, () -> 1400, () -> 1400));
     m_operatorController.rightTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, m_leftPower::get, m_rightPower::get));
+        m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
 
     m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(10.0));
     m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(360.0 * 10.0));
 
-    // arm 45.0
-    // wrist 123.5]\[
-    
+    m_operatorController.a()
+        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.PREPARE_TRAP),
+            m_armSubsystem));
+    m_operatorController.b()
+        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.SCORE_TRAP),
+            m_armSubsystem));
+    m_operatorController.x()
+        .onTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
-    m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
-    m_operatorController.pov(90).whileTrue(m_climber.setClimberPowerFactory(-0.5));
-    m_operatorController.pov(180).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
-    m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
+    // arm 45.0
+    // wrist 123.5
 
     m_operatorController.start().onTrue(m_climber.resetClimber());
   }
@@ -264,6 +267,7 @@ public class RobotContainer {
 
     commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
     commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
+    commandTab.add("Reset Climber Lock", m_climber.resetClimberLock());
   }
 
   /**
@@ -273,5 +277,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return m_autonFactory.getSelectedAutonomous();
+  }
+
+  public void resetClimberLock() {
+    m_climber.resetClimberLock().schedule();
   }
 }
