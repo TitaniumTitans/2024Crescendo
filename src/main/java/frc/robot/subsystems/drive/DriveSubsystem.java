@@ -93,6 +93,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
 
+  private final PIDController m_turnAnglePIDVelocity;
+
   private final SysIdRoutine m_sysId;
 
   private final SwerveModuleState[] m_optimizedStates = new SwerveModuleState[] {
@@ -137,13 +139,17 @@ public class DriveSubsystem extends SubsystemBase {
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(-Math.PI, Math.PI);
-    m_thetaPid.setTolerance(Units.degreesToRadians(6));
+    m_thetaPid.setTolerance(Units.degreesToRadians(15.0));
 
     m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
         .addP(0.5)
         .addI(0.0)
         .addD(0.0)
         .build();
+
+    m_turnAnglePIDVelocity = new PIDController(0.2, 0, 0);
+    m_turnAnglePIDVelocity.setTolerance(5);
+    m_turnAnglePIDVelocity.enableContinuousInput(0, 360);
 
     m_cameras = cameras;
 
@@ -202,11 +208,11 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
-    Logger.processInputs("Swerve/Gyro", gyroInputs);
     for (var module : modules) {
       module.updateInputs();
     }
     odometryLock.unlock();
+    Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
     }
@@ -216,6 +222,11 @@ public class DriveSubsystem extends SubsystemBase {
       for (var module : modules) {
         module.stop();
       }
+    }
+    // Log empty setpoint states when disabled
+    if (DriverStation.isDisabled()) {
+      Logger.recordOutput("SwerveStates/Setpoints");
+      Logger.recordOutput("SwerveStates/SetpointsOptimized");
     }
 
     // Update odometry
@@ -264,7 +275,7 @@ public class DriveSubsystem extends SubsystemBase {
       }
     }
 
-    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
+//    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 
     Logger.recordOutput("Drive/DistanceToTarget",
@@ -287,7 +298,6 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
-//    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
@@ -301,13 +311,30 @@ public class DriveSubsystem extends SubsystemBase {
     Logger.recordOutput("SwerveStates/Optimized", m_optimizedStates);
   }
 
-  /**
-   * Calculates theta output to align to an arbitrary angle
-   *
-   * @param angle the desired angle to hold relative to the field
-   */
-  public double alignToAngle(Rotation2d angle) {
-    return m_thetaPid.calculate(getVisionPose().getRotation().getRadians(), angle.getRadians());
+  public void davidDrive(double xVel, double yVel, double angle) {
+    double angleCurrentDegree = getGyroRotation().getDegrees();
+    double steerVelocity = m_turnAnglePIDVelocity.calculate(angleCurrentDegree, angle);
+    ChassisSpeeds speeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xVel,
+            yVel,
+            steerVelocity,
+            AllianceFlipUtil.apply(getVisionPose().getRotation()));
+
+    runVelocity(speeds);
+  }
+
+    /**
+     * Calculates theta output to align to an arbitrary angle
+     *
+     * @param angle the desired angle to hold relative to the field
+     */
+  public double alignToAngle(Rotation2d angle, boolean useGyro) {
+    if (useGyro) {
+      return m_thetaPid.calculate(getGyroRotation().getRadians(), angle.getRadians());
+    } else {
+      return m_thetaPid.calculate(getVisionPose().getRotation().getRadians(), angle.getRadians());
+    }
   }
 
   /** Stops the drive. */
@@ -376,6 +403,10 @@ public class DriveSubsystem extends SubsystemBase {
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
     return m_wpiPoseEstimator.getEstimatedPosition().getRotation();
+  }
+
+  public Rotation2d getGyroRotation() {
+    return gyroInputs.yawPosition;
   }
 
   /** Returns the robot's field relative velocity, used for shoot on move */

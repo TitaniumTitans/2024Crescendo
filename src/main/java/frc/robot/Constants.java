@@ -137,7 +137,7 @@ public final class Constants {
             TURN_FB_GAINS,
             Units.rotationsToDegrees(-0.019775) + 180, // offset 0.457764
             true, // inversion
-            ModuleConstants.GearRatios.L3_KRAKEN
+            ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
@@ -148,7 +148,7 @@ public final class Constants {
             TURN_FB_GAINS,
             Units.rotationsToDegrees(-0.451416) + 180,
             true,
-            ModuleConstants.GearRatios.L3_KRAKEN
+            ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
@@ -159,7 +159,7 @@ public final class Constants {
             TURN_FB_GAINS,
             Units.rotationsToDegrees(0.429688) + 180,
             true,
-            ModuleConstants.GearRatios.L3_KRAKEN
+            ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
@@ -170,7 +170,7 @@ public final class Constants {
             TURN_FB_GAINS,
             Units.rotationsToDegrees(-0.092285) + 180,
             true,
-            ModuleConstants.GearRatios.L3_KRAKEN
+            ModuleConstants.GearRatios.L3
     );
   }
 

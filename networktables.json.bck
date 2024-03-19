@@ -843,5 +843,85 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/Drive/Aimbot Small.mm.kp",
+    "type": "double",
+    "value": 0.034,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Aimbot Small.mm.ki",
+    "type": "double",
+    "value": 0.001,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Aimbot Small.mm.kd",
+    "type": "double",
+    "value": 0.004,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Aimbot Fast.mm.kp",
+    "type": "double",
+    "value": 0.1,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Aimbot Fast.mm.ki",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Aimbot Fast.mm.kd",
+    "type": "double",
+    "value": 0.002,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/Pass SetpointArm Angle",
+    "type": "double",
+    "value": 45.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/Pass SetpointWrist Angle",
+    "type": "double",
+    "value": 55.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/ShooterTestingArm Angle",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/ShooterTestingWrist Angle",
+    "type": "double",
+    "value": 55.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

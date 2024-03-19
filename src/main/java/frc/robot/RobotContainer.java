@@ -255,11 +255,9 @@ public class RobotContainer {
     // 2250
 
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
+        new DavidDriveCommand(
             m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            controller));
     controller
         .start()
         .onTrue(

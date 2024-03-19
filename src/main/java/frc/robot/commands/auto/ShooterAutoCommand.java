@@ -49,7 +49,7 @@ public class ShooterAutoCommand extends Command {
   public void execute() {
     // Calculate output to align to speaker
     Rotation2d desiredAngle = AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose());
-    double omega = m_driveSubsystem.alignToAngle(desiredAngle);
+    double omega = m_driveSubsystem.alignToAngle(desiredAngle, false);
     m_driveSubsystem.runVelocity(new ChassisSpeeds(0.0, 0.0, omega));
 
     double error = Math.abs(desiredAngle.getDegrees() - m_driveSubsystem.getRotation().getDegrees());
