@@ -128,7 +128,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.039795) + 180, // offset 0.457764
+            Units.rotationsToDegrees(-0.019775) + 180, // offset 0.457764
             true, // inversion
             ModuleConstants.GearRatios.L3
     );
@@ -139,7 +139,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.297363) + 180,
+            Units.rotationsToDegrees(-0.451416) + 180,
             true,
             ModuleConstants.GearRatios.L3
     );
@@ -150,7 +150,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.333740) + 180,
+            Units.rotationsToDegrees(0.429688) + 180,
             true,
             ModuleConstants.GearRatios.L3
     );
@@ -161,7 +161,7 @@ public final class Constants {
             DRIVE_FF_GAINS,
             DRIVE_FB_GAINS,
             TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.246826) + 180,
+            Units.rotationsToDegrees(-0.092285) + 180,
             true,
             ModuleConstants.GearRatios.L3
     );

@@ -152,11 +152,11 @@ public class DriveSubsystem extends SubsystemBase {
         VecBuilder.fill(
             Units.inchesToMeters(0.5),
             Units.inchesToMeters(0.5),
-            Units.degreesToRadians(0.5)),
+            Units.degreesToRadians(0.75)),
         VecBuilder.fill(
             Units.inchesToMeters(2.0),
             Units.inchesToMeters(2.0),
-            Units.degreesToRadians(40.0))
+            Units.degreesToRadians(35.0))
     );
 
     // Configure AutoBuilder for PathPlanner
@@ -256,7 +256,7 @@ public class DriveSubsystem extends SubsystemBase {
     if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
         && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
         && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED * 0.75)
-        /* || DriverStation.isTeleop() */[]\) {
+        || DriverStation.isTeleop()) {
       for (VisionSubsystem camera : m_cameras) {
         camera.updateInputs();
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
