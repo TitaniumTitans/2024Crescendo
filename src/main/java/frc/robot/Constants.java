@@ -123,47 +123,47 @@ public final class Constants {
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
-            0,
-            new int[]{1, 2, 3}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.019775) + 180, // offset 0.457764
-            true, // inversion
-            ModuleConstants.GearRatios.L3
+        0,
+        new int[]{1, 2, 3}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(-0.039795) + 180, // offset 0.457764
+        true, // inversion
+        ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
-            1,
-            new int[]{4, 5, 6}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.451416) + 180,
-            true,
-            ModuleConstants.GearRatios.L3
+        1,
+        new int[]{4, 5, 6}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(-0.297363) + 180,
+        true,
+        ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
-            2,
-            new int[]{7, 8, 9}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.429688) + 180,
-            true,
-            ModuleConstants.GearRatios.L3
+        2,
+        new int[]{7, 8, 9}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(0.333740) + 180,
+        true,
+        ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
-            3,
-            new int[]{10, 11, 12}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.092285) + 180,
-            true,
-            ModuleConstants.GearRatios.L3
+        3,
+        new int[]{10, 11, 12}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(0.246826) + 180,
+        true,
+        ModuleConstants.GearRatios.L3
     );
   }
 
