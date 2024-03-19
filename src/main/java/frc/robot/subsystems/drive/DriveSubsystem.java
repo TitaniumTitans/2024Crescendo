@@ -138,8 +138,8 @@ public class DriveSubsystem extends SubsystemBase {
     PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
-    m_thetaPid.enableContinuousInput(-Math.PI, Math.PI);
-    m_thetaPid.setTolerance(Units.degreesToRadians(15.0));
+    m_thetaPid.enableContinuousInput(0, 360);
+    m_thetaPid.setTolerance(Units.degreesToRadians(5.0));
 
     m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
         .addP(0.5)
@@ -313,7 +313,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void davidDrive(double xVel, double yVel, double angle) {
     double angleCurrentDegree = getGyroRotation().getDegrees();
-    double steerVelocity = m_turnAnglePIDVelocity.calculate(angleCurrentDegree, angle);
+    double steerVelocity = m_thetaPid.calculate(angleCurrentDegree, angle);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             xVel,
@@ -331,9 +331,9 @@ public class DriveSubsystem extends SubsystemBase {
      */
   public double alignToAngle(Rotation2d angle, boolean useGyro) {
     if (useGyro) {
-      return m_thetaPid.calculate(getGyroRotation().getRadians(), angle.getRadians());
+      return m_thetaPid.calculate(getGyroRotation().getDegrees(), angle.getDegrees());
     } else {
-      return m_thetaPid.calculate(getVisionPose().getRotation().getRadians(), angle.getRadians());
+      return m_thetaPid.calculate(getVisionPose().getRotation().getDegrees(), angle.getDegrees());
     }
   }
 
