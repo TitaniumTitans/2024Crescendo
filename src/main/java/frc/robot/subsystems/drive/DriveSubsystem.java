@@ -266,7 +266,7 @@ public class DriveSubsystem extends SubsystemBase {
       }
     }
 
-//    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
+    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 
     Logger.recordOutput("Drive/DistanceToTarget",
