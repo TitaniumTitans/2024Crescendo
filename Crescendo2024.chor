@@ -425,7 +425,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "FrontWing3Contested5": {
             "waypoints": [
@@ -1025,7 +1025,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "AmpWing3": {
             "waypoints": [
@@ -1326,7 +1326,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "SourceWing1": {
             "waypoints": [
@@ -1880,7 +1880,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "FrontWing3": {
             "waypoints": [
@@ -2065,7 +2065,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "SourceContested1": {
             "waypoints": [
@@ -2743,7 +2743,7 @@
                 }
             ],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "SourceWing1Contested1": {
             "waypoints": [
@@ -3932,7 +3932,7 @@
                 }
             ],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "AmpWing3Contested5": {
             "waypoints": [
@@ -4886,7 +4886,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "AmpWing321": {
             "waypoints": [
@@ -6251,7 +6251,7 @@
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
             "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "AmpWing3Contested4": {
             "waypoints": [
@@ -7229,32 +7229,7 @@
                 }
             ],
             "eventMarkers": [],
-            "isTrajectoryStale": true
-        },
-        "New Path": {
-            "waypoints": [],
-            "trajectory": [],
-            "trajectoryWaypoints": [],
-            "constraints": [
-                {
-                    "scope": [
-                        "first"
-                    ],
-                    "type": "StopPoint"
-                },
-                {
-                    "scope": [
-                        "last"
-                    ],
-                    "type": "StopPoint"
-                }
-            ],
-            "usesControlIntervalGuessing": true,
-            "defaultControlIntervalCount": 40,
-            "usesDefaultFieldObstacles": true,
-            "circleObstacles": [],
-            "eventMarkers": [],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         }
     },
     "splitTrajectoriesAtStopPoints": true,
