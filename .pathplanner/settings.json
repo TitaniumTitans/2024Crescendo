@@ -4,9 +4,9 @@
   "holonomicMode": true,
   "pathFolders": [],
   "autoFolders": [],
-  "defaultMaxVel": 1.5,
-  "defaultMaxAccel": 1.5,
-  "defaultMaxAngVel": 540.0,
-  "defaultMaxAngAccel": 720.0,
+  "defaultMaxVel": 4.032,
+  "defaultMaxAccel": 10.098,
+  "defaultMaxAngVel": 659.0,
+  "defaultMaxAngAccel": 2515.0,
   "maxModuleSpeed": 4.5
 }

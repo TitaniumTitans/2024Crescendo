@@ -64,7 +64,7 @@ public final class Constants {
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.8);
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.75);
     public static final double TRACK_WIDTH_Y = Units.inchesToMeters(20.75);
     public static final double DRIVE_BASE_RADIUS =
