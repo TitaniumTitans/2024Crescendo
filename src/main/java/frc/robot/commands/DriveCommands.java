@@ -103,17 +103,14 @@ public class DriveCommands {
           new Rotation2d(xInput, yInput);
 
       // Calculate omega
-      double omega = driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()), false);
+      double omega =
+          driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()), false);
 
       // Calcaulate new linear velocity
       Translation2d linearVelocity =
           new Pose2d(new Translation2d(), linearDirection)
               .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
               .getTranslation();
-
-//      if (linearVelocity.getNorm() > 0.1) {
-//        omega = omega * 4;
-//      }
 
       Rotation2d heading = new Rotation2d();
 
