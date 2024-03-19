@@ -12,23 +12,18 @@
 // GNU General Public License for more details.
 
 package frc.robot;
-import com.fasterxml.jackson.core.SerializableString;
-import edu.wpi.first.math.geometry.*;
+
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.units.Unit;
 import frc.robot.subsystems.arm.ArmPose;
-import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
 import java.util.List;
@@ -51,8 +46,6 @@ public final class Constants {
   public enum Mode {
     /** Running on a real robot. */
     REAL,
-    PROTO_SHOOTER,
-    PROTO_ARM,
 
     /** Running a physics simulator. */
     SIM,
@@ -242,6 +235,8 @@ public final class Constants {
 
   public static class ArmSetpoints {
     public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
+    public static final ArmPose TRAP_PREPARE = new ArmPose(92.0, 145.0);
+    public static final ArmPose TRAP_SCORE = new ArmPose(45.0, 123.5);
 
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");

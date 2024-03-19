@@ -26,7 +26,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.drive.DriveSubsystem;
-//import org.littletonrobotics.junction.Logger;
 
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
