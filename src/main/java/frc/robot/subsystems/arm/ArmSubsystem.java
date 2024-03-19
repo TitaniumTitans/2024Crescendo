@@ -23,8 +23,6 @@ public class ArmSubsystem extends SubsystemBase {
     AUTO_AIM,
     ANTI_DEFENSE,
     AMP,
-    SOURCE,
-    TRANSITION_SOURCE,
     PREPARE_TRAP,
     SCORE_TRAP,
     PASS,
