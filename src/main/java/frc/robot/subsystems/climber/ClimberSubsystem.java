@@ -52,8 +52,7 @@ public class ClimberSubsystem extends SubsystemBase {
     return runEnd(() -> m_io.setRightVoltage(power * 12.0), () -> setClimberPower(0.0));
   }
 
-  public Command
-  setClimberPosition(double degrees) {
+  public Command setClimberPosition(double degrees) {
     m_climberLock = true;
     return runEnd(() -> {
           m_io.setLeftPosition(degrees);
@@ -64,6 +63,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public Command resetClimber() {
     return runOnce(m_io::resetPosition);
+  }
+
+  public double getClimberHeight() {
+    return (m_inputs.getLeftClimberPosition() + m_inputs.getRightClimberPosition()) / 2.0;
   }
 }
 

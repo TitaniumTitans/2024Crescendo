@@ -47,7 +47,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    return runShooterVelocity(runKicker, () -> 3750, () -> 4500);
+    return runShooterVelocity(runKicker, () -> 4000, () -> 4750);
   }
 
   public Command runShooterVelocity(boolean runKicker, DoubleSupplier leftRPM, DoubleSupplier rightRPM) {

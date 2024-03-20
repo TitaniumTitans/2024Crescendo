@@ -97,7 +97,7 @@ public final class Constants {
         new Rotation3d(
             Units.degreesToRadians(0.0 + 0.5),
             Units.degreesToRadians(-30.0 - 2.5), // -30.0 - 1
-            Units.degreesToRadians(14.7 - 3.0)) // 165.3224)
+            Units.degreesToRadians(14.7 - 2.0)) // 165.3224)
     );
 
     public static final Transform3d INTAKE_CAMERA_TRANSFORMATION = new Transform3d(
@@ -119,7 +119,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(4.0, 0.35), new PIDConstants(3.75, 0.75),
+        new PIDConstants(5.0, 0.0), new PIDConstants(5.0, 0.0),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(

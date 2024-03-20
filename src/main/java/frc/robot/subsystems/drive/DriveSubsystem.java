@@ -139,7 +139,7 @@ public class DriveSubsystem extends SubsystemBase {
         .build();
 
     m_turnAnglePIDVelocity = new PIDController(0.2, 0, 0);
-    m_turnAnglePIDVelocity.setTolerance(5);
+    m_turnAnglePIDVelocity.setTolerance(15);
     m_turnAnglePIDVelocity.enableContinuousInput(0, 360);
 
     m_cameras = cameras;
@@ -156,7 +156,7 @@ public class DriveSubsystem extends SubsystemBase {
         VecBuilder.fill(
             Units.inchesToMeters(2.0),
             Units.inchesToMeters(2.0),
-            Units.degreesToRadians(35.0))
+            Units.degreesToRadians(30.0))
     );
 
     // Configure AutoBuilder for PathPlanner
@@ -303,7 +303,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void davidDrive(double xVel, double yVel, double angle) {
-    double angleCurrentDegree = getGyroRotation().getDegrees();
+    double angleCurrentDegree = getVisionPose().getRotation().getDegrees();
     double steerVelocity = m_thetaPid.calculate(angleCurrentDegree, angle);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(

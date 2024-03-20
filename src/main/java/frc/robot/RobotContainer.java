@@ -96,7 +96,7 @@ public class RobotContainer {
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
-            m_driveSubsystem::getVisionPose, m_climber::getClimberLock);
+            m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
       }
       case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -109,7 +109,8 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIOSim(), m_driveSubsystem::getVisionPose, m_climber::getClimberLock);
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim(),
+            m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -205,8 +206,10 @@ public class RobotContainer {
     m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
-    m_driverController.pov(90).whileTrue(m_shooter.intakeCommand(-0.75, -0.75, 0.0))
-        .whileFalse(m_shooter.intakeCommand(0.0, 0.0, 0.0));
+    m_driverController.pov(90).whileTrue(
+        Commands.runEnd(() -> m_shooter.setIntakePower(-0.75),
+            () -> m_shooter.setIntakePower(0.0),
+            m_shooter));
 
     // 96.240234375
     // 60.029296875
@@ -236,8 +239,16 @@ public class RobotContainer {
     m_operatorController.rightTrigger().whileTrue(
         m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
 
-    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPowerFactory(-0.5));
-    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPowerFactory(0.5));
+    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-360.0 * 3.0));
+    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(360.0 * 2.25)
+        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
+    m_operatorController.y().whileTrue(m_climber.setClimberPosition(0.0)
+        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
+
+    m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
+    m_operatorController.pov(180).whileTrue(m_climber.setClimberPowerFactory(-0.5));
+//    m_operatorController.pov(90).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
+//    m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
 
     m_operatorController.a()
         .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.PREPARE_TRAP),

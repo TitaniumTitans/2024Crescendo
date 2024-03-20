@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -19,7 +20,8 @@ public class DavidDriveCommand extends Command {
 
   @Override
   public void initialize() {
-    m_lastAngle = m_drive.getGyroRotation().getDegrees();
+    m_lastAngle = m_drive.getVisionPose().getRotation()
+        .plus(Rotation2d.fromDegrees(180)).getDegrees();
   }
 
   @Override
@@ -40,6 +42,6 @@ public class DavidDriveCommand extends Command {
     m_drive.davidDrive(
         yLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
         xLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
-        joyStickAngle);
+        joyStickAngle + 180);
   }
 }
