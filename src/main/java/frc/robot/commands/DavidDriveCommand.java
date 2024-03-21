@@ -2,9 +2,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveSubsystem;
+import lib.utils.AllianceFlipUtil;
 
 public class DavidDriveCommand extends Command {
 
@@ -39,9 +42,18 @@ public class DavidDriveCommand extends Command {
       joyStickAngle = m_lastAngle;
     }
 
-    m_drive.davidDrive(
-        yLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
-        xLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
-        joyStickAngle + 180);
+    if (Constants.DriveConstants.USE_DAVID_DRIVE.getValue()) {
+      m_drive.davidDrive(
+          yLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
+          xLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
+          joyStickAngle + 180);
+    } else {
+      m_drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+          xLeft,
+          yLeft,
+          xRight,
+          AllianceFlipUtil.apply(m_drive.getRotation())
+      ));
+    }
   }
 }

@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.gos.lib.properties.GosBooleanProperty;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -70,6 +71,9 @@ public final class Constants {
     public static final double DRIVE_BASE_RADIUS =
         Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+
+    public static final GosBooleanProperty USE_DAVID_DRIVE
+        = new GosBooleanProperty(false, "Drive/Use David Drive", false);
 
     // kV, kS, kA in order
     public static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
