@@ -114,7 +114,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     // setup pid gains for drive motor
     m_drivePid = new Phoenix6PidPropertyBuilder(
             "Drive/Module" + m_moduleConstants.MODULE_INDEX() + "/Drive Pid Property",
-            false, m_driveTalon, 0)
+            true, m_driveTalon, 0)
             .addP(m_moduleConstants.DRIVE_KP())
             .addI(m_moduleConstants.DRIVE_KI())
             .addD(m_moduleConstants.DRIVE_KD())
@@ -139,7 +139,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     // setup pid gains for turn motor
     m_turnPid = new Phoenix6PidPropertyBuilder(
             "Drive/Module" + m_moduleConstants.MODULE_INDEX() + "/Turn Pid Property",
-            false,
+            true,
             m_turnTalon,
             0)
             .addP(m_moduleConstants.TURN_KP())

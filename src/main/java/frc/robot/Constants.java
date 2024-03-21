@@ -76,11 +76,11 @@ public final class Constants {
         = new GosBooleanProperty(false, "Drive/Use David Drive", false);
 
     // kV, kS, kA in order
-    public static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.06, 0.35, 0.0};
     // kP, kI, kD in order
-    public static final double[] DRIVE_FB_GAINS = new double[]{0.314, 0.0, 0.0};
+    public static final double[] DRIVE_FB_GAINS = new double[]{0.08, 0.0, 0.0};
     // kP, kI, kD in order
-    public static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
+    public static final double[] TURN_FB_GAINS = new double[]{47.0, 0.0, 0.0};
 
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
@@ -123,7 +123,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0, 0.0), new PIDConstants(5.0, 0.0),
+        new PIDConstants(5.0, 0.0), new PIDConstants(4.5, 0.75),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
@@ -216,7 +216,7 @@ public final class Constants {
         new GosDoubleProperty(true, "Arm/WristUpperLimit", 180);
 
     public static final GosDoubleProperty ARM_LOWER_LIMIT =
-        new GosDoubleProperty(false, "Arm/ArmLowerLimit", -9);
+        new GosDoubleProperty(true, "Arm/ArmLowerLimit", -9);
     public static final GosDoubleProperty ARM_UPPER_LIMIT =
         new GosDoubleProperty(true, "Arm/ArmUpperLimit", 180);
 
@@ -304,12 +304,12 @@ public final class Constants {
     public static final int INTAKE_ID = 14;
     public static final int INDEXER_ID = 15;
 
-    public static final double SHOOTER_KP = 0.19623;
+    public static final double SHOOTER_KP = 0.015;
     public static final double SHOOTER_KI = 0.0;
-    public static final double SHOOTER_KD = 0.005;
+    public static final double SHOOTER_KD = 0.00675;
     public static final double SHOOTER_KF = 0.000152;
     public static final double SHOOTER_KS = 0.21963;
-    public static final double SHOOTER_KV = 0.13041;
+    public static final double SHOOTER_KV = 0.114541;
 
     public static final boolean TOP_LEFT_INVERTED = false;
     public static final boolean TOP_RIGHT_INVERTED = true;
@@ -327,7 +327,7 @@ public final class Constants {
     public static final int LEFT_CLIMBER_ID = 16;
     public static final int RIGHT_CLIMBER_ID = 17;
 
-    public static final double CLIMBER_KP = 0.0;
+    public static final double CLIMBER_KP = 12.0;
     public static final double CLIMBER_KI = 0.0;
     public static final double CLIMBER_KD = 0.0;
 

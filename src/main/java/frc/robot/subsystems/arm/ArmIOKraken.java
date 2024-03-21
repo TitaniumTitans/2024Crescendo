@@ -140,20 +140,16 @@ public class ArmIOKraken implements ArmIO {
 
     m_armMaxVelDegS = new HeavyDoubleProperty(
         (double maxVel) -> m_armMaxVel = Units.degreesToRotations(maxVel),
-        new GosDoubleProperty(false, "Arm/Arm Max Vel DegsS", 120));
+        new GosDoubleProperty(true, "Arm/Arm Max Vel DegsS", 360));
 
     m_wristMaxVelDegS = new HeavyDoubleProperty(
         (double maxVel) -> m_wristMaxVel = Units.degreesToRotations(maxVel),
-        new GosDoubleProperty(false, "Arm/Wrist Max Vel DegsS", 120));
+        new GosDoubleProperty(true, "Arm/Wrist Max Vel DegsS", 360));
 
     m_accelTimeSecs = new HeavyDoubleProperty((double accel) -> {
       m_armDynMMRequest.Acceleration = m_armMaxVel / accel;
       m_wristDynMMRequest.Acceleration = m_wristMaxVel / accel;
-    }, new GosDoubleProperty(false, "Arm/Acceleration Time Secs", 1));
-
-    m_armMaxVelDegS.updateIfChanged(true);
-    m_wristMaxVelDegS.updateIfChanged(true);
-    m_accelTimeSecs.updateIfChanged(true);
+    }, new GosDoubleProperty(true, "Arm/Acceleration Time Secs", 0.125));
 
     m_armFollowerRequest = new Follower(m_armMaster.getDeviceID(), false);
     m_wristFollowerRequest = new Follower(m_wristMaster.getDeviceID(), false);

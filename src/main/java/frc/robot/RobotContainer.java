@@ -190,7 +190,7 @@ public class RobotContainer {
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
         .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
-    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.25),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
@@ -216,11 +216,9 @@ public class RobotContainer {
     // 2250
 
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
+        new DavidDriveCommand(
             m_driveSubsystem,
-            () -> -m_driverController.getLeftY(),
-            () -> -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()));
+            m_driverController));
     m_driverController
         .start()
         .onTrue(

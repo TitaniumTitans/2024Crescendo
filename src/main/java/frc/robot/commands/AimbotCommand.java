@@ -66,12 +66,12 @@ public class AimbotCommand extends Command {
     m_smallController.setTolerance(5.0);
     m_fastController.setTolerance(10.0);
 
-    m_smallProperty = new WpiPidPropertyBuilder("Drive/Aimbot Small", false, m_smallController)
+    m_smallProperty = new WpiPidPropertyBuilder("Drive/Aimbot Small", true, m_smallController)
             .addP(0.034)
             .addI(0.001)
             .addD(0.004)
             .build();
-    m_fastProperty = new WpiPidPropertyBuilder("Drive/Aimbot Fast", false, m_fastController)
+    m_fastProperty = new WpiPidPropertyBuilder("Drive/Aimbot Fast", true, m_fastController)
             .addP(0.1)
             .addI(0.0)
             .addD(0.002)
