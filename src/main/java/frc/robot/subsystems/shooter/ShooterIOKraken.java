@@ -15,6 +15,8 @@ import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ShooterConstants;
 
+import java.util.Arrays;
+
 public class ShooterIOKraken implements ShooterIO {
   private final TalonFX m_leftTalon;
   private final TalonFX m_rightTalon;
@@ -30,7 +32,7 @@ public class ShooterIOKraken implements ShooterIO {
   private final VelocityVoltage m_velRequest;
   private final NeutralOut m_stopRequest;
 
-  private double[] m_prevKickerCurrent = new double[] {0.0, 0.0, 0.0, 0.0};
+  private double[] m_prevIndexerCurrent = new double[] {0.0, 0.0, 0.0, 0.0};
 
   private final StatusSignal<Double> m_leftVelSignal;
   private final StatusSignal<Double> m_rightVelSignal;
@@ -182,11 +184,11 @@ public class ShooterIOKraken implements ShooterIO {
     inputs.indexerCurrentDraw = m_indexerCurrentDrawSignal.getValueAsDouble();
     inputs.kickerCurrentDraw = m_kickerCurrentDrawSignal.getValueAsDouble();
 
-    m_prevKickerCurrent = new double[] {
-        m_prevKickerCurrent[1],
-        m_prevKickerCurrent[2],
-        m_prevKickerCurrent[3],
-        inputs.kickerCurrentDraw
+    m_prevIndexerCurrent = new double[] {
+        m_prevIndexerCurrent[1],
+        m_prevIndexerCurrent[2],
+        m_prevIndexerCurrent[3],
+        inputs.indexerCurrentDraw
     };
 
     inputs.tlTemperature = m_leftTemperatureSignal.getValueAsDouble();
@@ -223,7 +225,11 @@ public class ShooterIOKraken implements ShooterIO {
   @Override
   public void setIntakeVoltage(double voltage) {
     m_intake.setVoltage(voltage);
-    m_indexer.setVoltage(voltage * 0.8);
+    if (Arrays.stream(m_prevIndexerCurrent).sum() / 5.0 > 40.0) {
+      m_indexer.setVoltage(voltage * 0.5);
+    } else {
+      m_indexer.setVoltage(voltage);
+    }
   }
 
   @Override

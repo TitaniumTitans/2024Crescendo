@@ -46,6 +46,10 @@ public class DavidDriveCommand extends Command {
       joyStickAngle = m_lastAngle;
     }
 
+    joyStickAngle += DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
+            == DriverStation.Alliance.Blue
+            ? 0 : 180;
+
     m_drive.davidDrive(
         yLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
         xLeft * m_drive.getMaxLinearSpeedMetersPerSec(),

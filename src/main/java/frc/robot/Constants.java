@@ -116,10 +116,10 @@ public final class Constants {
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        MAX_LINEAR_SPEED * 0.75,
-        MAX_LINEAR_SPEED * 0.45,
-        MAX_ANGULAR_SPEED * 0.75,
-        MAX_ANGULAR_SPEED * 0.45
+        MAX_LINEAR_SPEED * 0.85,
+        MAX_LINEAR_SPEED * 0.65,
+        MAX_ANGULAR_SPEED * 0.85,
+        MAX_ANGULAR_SPEED * 0.65
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
@@ -327,7 +327,7 @@ public final class Constants {
     public static final int LEFT_CLIMBER_ID = 16;
     public static final int RIGHT_CLIMBER_ID = 17;
 
-    public static final double CLIMBER_KP = 12.0;
+    public static final double CLIMBER_KP = 24.0;
     public static final double CLIMBER_KI = 0.0;
     public static final double CLIMBER_KD = 0.0;
 

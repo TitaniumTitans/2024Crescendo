@@ -190,7 +190,7 @@ public class RobotContainer {
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
         .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
-    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.25),
+    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.75),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
@@ -210,10 +210,12 @@ public class RobotContainer {
             Commands.runEnd(() -> {
                       m_shooter.setIntakePower(-0.75);
                       m_shooter.setKickerPower(-0.75);
+                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
                     },
                     () -> {
                       m_shooter.setIntakePower(0.0);
                       m_shooter.setKickerPower(0.0);
+                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
                     },
                     m_shooter));
 
@@ -244,9 +246,9 @@ public class RobotContainer {
         m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
 
     m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-360.0 * 3.0));
-    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(360.0 * 2.25)
+    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(360.0 * 3.5)
         .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
-    m_operatorController.y().whileTrue(m_climber.setClimberPosition(0.0)
+    m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
         .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
 
     m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));

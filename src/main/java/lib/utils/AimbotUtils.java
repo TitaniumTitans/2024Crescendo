@@ -52,11 +52,12 @@ public class AimbotUtils {
       return angle;
     } else if (150.0 >= distance && distance > 90.0) {
       return angle - 1.8;
-    } else if ((175.0 >= distance && distance > 150.0)
-        || (200.0 >= distance && distance > 175.0)) {
+    } else if (195.0 >= distance && distance > 150.0) {
       return angle - 3.75;
     } else if (distance > 200.0) {
       return angle;
+    } else if (distance > 195.0) {
+      return angle - 4.25;
     } else {
       return 55.0;
     }

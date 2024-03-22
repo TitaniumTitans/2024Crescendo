@@ -57,7 +57,7 @@ public class ShooterAutoCommand extends Command {
 
     // only actually shoot if we're aligned close enough to speaker and flywheels are at speed
     m_shooterSubsystem.runShooterVelocity(m_shooterSubsystem.atSpeed()
-        && error < 5.0 && m_armSubsystem.wristAtSetpoint()).execute();
+        && error < 10.0 && m_armSubsystem.wristAtSetpoint()).execute();
     m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
 
     // check to see if the state of having a note has changed, mark if it has

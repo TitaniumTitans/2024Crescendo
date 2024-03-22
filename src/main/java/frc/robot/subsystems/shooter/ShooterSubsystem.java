@@ -118,7 +118,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean atSpeed() {
-    return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 50
-        && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 50;
+    return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 75
+        && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 75;
   }
 }
