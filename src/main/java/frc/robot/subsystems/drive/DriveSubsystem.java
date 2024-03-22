@@ -304,13 +304,23 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void davidDrive(double xVel, double yVel, double angle) {
     double angleCurrentDegree = getVisionPose().getRotation().getDegrees();
+    Rotation2d heading;
+
+    // if red change heading goal
+    if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      heading = getRotation().plus(Rotation2d.fromDegrees(180));
+    } else {
+      heading = getRotation();
+    }
+
     double steerVelocity = m_thetaPid.calculate(angleCurrentDegree, angle);
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             xVel,
             yVel,
             steerVelocity,
-            AllianceFlipUtil.apply(getVisionPose().getRotation()));
+            heading);
 
     runVelocity(speeds);
   }

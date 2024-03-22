@@ -207,9 +207,15 @@ public class RobotContainer {
     m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
     m_driverController.pov(90).whileTrue(
-        Commands.runEnd(() -> m_shooter.setIntakePower(-0.75),
-            () -> m_shooter.setIntakePower(0.0),
-            m_shooter));
+            Commands.runEnd(() -> {
+                      m_shooter.setIntakePower(-0.75);
+                      m_shooter.setKickerPower(-0.75);
+                    },
+                    () -> {
+                      m_shooter.setIntakePower(0.0);
+                      m_shooter.setKickerPower(0.0);
+                    },
+                    m_shooter));
 
     // 96.240234375
     // 60.029296875
