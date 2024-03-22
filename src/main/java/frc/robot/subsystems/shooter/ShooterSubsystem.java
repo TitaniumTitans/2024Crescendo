@@ -26,6 +26,8 @@ public class ShooterSubsystem extends SubsystemBase {
   public void periodic() {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Shooter", m_inputs);
+
+    Logger.recordOutput("Shooter/Has Note?", hasPiece());
   }
 
   public void setShooterPowerLeft(double power) {

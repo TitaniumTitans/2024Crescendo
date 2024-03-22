@@ -246,7 +246,7 @@ public class RobotContainer {
         m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
 
     m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-360.0 * 3.0));
-    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(360.0 * 3.5)
+    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
         .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
     m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
         .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
