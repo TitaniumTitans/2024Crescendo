@@ -50,9 +50,18 @@ public class DavidDriveCommand extends Command {
             == DriverStation.Alliance.Blue
             ? 0 : 180;
 
-    m_drive.davidDrive(
-        yLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
-        xLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
-        joyStickAngle + 180);
+    if (Constants.DriveConstants.USE_DAVID_DRIVE.getValue()) {
+      m_drive.davidDrive(
+              yLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
+              xLeft * m_drive.getMaxLinearSpeedMetersPerSec(),
+              joyStickAngle + 180);
+    } else {
+      DriveCommands.joystickDrive(
+              m_drive,
+              () -> yLeft,
+              () -> xLeft,
+              () -> xRight
+      ).execute();
+    }
   }
 }

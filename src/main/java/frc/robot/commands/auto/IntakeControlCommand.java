@@ -11,12 +11,14 @@ public class IntakeControlCommand extends Command {
   private final ShooterSubsystem m_shooterSubsystem;
 
   private final Timer m_timer;
+  private final Timer m_reverseTimer;
   private boolean hasPieceRising;
 
   public IntakeControlCommand(ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem) {
     m_armSubsystem = armSubsystem;
     m_shooterSubsystem = shooterSubsystem;
     m_timer = new Timer();
+    m_reverseTimer = new Timer();
     // each subsystem used by the command must be passed into the
     // addRequirements() method (which takes a vararg of Subsystem)
     addRequirements(m_armSubsystem, m_shooterSubsystem);
@@ -26,26 +28,28 @@ public class IntakeControlCommand extends Command {
   public void initialize() {
     hasPieceRising = false;
     m_timer.reset();
+    m_reverseTimer.reset();
   }
 
   @Override
   public void execute() {
     if(!m_shooterSubsystem.hasPiece() && !hasPieceRising) {
       // run intake and kicker wheels in
-      m_shooterSubsystem.setIntakePower(0.95);
-      m_shooterSubsystem.setKickerPower(0.35);
+      m_shooterSubsystem.setIntakePower(0.9);
+      m_shooterSubsystem.setKickerPower(0.25);
       m_shooterSubsystem.setShooterPowerLeft(-0.1);
       m_shooterSubsystem.setShooterPowerRight(-0.1);
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
-    } else if (m_shooterSubsystem.hasPiece() && m_timer.hasElapsed(0.000001)){
+    } else if (m_shooterSubsystem.hasPiece() && !m_reverseTimer.hasElapsed(0.1)){
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
       m_shooterSubsystem.setIntakePower(0.0);
-      m_shooterSubsystem.setKickerPower(-0.1);
+      m_shooterSubsystem.setKickerPower(-0.13);
       m_shooterSubsystem.setShooterPowerLeft(0.0);
       m_shooterSubsystem.setShooterPowerRight(0.0);
     }
 
-    if (m_shooterSubsystem.hasPiece() && !m_timer.hasElapsed(0.00000001)) {
+    if (m_shooterSubsystem.hasPiece()
+            && !m_timer.hasElapsed(0.00000001)) {
       m_timer.restart();
     }
   }

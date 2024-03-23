@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.fasterxml.jackson.core.SerializableString;
 import com.gos.lib.properties.GosBooleanProperty;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
@@ -56,6 +57,11 @@ public final class Constants {
   }
 
   public static class DriveConstants {
+    public static final GosDoubleProperty TURNING_SPEED =
+            new GosDoubleProperty(false, "Drive/Turning Speed", 0.75);
+    public static final GosBooleanProperty HOLD_HEADING =
+            new GosBooleanProperty(false, "Drive/Hold Heading", false);
+
     private DriveConstants() {
       throw new IllegalStateException("Constants class should not be constructed");
     }
@@ -123,7 +129,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(4.5, 0.35), new PIDConstants(4.0, 0.75),
+        new PIDConstants(4.75, 0.35), new PIDConstants(4.5, 0.75),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
@@ -165,7 +171,7 @@ public final class Constants {
         DRIVE_FF_GAINS,
         DRIVE_FB_GAINS,
         TURN_FB_GAINS,
-        Units.rotationsToDegrees(0.246826) + 180,
+        Units.rotationsToDegrees(0.235107) + 180,
         true,
         ModuleConstants.GearRatios.L3
     );

@@ -64,11 +64,11 @@ public class AimbotUtils {
   }
 
   public static double getLeftSpeed(double distance) {
-    return m_leftSpeedLerpTable.get(distance);
+    return distance >= 75.0 ? 4000 : 3750;
   }
 
   public static double getRightSpeed(double distance) {
-    return m_rightSpeedLerpTable.get(distance);
+    return distance >= 75.0 ? 4750 : 4500;
   }
 
   /** Gets the distance from the drivebase to the speaker in meters */

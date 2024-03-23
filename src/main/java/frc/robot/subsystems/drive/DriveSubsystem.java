@@ -84,7 +84,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
 
-  private final PIDController m_turnAnglePIDVelocity;
+  private final PIDController m_largeThetaPid;
 
   private final SysIdRoutine m_sysId;
 
@@ -130,17 +130,19 @@ public class DriveSubsystem extends SubsystemBase {
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(0, 360);
-    m_thetaPid.setTolerance(Units.degreesToRadians(5.0));
+    m_thetaPid.setTolerance(5.0);
 
     m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
-        .addP(0.04)
+        .addP(0.02)
         .addI(0.01)
-        .addD(0.0)
+        .addD(0.004)
         .build();
 
-    m_turnAnglePIDVelocity = new PIDController(0.2, 0, 0);
-    m_turnAnglePIDVelocity.setTolerance(15);
-    m_turnAnglePIDVelocity.enableContinuousInput(0, 360);
+    // 0.04, 0.01, 0.0
+
+    m_largeThetaPid = new PIDController(0.04, 0, 0.002);
+    m_largeThetaPid.setTolerance(15);
+    m_largeThetaPid.enableContinuousInput(0, 360);
 
     m_cameras = cameras;
 
@@ -303,7 +305,6 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void davidDrive(double xVel, double yVel, double angle) {
-    double angleCurrentDegree = getVisionPose().getRotation().getDegrees();
     Rotation2d heading;
 
     // if red change heading goal
@@ -314,7 +315,7 @@ public class DriveSubsystem extends SubsystemBase {
       heading = getRotation();
     }
 
-    double steerVelocity = m_thetaPid.calculate(angleCurrentDegree, angle);
+    double steerVelocity = alignToAngle(Rotation2d.fromDegrees(angle));
     ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             xVel,
@@ -330,11 +331,13 @@ public class DriveSubsystem extends SubsystemBase {
      *
      * @param angle the desired angle to hold relative to the field
      */
-  public double alignToAngle(Rotation2d angle, boolean useGyro) {
-    if (useGyro) {
-      return m_thetaPid.calculate(getGyroRotation().getDegrees(), angle.getDegrees());
+  public double alignToAngle(Rotation2d angle) {
+    double currentAngle = getVisionPose().getRotation().getDegrees();
+    double error = Math.abs(currentAngle - angle.getDegrees());
+    if (error > 15.0) {
+      return m_largeThetaPid.calculate(currentAngle, angle.getDegrees());
     } else {
-      return m_thetaPid.calculate(getVisionPose().getRotation().getDegrees(), angle.getDegrees());
+      return m_thetaPid.calculate(currentAngle, angle.getDegrees());
     }
   }
 

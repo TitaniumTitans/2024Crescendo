@@ -1,8 +1,6 @@
 package frc.robot.commands.auto;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,7 +8,6 @@ import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import lib.utils.AimbotUtils;
-import lib.utils.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
 
@@ -49,7 +46,7 @@ public class ShooterAutoCommand extends Command {
   public void execute() {
     // Calculate output to align to speaker
     Rotation2d desiredAngle = AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose());
-    double omega = m_driveSubsystem.alignToAngle(desiredAngle, false);
+    double omega = m_driveSubsystem.alignToAngle(desiredAngle);
     m_driveSubsystem.runVelocity(new ChassisSpeeds(0.0, 0.0, omega));
 
     double error = Math.abs(desiredAngle.getDegrees() - m_driveSubsystem.getRotation().getDegrees());

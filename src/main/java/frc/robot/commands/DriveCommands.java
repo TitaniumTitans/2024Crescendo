@@ -19,10 +19,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import lib.utils.AimbotUtils;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -80,7 +80,8 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
-                  omega * driveSubsystem.getMaxAngularSpeedRadPerSec() * 0.75,
+                  omega * driveSubsystem.getMaxAngularSpeedRadPerSec()
+                          * Constants.DriveConstants.TURNING_SPEED.getValue(),
                   heading));
         },
             driveSubsystem);
@@ -104,7 +105,7 @@ public class DriveCommands {
 
       // Calculate omega
       double omega =
-          driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()), false);
+          driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()));
 
       // Calcaulate new linear velocity
       Translation2d linearVelocity =

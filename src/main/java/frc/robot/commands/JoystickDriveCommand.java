@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 
 import java.util.function.DoubleSupplier;
@@ -49,7 +50,8 @@ public class JoystickDriveCommand extends Command {
   public void execute() {
     double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
     double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
-    double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0) * 0.5;
+    double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0)
+            * Constants.DriveConstants.TURNING_SPEED.getValue();
 
     // Apply deadband
     double linearMagnitude =
@@ -65,7 +67,7 @@ public class JoystickDriveCommand extends Command {
             .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
             .getTranslation();
 
-    double rotationOutput = driveSubsystem.alignToAngle(m_headingGoal, true);
+    double rotationOutput = driveSubsystem.alignToAngle(m_headingGoal);
 
     if (Math.abs(omegaInput) > DEADBAND) {
       rotationOutput = omega;
@@ -84,6 +86,10 @@ public class JoystickDriveCommand extends Command {
       && !m_timer.hasElapsed(0.5)) {
         rotationOutput = 0.0;
       }
+    }
+
+    if (!Constants.DriveConstants.HOLD_HEADING.getValue()) {
+      rotationOutput = omegaInput;
     }
 
     Rotation2d heading;
