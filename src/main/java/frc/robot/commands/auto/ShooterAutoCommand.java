@@ -1,8 +1,6 @@
 package frc.robot.commands.auto;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,7 +8,6 @@ import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.shooter.ShooterSubsystem;
 import lib.utils.AimbotUtils;
-import lib.utils.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
 
@@ -41,6 +38,8 @@ public class ShooterAutoCommand extends Command {
   public void initialize() {
     m_timer.restart();
     m_previousHadPiece = m_shooterSubsystem.hasPiece();
+
+    m_hasChanged = false;
   }
 
   @Override
@@ -73,7 +72,7 @@ public class ShooterAutoCommand extends Command {
 
     // too long check may change as system gets tuned
     return (!m_shooterSubsystem.hasPiece() && m_hasChanged
-        && m_timer.hasElapsed(0.75)) || m_timer.hasElapsed(5.0);
+        && m_timer.hasElapsed(1.25)) || m_timer.hasElapsed(5.0);
   }
 
   @Override

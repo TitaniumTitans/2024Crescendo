@@ -2,7 +2,6 @@ package frc.robot.subsystems.arm;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.util.Units;
@@ -16,9 +15,6 @@ public class ArmIOPrototype implements ArmIO {
   private final TalonFX m_wrist;
   private final PidPropertyPublic m_shoulderPID;
   private final PidPropertyPublic m_wristPID;
-
-  private final PositionVoltage m_wristReqPID;
-  private final PositionVoltage m_shoulderReqPID;
 
   private final MotionMagicVoltage m_wristReqMM;
   private final MotionMagicVoltage m_shoulderReqMM;
@@ -73,8 +69,6 @@ public class ArmIOPrototype implements ArmIO {
         .addKG(ArmConstants.WRIST_KG, GravityTypeValue.Arm_Cosine)
         .build();
 
-    m_shoulderReqPID = new PositionVoltage(0).withSlot(0);
-    m_wristReqPID = new PositionVoltage(0).withSlot(0);
     m_shoulderReqMM = new MotionMagicVoltage(0).withSlot(0);
     m_wristReqMM = new MotionMagicVoltage(0).withSlot(0);
   }
@@ -120,6 +114,6 @@ public class ArmIOPrototype implements ArmIO {
 
   @Override
   public void setWristAngle(double degrees, double velocity) {
-      m_wrist.setControl(m_wristReqMM.withPosition(degrees / 360.0));
+    m_wrist.setControl(m_wristReqMM.withPosition(degrees / 360.0));
   }
 }

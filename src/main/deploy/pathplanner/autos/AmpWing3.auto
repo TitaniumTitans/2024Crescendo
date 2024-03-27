@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.8817893862724304,
-      "y": 6.609423637390137
+      "x": 0.875186562538147,
+      "y": 6.525386810302734
     },
-    "rotation": -121.26372732872956
+    "rotation": -122.82856148867296
   },
   "command": {
     "type": "sequential",
@@ -18,13 +18,13 @@
           }
         },
         {
-          "type": "race",
+          "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpWing3Contested5.1"
+                  "pathName": "AmpWing3.1"
                 }
               },
               {

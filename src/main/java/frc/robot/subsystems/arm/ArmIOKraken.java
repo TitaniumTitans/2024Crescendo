@@ -3,24 +3,21 @@ package frc.robot.subsystems.arm;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.gos.lib.properties.HeavyDoubleProperty;
-
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import frc.robot.Constants.ArmConstants;
 import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
-
-import frc.robot.Constants.ArmConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ArmIOKraken implements ArmIO {
@@ -123,7 +120,7 @@ public class ArmIOKraken implements ArmIO {
         .withSlot(0);
 
     // config pid and properties
-    m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", false, m_armMaster, 0)
+    m_armProperty = new Phoenix6PidPropertyBuilder("Arm/Arm PID", true, m_armMaster, 0)
         .addP(ArmConstants.ARM_KP)
         .addI(ArmConstants.ARM_KI)
         .addD(ArmConstants.ARM_KD)
@@ -132,7 +129,7 @@ public class ArmIOKraken implements ArmIO {
         .addKG(ArmConstants.ARM_KG, GravityTypeValue.Arm_Cosine)
         .build();
 
-    m_wristProperty = new Phoenix6PidPropertyBuilder("Arm/Wrist PID", false, m_wristMaster, 0)
+    m_wristProperty = new Phoenix6PidPropertyBuilder("Arm/Wrist PID", true, m_wristMaster, 0)
         .addP(ArmConstants.WRIST_KP)
         .addI(ArmConstants.WRIST_KI)
         .addD(ArmConstants.WRIST_KD)
@@ -143,20 +140,16 @@ public class ArmIOKraken implements ArmIO {
 
     m_armMaxVelDegS = new HeavyDoubleProperty(
         (double maxVel) -> m_armMaxVel = Units.degreesToRotations(maxVel),
-        new GosDoubleProperty(false, "Arm/Arm Max Vel DegsS", 120));
+        new GosDoubleProperty(true, "Arm/Arm Max Vel DegsS", 360));
 
     m_wristMaxVelDegS = new HeavyDoubleProperty(
         (double maxVel) -> m_wristMaxVel = Units.degreesToRotations(maxVel),
-        new GosDoubleProperty(false, "Arm/Wrist Max Vel DegsS", 120));
+        new GosDoubleProperty(true, "Arm/Wrist Max Vel DegsS", 360));
 
     m_accelTimeSecs = new HeavyDoubleProperty((double accel) -> {
       m_armDynMMRequest.Acceleration = m_armMaxVel / accel;
       m_wristDynMMRequest.Acceleration = m_wristMaxVel / accel;
-    }, new GosDoubleProperty(false, "Arm/Acceleration Time Secs", 1));
-
-    m_armMaxVelDegS.updateIfChanged(true);
-    m_wristMaxVelDegS.updateIfChanged(true);
-    m_accelTimeSecs.updateIfChanged(true);
+    }, new GosDoubleProperty(true, "Arm/Acceleration Time Secs", 0.125));
 
     m_armFollowerRequest = new Follower(m_armMaster.getDeviceID(), false);
     m_wristFollowerRequest = new Follower(m_wristMaster.getDeviceID(), false);

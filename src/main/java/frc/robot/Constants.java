@@ -12,23 +12,20 @@
 // GNU General Public License for more details.
 
 package frc.robot;
+
 import com.fasterxml.jackson.core.SerializableString;
-import edu.wpi.first.math.geometry.*;
+import com.gos.lib.properties.GosBooleanProperty;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.units.Unit;
 import frc.robot.subsystems.arm.ArmPose;
-import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.drive.module.ModuleConstants;
 
 import java.util.List;
@@ -51,8 +48,6 @@ public final class Constants {
   public enum Mode {
     /** Running on a real robot. */
     REAL,
-    PROTO_SHOOTER,
-    PROTO_ARM,
 
     /** Running a physics simulator. */
     SIM,
@@ -62,6 +57,11 @@ public final class Constants {
   }
 
   public static class DriveConstants {
+    public static final GosDoubleProperty TURNING_SPEED =
+            new GosDoubleProperty(false, "Drive/Turning Speed", 0.75);
+    public static final GosBooleanProperty HOLD_HEADING =
+            new GosBooleanProperty(false, "Drive/Hold Heading", false);
+
     private DriveConstants() {
       throw new IllegalStateException("Constants class should not be constructed");
     }
@@ -71,23 +71,26 @@ public final class Constants {
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.8);
-    public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.6);
-    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(18.6);
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+    public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.75);
+    public static final double TRACK_WIDTH_Y = Units.inchesToMeters(20.75);
     public static final double DRIVE_BASE_RADIUS =
         Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
+    public static final GosBooleanProperty USE_DAVID_DRIVE
+        = new GosBooleanProperty(false, "Drive/Use David Drive", false);
+
     // kV, kS, kA in order
-    public static final double[] DRIVE_FF_GAINS = new double[]{0.13, 0.1, 0.0};
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.06, 0.35, 0.0};
     // kP, kI, kD in order
-    public static final double[] DRIVE_FB_GAINS = new double[]{0.314, 0.0, 0.0};
+    public static final double[] DRIVE_FB_GAINS = new double[]{0.08, 0.0, 0.0};
     // kP, kI, kD in order
-    public static final double[] TURN_FB_GAINS = new double[]{43.982, 0.0, 0.0};
+    public static final double[] TURN_FB_GAINS = new double[]{47.0, 0.0, 0.0};
 
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(11.0351), // 11.0351
+            Units.inchesToMeters(11.0351 + 0.25), // 11.0351
             Units.inchesToMeters(10.023204 - 2.0), // 10.023204
             Units.inchesToMeters(7.1374 - 2.0)), // 4.1374
         new Rotation3d(
@@ -98,68 +101,79 @@ public final class Constants {
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(11.0351), //11.0351
+            Units.inchesToMeters(11.0351 + 0.25), //11.0351
             Units.inchesToMeters(-10.023204), //-10.023204
             Units.inchesToMeters(7.1374 - 0.0)), // 7.1374
         new Rotation3d(
             Units.degreesToRadians(0.0 + 0.5),
             Units.degreesToRadians(-30.0 - 2.5), // -30.0 - 1
-            Units.degreesToRadians(14.7 - 3.0)) // 165.3224)
+            Units.degreesToRadians(14.7 - 2.0)) // 165.3224)
+    );
+
+    public static final Transform3d INTAKE_CAMERA_TRANSFORMATION = new Transform3d(
+        new Translation3d(
+            Units.inchesToMeters(-16.5), //11.0351
+            Units.inchesToMeters(-9.25), //-10.023204
+            Units.inchesToMeters(10.0)), // 7.1374
+        new Rotation3d(
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-3.0), // -30.0 - 1
+            Units.degreesToRadians(180.0)) // 165.3224)
     );
 
     public static final PathConstraints DEFAULT_CONSTRAINTS = new PathConstraints(
-        MAX_LINEAR_SPEED * 0.75,
-        MAX_LINEAR_SPEED * 0.45,
-        MAX_ANGULAR_SPEED * 0.75,
-        MAX_ANGULAR_SPEED * 0.45
+        MAX_LINEAR_SPEED * 0.85,
+        MAX_LINEAR_SPEED * 0.65,
+        MAX_ANGULAR_SPEED * 0.85,
+        MAX_ANGULAR_SPEED * 0.65
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0, 0.4), new PIDConstants(5.0, 0.8),
+        new PIDConstants(4.75, 0.35), new PIDConstants(4.5, 0.75),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
-            0,
-            new int[]{1, 2, 3}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.019775) + 180, // offset 0.457764
-            true, // inversion
-            ModuleConstants.GearRatios.L3_KRAKEN
+        0,
+        new int[]{1, 2, 3}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(-0.039795) + 180, // offset 0.457764
+        true, // inversion
+        ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants FR_MOD_CONSTANTS = new ModuleConstants(
-            1,
-            new int[]{4, 5, 6}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.451416) + 180,
-            true,
-            ModuleConstants.GearRatios.L3_KRAKEN
+        1,
+        new int[]{4, 5, 6}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(-0.297363) + 180,
+        true,
+        ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BL_MOD_CONSTANTS = new ModuleConstants(
-            2,
-            new int[]{7, 8, 9}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(0.429688) + 180,
-            true,
-            ModuleConstants.GearRatios.L3_KRAKEN
+        2,
+        new int[]{7, 8, 9}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(0.333740) + 180,
+        true,
+        ModuleConstants.GearRatios.L3
     );
 
     public static final ModuleConstants BR_MOD_CONSTANTS = new ModuleConstants(
-            3,
-            new int[]{10, 11, 12}, // drive, turn, encoder
-            DRIVE_FF_GAINS,
-            DRIVE_FB_GAINS,
-            TURN_FB_GAINS,
-            Units.rotationsToDegrees(-0.092285) + 180,
-            true,
-            ModuleConstants.GearRatios.L3_KRAKEN
+        3,
+        new int[]{10, 11, 12}, // drive, turn, encoder
+        DRIVE_FF_GAINS,
+        DRIVE_FB_GAINS,
+        TURN_FB_GAINS,
+        Units.rotationsToDegrees(0.235107) + 180,
+        true,
+        ModuleConstants.GearRatios.L3
     );
   }
 
@@ -188,14 +202,14 @@ public final class Constants {
         (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (48.0 / 24.0);
     public static final double WRIST_CANCODER_MECHANISM_RATIO = (48.0 / 24.0);
 
-    public static final double WRIST_KP = 108.0;
-    public static final double WRIST_KI = 3.0;
+    public static final double WRIST_KP = 350.0;
+    public static final double WRIST_KI = 6.0;
     public static final double WRIST_KD = 3.0;
     public static final double WRIST_KS = 0.375;
     public static final double WRIST_KV = 0.0;
     public static final double WRIST_KG = 0.35;
 
-    public static final double ARM_KP = 72.0;
+    public static final double ARM_KP = 350.0;
     public static final double ARM_KI = 6.0;
     public static final double ARM_KD = 3.0;
     public static final double ARM_KS = 0.375;
@@ -208,7 +222,7 @@ public final class Constants {
         new GosDoubleProperty(true, "Arm/WristUpperLimit", 180);
 
     public static final GosDoubleProperty ARM_LOWER_LIMIT =
-        new GosDoubleProperty(false, "Arm/ArmLowerLimit", -9);
+        new GosDoubleProperty(true, "Arm/ArmLowerLimit", -9);
     public static final GosDoubleProperty ARM_UPPER_LIMIT =
         new GosDoubleProperty(true, "Arm/ArmUpperLimit", 180);
 
@@ -231,6 +245,8 @@ public final class Constants {
 
   public static class ArmSetpoints {
     public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
+    public static final ArmPose TRAP_PREPARE = new ArmPose(92.0, 145.0);
+    public static final ArmPose TRAP_SCORE = new ArmPose(45.0, 123.5);
 
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
@@ -294,12 +310,12 @@ public final class Constants {
     public static final int INTAKE_ID = 14;
     public static final int INDEXER_ID = 15;
 
-    public static final double SHOOTER_KP = 0.19623;
+    public static final double SHOOTER_KP = 0.015;
     public static final double SHOOTER_KI = 0.0;
-    public static final double SHOOTER_KD = 0.005;
+    public static final double SHOOTER_KD = 0.00675;
     public static final double SHOOTER_KF = 0.000152;
     public static final double SHOOTER_KS = 0.21963;
-    public static final double SHOOTER_KV = 0.13041;
+    public static final double SHOOTER_KV = 0.114541;
 
     public static final boolean TOP_LEFT_INVERTED = false;
     public static final boolean TOP_RIGHT_INVERTED = true;
@@ -317,7 +333,7 @@ public final class Constants {
     public static final int LEFT_CLIMBER_ID = 16;
     public static final int RIGHT_CLIMBER_ID = 17;
 
-    public static final double CLIMBER_KP = 0.0;
+    public static final double CLIMBER_KP = 24.0;
     public static final double CLIMBER_KI = 0.0;
     public static final double CLIMBER_KD = 0.0;
 

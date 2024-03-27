@@ -24,12 +24,12 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoFactory;
+import frc.robot.commands.auto.IntakeControlCommand;
 import frc.robot.commands.auto.ShooterAutoCommand;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
@@ -64,12 +64,15 @@ public class RobotContainer {
   private final ClimberSubsystem m_climber;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController m_driverController = new CommandXboxController(0);
+  private final CommandXboxController m_operatorController = new CommandXboxController(1);
+
+  private final LoggedDashboardNumber m_armIncrement = new LoggedDashboardNumber("Arm/Increment value", 1);
+  private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
+  private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
-  private final LoggedDashboardNumber m_leftRPM = new LoggedDashboardNumber("Shooter/LeftRPM", 3600);
-  private final LoggedDashboardNumber m_rightRPM = new LoggedDashboardNumber("Shooter/RightRPM", 3600);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -86,38 +89,17 @@ public class RobotContainer {
             new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
                 new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
-                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION)
+                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
+                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
             }
             );
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken(), m_driveSubsystem::getVisionPose);
-        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(), m_driveSubsystem::getVisionPose);
-        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
-      }
-      case PROTO_ARM -> {
-        m_driveSubsystem = new DriveSubsystem(
-            new GyroIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {});
-        m_shooter = new ShooterSubsystem(new ShooterIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIOPrototype());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-      }
-      case PROTO_SHOOTER -> {
-        m_driveSubsystem = new DriveSubsystem(
-            new GyroIO() {
-            },
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {},
-            new ModuleIO() {});
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
-        m_climber = new ClimberSubsystem(new ClimberIO() {});
-        m_armSubsystem = new ArmSubsystem(new ArmIO() {});
+        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
+            m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
       }
       case SIM -> {
-//       Sim robot, instantiate physics sim IO implementations
+      // Sim robot, instantiate physics sim IO implementations
         m_driveSubsystem =
             new DriveSubsystem(
                 new GyroIO() {},
@@ -126,8 +108,9 @@ public class RobotContainer {
                 new ModuleIOSim(DriveConstants.BL_MOD_CONSTANTS),
                 new ModuleIOSim(DriveConstants.BR_MOD_CONSTANTS));
         m_shooter = new ShooterSubsystem(new ShooterIOSim());
-        m_armSubsystem = new ArmSubsystem(new ArmIOSim());
         m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_armSubsystem = new ArmSubsystem(new ArmIOSim(),
+            m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -161,92 +144,80 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Trigger intakeTrigger = controller.y().and(controller.x().negate())
-        .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate())
-        .and(controller.leftTrigger().negate());
+    /** trigger setup */
+    Trigger intakeTrigger = m_driverController.y().and(m_driverController.x().negate())
+        .and(m_driverController.a().negate()) // make sure we don't amp
+        .and(m_driverController.b().negate())
+        .and(m_driverController.leftTrigger().negate());
 
-    Trigger spinUpTrigger = controller.x().and(controller.y().negate())
-        .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate());
+    Trigger spinUpTrigger = m_driverController.x().and(m_driverController.y().negate())
+        .and(m_driverController.a().negate()) // make sure we don't amp
+        .and(m_driverController.b().negate());
 
-    Trigger passSpinUpTrigger = controller.leftTrigger()
+    Trigger passSpinUpTrigger = m_driverController.leftTrigger()
         .and(spinUpTrigger.negate())
-        .and(controller.y().negate());
+        .and(m_driverController.y().negate());
 
-    Trigger passTrigger = controller.leftTrigger()
+    Trigger passTrigger = m_driverController.leftTrigger()
         .and(spinUpTrigger.negate())
-        .and(controller.y());
+        .and(m_driverController.y());
 
-    Trigger shootTrigger = controller.x().and(controller.y())
-        .and(controller.a().negate()) // make sure we don't amp
-        .and(controller.b().negate())
-        .and(controller.leftTrigger().negate());
+    Trigger shootTrigger = m_driverController.x().and(m_driverController.y())
+        .and(m_driverController.a().negate()) // make sure we don't amp
+        .and(m_driverController.b().negate())
+        .and(m_driverController.leftTrigger().negate());
 
-    Trigger ampLineupTrigger = controller.b().and(controller.a().negate())
+    Trigger ampLineupTrigger = m_driverController.b().and(m_driverController.a().negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
 
-    Trigger ampDepositeTrigger = controller.b().and(controller.a())
+    Trigger ampDepositeTrigger = m_driverController.b().and(m_driverController.a())
         .and(spinUpTrigger.negate()) // make sure we don't amp while trying to do anything else
         .and(shootTrigger.negate())
         .and(intakeTrigger.negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
 
+    /** driver controller */
+
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-//    spinUpTrigger.whileTrue(m_shooter.runShooterVelocity(false)
-//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-//        .alongWith(DriveCommands.alignmentDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-//        )));
-    spinUpTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), false));
-
-//    shootTrigger.whileTrue(m_shooter.runShooterVelocity(true)
-//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AUTO_AIM))
-//        .alongWith(DriveCommands.alignmentDrive(
-//            m_driveSubsystem,
-//            () -> -controller.getLeftY(),
-//            () -> -controller.getLeftX(),
-//            () -> AllianceFlipUtil.apply(FieldConstants.CENTER_SPEAKER)
-//        )));
-
-    shootTrigger.whileTrue(new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, controller.getHID(), true));
+    spinUpTrigger.whileTrue(
+        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), false));
+    shootTrigger.whileTrue(
+        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), true));
 
     ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
         .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
-    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.5),
+    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.75),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
-
-    controller.leftBumper().whileTrue(
-        m_shooter.runShooterVelocity(false, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
-
-    controller.rightBumper().whileTrue(
-        m_shooter.runShooterVelocity(true, m_leftRPM.get(), m_rightRPM.get())
-            .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.MANUAL_WRIST)));
-
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, 3500, 3500)));
+            .alongWith(m_shooter.runShooterVelocity(false, () -> 3500, () -> 3500)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, 3500, 3500)));
+            .alongWith(m_shooter.runShooterVelocity(true, () -> 3500, () -> 3500)));
 
-    controller.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    controller.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
-    controller.pov(90).whileTrue(m_shooter.intakeCommand(-0.75, -0.75, 0.0))
-        .whileFalse(m_shooter.intakeCommand(0.0, 0.0, 0.0));
+    m_driverController.pov(90).whileTrue(
+            Commands.runEnd(() -> {
+                      m_shooter.setIntakePower(-0.75);
+                      m_shooter.setKickerPower(-0.75);
+                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
+                    },
+                    () -> {
+                      m_shooter.setIntakePower(0.0);
+                      m_shooter.setKickerPower(0.0);
+                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
+                    },
+                    m_shooter));
 
     // 96.240234375
     // 60.029296875
@@ -254,11 +225,12 @@ public class RobotContainer {
 
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
-            m_driveSubsystem,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    controller
+                m_driveSubsystem,
+                () -> -m_driverController.getLeftY(),
+                () -> -m_driverController.getLeftX(),
+                () -> -m_driverController.getRightX()
+        ));
+    m_driverController
         .start()
         .onTrue(
             Commands.runOnce(
@@ -268,14 +240,45 @@ public class RobotContainer {
                             Rotation2d.fromDegrees(180.0)))),
                     m_driveSubsystem)
                 .ignoringDisable(true));
+
+
+    /** Operator controller */
+    m_operatorController.leftTrigger().whileTrue(
+        m_shooter.runShooterVelocity(false, () -> 1400, () -> 1400));
+    m_operatorController.rightTrigger().whileTrue(
+        m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
+
+    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-360.0 * 3.0));
+    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
+        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
+    m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
+        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
+
+    m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
+    m_operatorController.pov(180).whileTrue(m_climber.setClimberPowerFactory(-0.5));
+//    m_operatorController.pov(90).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
+//    m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
+
+    m_operatorController.a()
+        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.PREPARE_TRAP),
+            m_armSubsystem));
+    m_operatorController.b()
+        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.SCORE_TRAP),
+            m_armSubsystem));
+    m_operatorController.x()
+        .onTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
+
+    // arm 45.0
+    // wrist 123.5
+
+    m_operatorController.start().onTrue(m_climber.resetClimber());
   }
 
   /**
    * Use this method to configure any named commands needed for PathPlanner autos
    */
   private void configureNamedCommands() {
-    NamedCommands.registerCommand("Intake", m_shooter.intakeCommand(0.75, 0.5, 0.1)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
+    NamedCommands.registerCommand("Intake", new IntakeControlCommand(m_armSubsystem, m_shooter));
 
     NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem));
   }
@@ -285,6 +288,7 @@ public class RobotContainer {
 
     commandTab.add("Disable Arm Brake", m_armSubsystem.enableBrakeMode(false));
     commandTab.add("Enable Arm Brake", m_armSubsystem.enableBrakeMode(true));
+    commandTab.add("Reset Climber Lock", m_climber.resetClimberLock());
   }
 
   /**
@@ -294,5 +298,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return m_autonFactory.getSelectedAutonomous();
+  }
+
+  public void resetClimberLock() {
+    m_climber.resetClimberLock().schedule();
   }
 }

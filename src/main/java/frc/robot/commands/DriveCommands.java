@@ -19,9 +19,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import lib.utils.AimbotUtils;
-import org.opencv.core.Mat;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -39,11 +39,12 @@ public class DriveCommands {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
+//    AtomicReference<Rotation2d> prevheading = new AtomicReference<>(driveSubsystem.getRotation());
     return Commands.run(
         () -> {
           double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
           double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
-          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0) * 0.75;
+          double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0) * 0.5;
 
           // Apply deadband
           double linearMagnitude =
@@ -52,6 +53,11 @@ public class DriveCommands {
           Rotation2d linearDirection =
               new Rotation2d(xInput, yInput);
           double omega = MathUtil.applyDeadband(omegaInput, DEADBAND);
+
+//          if (omegaInput < DEADBAND) {
+//            omega = driveSubsystem.alignToAngle(prevheading.get());
+//            prevheading.set(driveSubsystem.getRotation());
+//          }
 
           // Calcaulate new linear velocity
           Translation2d linearVelocity =
@@ -74,7 +80,8 @@ public class DriveCommands {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
-                  omega * driveSubsystem.getMaxAngularSpeedRadPerSec(),
+                  omega * driveSubsystem.getMaxAngularSpeedRadPerSec()
+                          * Constants.DriveConstants.TURNING_SPEED.getValue(),
                   heading));
         },
             driveSubsystem);
@@ -97,17 +104,14 @@ public class DriveCommands {
           new Rotation2d(xInput, yInput);
 
       // Calculate omega
-      double omega = driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()));
+      double omega =
+          driveSubsystem.alignToAngle(AimbotUtils.getDrivebaseAimingAngle(driveSubsystem.getVisionPose()));
 
       // Calcaulate new linear velocity
       Translation2d linearVelocity =
           new Pose2d(new Translation2d(), linearDirection)
               .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
               .getTranslation();
-
-//      if (linearVelocity.getNorm() > 0.1) {
-//        omega = omega * 4;
-//      }
 
       Rotation2d heading = new Rotation2d();
 

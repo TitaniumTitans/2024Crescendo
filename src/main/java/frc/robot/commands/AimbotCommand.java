@@ -5,7 +5,6 @@ import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,10 +35,8 @@ public class AimbotCommand extends Command {
   private final PidProperty m_smallProperty;
   private final PidProperty m_fastProperty;
 
-  private boolean m_runKicker;
-  private boolean m_pass;
-
-  private static final double TOLERENCE_DEGREES = 10.0;
+  private final boolean m_runKicker;
+  private final boolean m_pass;
 
   public AimbotCommand(ArmSubsystem armSubsystem,
                        DriveSubsystem driveSubsystem,
@@ -69,15 +66,15 @@ public class AimbotCommand extends Command {
     m_smallController.setTolerance(5.0);
     m_fastController.setTolerance(10.0);
 
-    m_smallProperty = new WpiPidPropertyBuilder("Drive/Aimbot Small", false, m_smallController)
-            .addP(1.0)
-            .addI(0.0)
-            .addD(0.0)
+    m_smallProperty = new WpiPidPropertyBuilder("Drive/Aimbot Small", true, m_smallController)
+            .addP(0.03)
+            .addI(0.001)
+            .addD(0.004)
             .build();
-    m_fastProperty = new WpiPidPropertyBuilder("Drive/Aimbot Fast", false, m_fastController)
-            .addP(3.0)
+    m_fastProperty = new WpiPidPropertyBuilder("Drive/Aimbot Fast", true, m_fastController)
+            .addP(0.1)
             .addI(0.0)
-            .addD(0.0)
+            .addD(0.002)
             .build();
 
     m_runKicker = runKicker;
@@ -89,11 +86,6 @@ public class AimbotCommand extends Command {
   }
 
   @Override
-  public void initialize() {
-
-  }
-
-  @Override
   public void execute() {
     double x = -DriveCommands.setSensitivity(-m_driverController.getLeftY(), 0.25);
     double y = -DriveCommands.setSensitivity(-m_driverController.getLeftX(), 0.25);
@@ -101,20 +93,20 @@ public class AimbotCommand extends Command {
     x = MathUtil.applyDeadband(x, 0.1);
     y = MathUtil.applyDeadband(y, 0.1);
 
-    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15);
-    o = MathUtil.applyDeadband(0, 0.1);
+    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15) * 0.65;
+    o = MathUtil.applyDeadband(o, 0.1);
 
     Rotation2d heading;
 
     // if red change heading goal
     if (DriverStation.getAlliance().isPresent()
-        && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+        && DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue) == DriverStation.Alliance.Red) {
       heading = m_driveSubsystem.getRotation();
     } else {
       heading = m_driveSubsystem.getRotation().plus(Rotation2d.fromDegrees(180));
     }
 
-    if (m_driveSubsystem.hasAprilTagCams()) {
+    if (m_driveSubsystem.useAutoControl()) {
       m_smallProperty.updateIfChanged();
       m_fastProperty.updateIfChanged();
 
@@ -133,15 +125,15 @@ public class AimbotCommand extends Command {
         for (int i = 0; i < 1; i++) {
           double virtualGoalX = target.getX()
               - shotTime * (
-              MathUtil.applyDeadband(fieldRelativeSpeed.vx, 0.15)
+              MathUtil.applyDeadband(fieldRelativeSpeed.vx, 0.25)
                   + MathUtil.applyDeadband(
-                  fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
+                  fieldRelativeAccel.ax * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.25));
 
           double virtualGoalY = target.getY()
               - shotTime * (
-              MathUtil.applyDeadband(fieldRelativeSpeed.vy, 0.15)
+              MathUtil.applyDeadband(fieldRelativeSpeed.vy, 0.25)
                   + MathUtil.applyDeadband(
-                  fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.1));
+                  fieldRelativeAccel.ay * ShooterConstants.ACCEL_COMP_FACTOR.getValue(), 0.25));
 
           movingTarget = new Translation3d(virtualGoalX, virtualGoalY, 0.0);
         }
@@ -169,23 +161,12 @@ public class AimbotCommand extends Command {
       y = MathUtil.clamp(y, -0.25, 0.25);
 
       // if we're far from our setpoint, move faster
-      double omega;// = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);;
+      double omega;
       if (error > 5.0) {
         omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
       } else {
         omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
       }
-
-      // add a feedforward component to compensate for horizontal movement
-      Translation2d linearFieldVelocity = new Translation2d(fieldRelativeSpeed.vx, fieldRelativeSpeed.vy);
-      Translation2d tangentalVelocity = linearFieldVelocity
-          .rotateBy(Rotation2d.fromDegrees(desiredRotationDegs).unaryMinus());
-      double tangentalComponent = tangentalVelocity.getX();
-
-      Translation2d linearSpeedVector = new Translation2d(x, y);
-      double omegaFF = linearSpeedVector.getY() * Constants.DriveConstants.MAX_ANGULAR_SPEED * 0.5;
-
-      Logger.recordOutput("Aimbot/Linear Speed", omegaFF);
 
       // Convert to field relative speeds & send command
       m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -195,7 +176,7 @@ public class AimbotCommand extends Command {
           heading
       ));
 
-      m_armSubsystem.setDesiredState(m_pass ? ArmSubsystem.ArmState.PASS : ArmSubsystem.ArmState.AUTO_AIM);
+      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
       m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
 
       // set shooter speeds and rumble controller

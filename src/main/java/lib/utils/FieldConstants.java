@@ -32,7 +32,7 @@ public class FieldConstants {
   public static final Pose2d AMP_LINEUP =
     AllianceFlipUtil.apply(new Pose2d(
         AMP_CENTER.getX(),
-        AMP_CENTER.getY() - Units.inchesToMeters(18.5),
+        AMP_CENTER.getY() - Units.inchesToMeters(10.0),
         Rotation2d.fromDegrees(90)
     ));
 

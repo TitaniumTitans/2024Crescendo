@@ -19,14 +19,17 @@ import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
@@ -44,18 +47,14 @@ import frc.robot.subsystems.drive.module.Module;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.PhoenixOdometryThread;
 import frc.robot.subsystems.vision.VisionSubsystem;
+import lib.utils.*;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
-
-import lib.logger.DataLogUtil;
-import lib.logger.DataLogUtil.DataLogTable;
-import lib.utils.*;
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -80,18 +79,12 @@ public class DriveSubsystem extends SubsystemBase {
       new SwerveModulePosition()
   };
 
-  private Rotation2d[] m_prevRotations = new Rotation2d[] {
-          new Rotation2d(),
-          new Rotation2d(),
-          new Rotation2d(),
-          new Rotation2d(),
-          new Rotation2d()
-  };
-
   private final VisionSubsystem[] m_cameras;
 
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
+
+  private final PIDController m_largeThetaPid;
 
   private final SysIdRoutine m_sysId;
 
@@ -136,14 +129,20 @@ public class DriveSubsystem extends SubsystemBase {
     PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
-    m_thetaPid.enableContinuousInput(-Math.PI, Math.PI);
-    m_thetaPid.setTolerance(Units.degreesToRadians(6));
+    m_thetaPid.enableContinuousInput(0, 360);
+    m_thetaPid.setTolerance(5.0);
 
-    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
-        .addP(0.5)
-        .addI(0.0)
-        .addD(0.0)
+    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
+        .addP(0.02)
+        .addI(0.01)
+        .addD(0.004)
         .build();
+
+    // 0.04, 0.01, 0.0
+
+    m_largeThetaPid = new PIDController(0.04, 0, 0.002);
+    m_largeThetaPid.setTolerance(15);
+    m_largeThetaPid.enableContinuousInput(0, 360);
 
     m_cameras = cameras;
 
@@ -159,7 +158,7 @@ public class DriveSubsystem extends SubsystemBase {
         VecBuilder.fill(
             Units.inchesToMeters(2.0),
             Units.inchesToMeters(2.0),
-            Units.degreesToRadians(35.0))
+            Units.degreesToRadians(30.0))
     );
 
     // Configure AutoBuilder for PathPlanner
@@ -202,11 +201,11 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
-    Logger.processInputs("Swerve/Gyro", gyroInputs);
     for (var module : modules) {
       module.updateInputs();
     }
     odometryLock.unlock();
+    Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
       module.periodic();
     }
@@ -216,6 +215,11 @@ public class DriveSubsystem extends SubsystemBase {
       for (var module : modules) {
         module.stop();
       }
+    }
+    // Log empty setpoint states when disabled
+    if (DriverStation.isDisabled()) {
+      Logger.recordOutput("SwerveStates/Setpoints");
+      Logger.recordOutput("SwerveStates/SetpointsOptimized");
     }
 
     // Update odometry
@@ -251,10 +255,10 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // make sure we're not moving too fast before trying to update vision poses
-    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED)
-    && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED)
-    && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED)
-    /* || DriverStation.isTeleop() */) {
+    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
+        && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
+        && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED * 0.75)
+        || DriverStation.isTeleop()) {
       for (VisionSubsystem camera : m_cameras) {
         camera.updateInputs();
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
@@ -287,8 +291,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
@@ -301,13 +304,41 @@ public class DriveSubsystem extends SubsystemBase {
     Logger.recordOutput("SwerveStates/Optimized", m_optimizedStates);
   }
 
-  /**
-   * Calculates theta output to align to an arbitrary angle
-   *
-   * @param angle the desired angle to hold relative to the field
-   */
+  public void davidDrive(double xVel, double yVel, double angle) {
+    Rotation2d heading;
+
+    // if red change heading goal
+    if (DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      heading = getRotation().plus(Rotation2d.fromDegrees(180));
+    } else {
+      heading = getRotation();
+    }
+
+    double steerVelocity = alignToAngle(Rotation2d.fromDegrees(angle));
+    ChassisSpeeds speeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xVel,
+            yVel,
+            steerVelocity,
+            heading);
+
+    runVelocity(speeds);
+  }
+
+    /**
+     * Calculates theta output to align to an arbitrary angle
+     *
+     * @param angle the desired angle to hold relative to the field
+     */
   public double alignToAngle(Rotation2d angle) {
-    return m_thetaPid.calculate(getVisionPose().getRotation().getRadians(), angle.getRadians());
+    double currentAngle = getVisionPose().getRotation().getDegrees();
+    double error = Math.abs(currentAngle - angle.getDegrees());
+    if (error > 15.0) {
+      return m_largeThetaPid.calculate(currentAngle, angle.getDegrees());
+    } else {
+      return m_thetaPid.calculate(currentAngle, angle.getDegrees());
+    }
   }
 
   /** Stops the drive. */
@@ -345,7 +376,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /** Returns whether there are connected april tag cameras */
-  public boolean hasAprilTagCams() {
+  public boolean useAutoControl() {
     return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected));
   }
 
@@ -378,6 +409,10 @@ public class DriveSubsystem extends SubsystemBase {
     return m_wpiPoseEstimator.getEstimatedPosition().getRotation();
   }
 
+  public Rotation2d getGyroRotation() {
+    return gyroInputs.yawPosition;
+  }
+
   /** Returns the robot's field relative velocity, used for shoot on move */
   public FieldRelativeSpeed getFieldRelativeVelocity() {
     return m_fieldRelVel;
@@ -407,7 +442,7 @@ public class DriveSubsystem extends SubsystemBase {
   public Command pathfollowFactory(Pose2d pose) {
     return AutoBuilder.pathfindToPoseFlipped(
         pose, DriveConstants.DEFAULT_CONSTRAINTS).withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf)
-        .unless(() -> !hasAprilTagCams());
+        .unless(() -> !useAutoControl());
   }
 
   /** Returns an array of module translations. */

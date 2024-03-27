@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.6472748517990112,
-      "y": 4.497877597808838
+      "x": 0.8210453391075134,
+      "y": 4.576303482055664
     },
-    "rotation": 123.17848329106131
+    "rotation": 120.96374169030298
   },
   "command": {
     "type": "sequential",
@@ -18,7 +18,7 @@
           }
         },
         {
-          "type": "race",
+          "type": "parallel",
           "data": {
             "commands": [
               {
@@ -37,7 +37,7 @@
           }
         },
         {
-          "type": "race",
+          "type": "parallel",
           "data": {
             "commands": [
               {
@@ -62,7 +62,7 @@
           }
         },
         {
-          "type": "race",
+          "type": "parallel",
           "data": {
             "commands": [
               {

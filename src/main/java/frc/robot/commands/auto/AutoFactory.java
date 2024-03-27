@@ -14,8 +14,12 @@ public final class AutoFactory {
     FRONT_WING_2("FrontWing2"),
     FRONT_WING_3("FrontWing3"),
     FRONT_WING_3_CONTESTED_5("FrontWing3Contested5"),
+    AMP_PRELOAD_MOBILITY("AmpPreloadMobility"),
     AMP_WING_3("AmpWing3"),
+    AMP_WING_3_CONTESTED_4("AmpWing3Contested4"),
     AMP_WING_3_CONTESTED_5("AmpWing3Contested5"),
+    AMP_WING_3_2_1("AmpWing321"),
+    SOURCE_PRELOAD_MOBILITY("SourcePreloadMobility"),
     SOURCE_WING_1("SourceWing1"),
     SOURCE_CONTESTED_1("SourceContested1"),
     SOURCE_WING_1_CONTESTED_1("SourceWing1Contested1");

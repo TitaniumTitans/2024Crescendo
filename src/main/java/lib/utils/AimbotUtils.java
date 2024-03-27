@@ -48,26 +48,27 @@ public class AimbotUtils {
   /** Linear interpolation tables for aiming */
   public static double getWristAngle(double distance) {
     double angle = 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance);
-    if (100.0 >= distance && distance > 55.0) {
+    if (90.0 >= distance && distance > 55.0) {
       return angle;
-    } else if (150.0 >= distance && distance > 100.0) {
-      return angle - 1.75;
-    } else if ((175.0 >= distance && distance > 150.0)
-        || (200.0 >= distance && distance > 175.0)) {
-      return angle - 3.0;
-    } else if (distance > 175.0) {
+    } else if (150.0 >= distance && distance > 90.0) {
+      return angle - 1.8;
+    } else if (195.0 >= distance && distance > 150.0) {
+      return angle - 3.75;
+    } else if (distance > 200.0) {
       return angle;
+    } else if (distance > 195.0) {
+      return angle - 4.25;
     } else {
       return 55.0;
     }
   }
 
   public static double getLeftSpeed(double distance) {
-    return m_leftSpeedLerpTable.get(distance);
+    return distance >= 75.0 ? 4000 : 3750;
   }
 
   public static double getRightSpeed(double distance) {
-    return m_rightSpeedLerpTable.get(distance);
+    return distance >= 75.0 ? 4750 : 4500;
   }
 
   /** Gets the distance from the drivebase to the speaker in meters */
