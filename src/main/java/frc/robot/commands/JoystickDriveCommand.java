@@ -47,6 +47,11 @@ public class JoystickDriveCommand extends Command {
   }
 
   @Override
+  public void initialize() {
+    m_headingGoal = driveSubsystem.getGyroRotation();
+  }
+
+  @Override
   public void execute() {
     double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
     double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
@@ -86,10 +91,6 @@ public class JoystickDriveCommand extends Command {
       && !m_timer.hasElapsed(0.5)) {
         rotationOutput = 0.0;
       }
-    }
-
-    if (!Constants.DriveConstants.HOLD_HEADING.getValue()) {
-      rotationOutput = omegaInput;
     }
 
     Rotation2d heading;
