@@ -48,6 +48,7 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.AllianceFlipUtil;
 import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
@@ -70,6 +71,8 @@ public class RobotContainer {
   private final LoggedDashboardNumber m_armIncrement = new LoggedDashboardNumber("Arm/Increment value", 1);
   private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
   private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
+  private final LoggedDashboardBoolean m_useAmpLineup
+      = new LoggedDashboardBoolean("Use Amp Lineup?", true);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
@@ -186,7 +189,9 @@ public class RobotContainer {
     shootTrigger.whileTrue(
         new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), true));
 
-    ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+    ampLineupTrigger.whileTrue(
+        m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+            .unless(() -> !m_useAmpLineup.get())
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
         .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 

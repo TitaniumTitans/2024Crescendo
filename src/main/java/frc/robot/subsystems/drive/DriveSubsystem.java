@@ -333,12 +333,9 @@ public class DriveSubsystem extends SubsystemBase {
      */
   public double alignToAngle(Rotation2d angle) {
     double currentAngle = getVisionPose().getRotation().getDegrees();
-    double error = Math.abs(currentAngle - angle.getDegrees());
-    if (error > 15.0) {
-      return m_largeThetaPid.calculate(currentAngle, angle.getDegrees());
-    } else {
-      return m_thetaPid.calculate(currentAngle, angle.getDegrees());
-    }
+    double desiredAngle = angle.getDegrees();
+
+    return Units.degreesToRadians(m_thetaPid.calculate(currentAngle, desiredAngle));
   }
 
   /** Stops the drive. */

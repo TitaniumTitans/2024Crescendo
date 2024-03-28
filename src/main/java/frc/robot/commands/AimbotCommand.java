@@ -152,21 +152,18 @@ public class AimbotCommand extends Command {
           ));
 
       // get our desired rotation and error from it
-      double desiredRotationDegs =
-          AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget)
-              .getDegrees();
-      double error = Math.abs(desiredRotationDegs - m_driveSubsystem.getRotation().getDegrees());
-
+      Rotation2d desiredRotation =
+          AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget);
       x = MathUtil.clamp(x, -0.25, 0.25);
       y = MathUtil.clamp(y, -0.25, 0.25);
 
       // if we're far from our setpoint, move faster
-      double omega;
-      if (error > 5.0) {
-        omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
-      } else {
-        omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
-      }
+      double omega = m_driveSubsystem.alignToAngle(desiredRotation);
+//      if (error > 5.0) {
+//        omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
+//      } else {
+//        omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
+//      }
 
       // Convert to field relative speeds & send command
       m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(

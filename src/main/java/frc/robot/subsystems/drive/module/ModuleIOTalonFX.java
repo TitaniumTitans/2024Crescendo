@@ -146,7 +146,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addI(m_moduleConstants.TURN_KI())
             .addD(m_moduleConstants.TURN_KD());
 
-    m_posRequest = new PositionVoltage(0, 0, true, 0, 0, false, false, false);
+    m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
 
     // Fancy multithreaded odometry update stuff
     // setup drive values
@@ -245,7 +245,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void setDriveVelocityMPS(double mps) {
     double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
-    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0).withEnableFOC(true);
+    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0).withEnableFOC(false);
     m_driveTalon.setControl(velRequest.withVelocity(rps));
   }
 
