@@ -19,6 +19,7 @@ import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -334,8 +335,18 @@ public class DriveSubsystem extends SubsystemBase {
   public double alignToAngle(Rotation2d angle) {
     double currentAngle = getVisionPose().getRotation().getDegrees();
     double desiredAngle = angle.getDegrees();
+    double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
 
-    return Units.degreesToRadians(m_thetaPid.calculate(currentAngle, desiredAngle));
+    Logger.recordOutput("Drive/Theta Output Degs/S", outputDegsPerSec);
+
+    return MathUtil.applyDeadband(
+        Units.degreesToRadians(outputDegsPerSec),
+        0.1);
+  }
+
+  @AutoLogOutput(key = "Drive/Theta Error")
+  public double getThetaError() {
+    return m_thetaPid.getPositionError();
   }
 
   /** Stops the drive. */

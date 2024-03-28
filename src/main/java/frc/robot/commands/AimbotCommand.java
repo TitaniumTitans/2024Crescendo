@@ -159,6 +159,7 @@ public class AimbotCommand extends Command {
 
       // if we're far from our setpoint, move faster
       double omega = m_driveSubsystem.alignToAngle(desiredRotation);
+      double error = m_driveSubsystem.getThetaError();
 //      if (error > 5.0) {
 //        omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
 //      } else {
