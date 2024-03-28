@@ -19,18 +19,21 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoFactory;
 import frc.robot.commands.auto.IntakeControlCommand;
 import frc.robot.commands.auto.ShooterAutoCommand;
+import frc.robot.subsystems.LedSubsystem;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -62,6 +65,7 @@ public class RobotContainer {
   private final ShooterSubsystem m_shooter;
   public final ArmSubsystem m_armSubsystem;
   private final ClimberSubsystem m_climber;
+  private final LedSubsystem m_led;
 
   // Controller
   private final CommandXboxController m_driverController = new CommandXboxController(0);
@@ -83,10 +87,10 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         m_driveSubsystem = new DriveSubsystem(
             new GyroIOPigeon2(true),
-            new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.FL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.FR_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
                 new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
                 new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
@@ -97,6 +101,7 @@ public class RobotContainer {
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
             m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
+        m_led = new LedSubsystem(m_shooter::hasPiece);
       }
       case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -111,6 +116,7 @@ public class RobotContainer {
         m_climber = new ClimberSubsystem(new ClimberIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOSim(),
             m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
+        m_led = new LedSubsystem(m_shooter::hasPiece);;
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -124,6 +130,7 @@ public class RobotContainer {
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
         m_climber = new ClimberSubsystem(new ClimberIO() {});
+        m_led = new LedSubsystem(m_shooter::hasPiece);
       }
     }
 
@@ -140,8 +147,8 @@ public class RobotContainer {
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   * Joystick} or {@link XboxController}), and then passing it to a {@link
+   * JoystickButton}.
    */
   private void configureButtonBindings() {
     /** trigger setup */
