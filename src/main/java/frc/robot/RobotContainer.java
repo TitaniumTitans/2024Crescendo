@@ -227,7 +227,7 @@ public class RobotContainer {
     // 96.240234375
     // 60.029296875
     // 2250
-
+    m_shooter.setDefaultCommand(m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000));
     m_driveSubsystem.setDefaultCommand(
         new JoystickDriveCommand(
                 m_driveSubsystem,
