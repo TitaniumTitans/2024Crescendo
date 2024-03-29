@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 import java.util.function.DoubleSupplier;
 
@@ -14,6 +15,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private double m_leftSpeedSetpoint = 3800.0;
   private double m_rightSpeedSetpoint = 3800.0;
+
+  private final LoggedDashboardNumber m_leftSetpoint =
+      new LoggedDashboardNumber("Shooter/Left RPM", 4000);
+  private final LoggedDashboardNumber m_rightSetpoint =
+      new LoggedDashboardNumber("Shooter/Right RPM", 4750);
 
   public ShooterSubsystem(ShooterIO io) {
     m_io = io;
@@ -49,7 +55,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    return runShooterVelocity(runKicker, () -> 4000, () -> 4750);
+    return runShooterVelocity(runKicker, m_leftSetpoint::get, m_rightSetpoint::get);
   }
 
   public Command runShooterVelocity(boolean runKicker, DoubleSupplier leftRPM, DoubleSupplier rightRPM) {

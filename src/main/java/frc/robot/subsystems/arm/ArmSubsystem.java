@@ -253,8 +253,9 @@ public class ArmSubsystem extends SubsystemBase {
         m_currentState = ArmState.BACKUP_SHOT;
       }
       case MANUAL_CONTROL -> {
-        m_desiredWristPoseDegs = m_wristIncremental;
-        m_desiredArmPoseDegs = m_armIncremental;
+        m_desiredWristPoseDegs = ArmSetpoints.STATIC_SHOOTER.wristAngle();
+
+        m_desiredArmPoseDegs = ArmSetpoints.STATIC_SHOOTER.armAngle();
         m_currentState = ArmState.MANUAL_CONTROL;
       }
       default -> {

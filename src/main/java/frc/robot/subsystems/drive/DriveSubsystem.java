@@ -133,7 +133,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_thetaPid.enableContinuousInput(0, 360);
     m_thetaPid.setTolerance(5.0);
 
-    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
+    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
         .addP(0.02)
         .addI(0.01)
         .addD(0.004)
@@ -303,6 +303,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveStates/Optimized", m_optimizedStates);
+
+    Logger.recordOutput("Drive/Desired Linear Velocity FPS",
+        Units.metersToFeet(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
   }
 
   public void davidDrive(double xVel, double yVel, double angle) {
@@ -336,12 +339,20 @@ public class DriveSubsystem extends SubsystemBase {
     double currentAngle = getVisionPose().getRotation().getDegrees();
     double desiredAngle = angle.getDegrees();
     double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
+    Logger.recordOutput("Drive/Theta Output DegsS", outputDegsPerSec);
 
-    Logger.recordOutput("Drive/Theta Output Degs/S", outputDegsPerSec);
+    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.001;
+    Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
 
-    return MathUtil.applyDeadband(
-        Units.degreesToRadians(outputDegsPerSec),
-        0.1);
+    outputDegsPerSec = outputDegsPerSec + cubicOutput;
+    // apply deadband, wpilib version borked?
+    if (1.0 > outputDegsPerSec && outputDegsPerSec > -1.0) {
+      outputDegsPerSec = 0.0;
+    }
+
+    Logger.recordOutput("Drive/Final Theta Output", outputDegsPerSec);
+
+    return Units.degreesToRadians(outputDegsPerSec);
   }
 
   @AutoLogOutput(key = "Drive/Theta Error")

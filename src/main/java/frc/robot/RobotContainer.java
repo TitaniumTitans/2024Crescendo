@@ -229,7 +229,7 @@ public class RobotContainer {
     // 2250
 
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
+        new JoystickDriveCommand(
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),

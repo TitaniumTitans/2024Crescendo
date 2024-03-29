@@ -48,7 +48,7 @@ public class JoystickDriveCommand extends Command {
 
   @Override
   public void initialize() {
-    m_headingGoal = driveSubsystem.getGyroRotation();
+    m_headingGoal = driveSubsystem.getRotation();
   }
 
   @Override
@@ -58,19 +58,9 @@ public class JoystickDriveCommand extends Command {
     double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0)
             * Constants.DriveConstants.TURNING_SPEED.getValue();
 
-    // Apply deadband
-    double linearMagnitude =
-        MathUtil.applyDeadband(
-            Math.hypot(xInput, yInput), DEADBAND);
-    Rotation2d linearDirection =
-        new Rotation2d(xInput, yInput);
+    xInput = MathUtil.applyDeadband(xInput, DEADBAND);
+    yInput = MathUtil.applyDeadband(yInput, DEADBAND);
     double omega = MathUtil.applyDeadband(omegaInput, DEADBAND) * driveSubsystem.getMaxAngularSpeedRadPerSec();
-
-    // Calcaulate new linear velocity
-    Translation2d linearVelocity =
-        new Pose2d(new Translation2d(), linearDirection)
-            .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
-            .getTranslation();
 
     double rotationOutput = driveSubsystem.alignToAngle(m_headingGoal);
 
@@ -81,16 +71,17 @@ public class JoystickDriveCommand extends Command {
       }
       m_timer.restart();
     } else {
+      // detect falling edge for updating heading
       if (omegaJoystick
-      && m_timer.hasElapsed(0.5)) {
+      && m_timer.hasElapsed(0.15)) {
         omegaJoystick = false;
-        m_headingGoal = driveSubsystem.getGyroRotation();
+        m_headingGoal = driveSubsystem.getRotation();
         m_timer.stop();
-        m_timer.reset();
       } else if (omegaJoystick
-      && !m_timer.hasElapsed(0.5)) {
+      && !m_timer.hasElapsed(0.15)) {
         rotationOutput = 0.0;
       }
+//      m_headingGoal = driveSubsystem.getRotation();
     }
 
     Rotation2d heading;
@@ -106,8 +97,8 @@ public class JoystickDriveCommand extends Command {
     // Convert to field relative speeds & send command
     driveSubsystem.runVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
-            linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+            xInput * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+            yInput * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
             rotationOutput,
             heading));
   }
