@@ -51,6 +51,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.*;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +70,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
   private final SwerveDrivePoseEstimator m_wpiPoseEstimator;
+  private final SwerveDrivePoseEstimator m_wheelOnlyPoseEstimator;
 
   private final Field2d m_field = new Field2d();
 
@@ -99,6 +101,8 @@ public class DriveSubsystem extends SubsystemBase {
   private FieldRelativeSpeed m_fieldRelVel = new FieldRelativeSpeed();
   private FieldRelativeSpeed m_lastFieldRelVel = new FieldRelativeSpeed();
   private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
+
+  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", true);
 
   public DriveSubsystem(
       GyroIO gyroIO,
@@ -157,8 +161,23 @@ public class DriveSubsystem extends SubsystemBase {
             Units.inchesToMeters(0.5),
             Units.degreesToRadians(0.75)),
         VecBuilder.fill(
-            Units.inchesToMeters(2.0),
-            Units.inchesToMeters(2.0),
+            Units.inchesToMeters(5.5),
+            Units.inchesToMeters(5.5),
+            Units.degreesToRadians(15.0))
+    );
+
+    m_wheelOnlyPoseEstimator = new SwerveDrivePoseEstimator(
+        kinematics,
+        new Rotation2d(),
+        getModulePositions(),
+        new Pose2d(),
+        VecBuilder.fill(
+            Units.inchesToMeters(0.5),
+            Units.inchesToMeters(0.5),
+            Units.degreesToRadians(0.75)),
+        VecBuilder.fill(
+            Units.inchesToMeters(5.0),
+            Units.inchesToMeters(5.0),
             Units.degreesToRadians(30.0))
     );
 
@@ -252,14 +271,17 @@ public class DriveSubsystem extends SubsystemBase {
       }
 
       // Apply update
-      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
+//      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
     }
 
     // make sure we're not moving too fast before trying to update vision poses
-    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
-        && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
-        && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED * 0.75)
-        || DriverStation.isTeleop()) {
+    if ((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
+        Units.inchesToMeters(6.0)) == 0.0)
+        && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond,
+        Units.inchesToMeters(6.0)) == 0.0)
+        && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
+        Units.degreesToRadians(7.5)) == 0.0)
+        || !DriverStation.isAutonomousEnabled()) {
       for (VisionSubsystem camera : m_cameras) {
         camera.updateInputs();
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
@@ -269,8 +291,11 @@ public class DriveSubsystem extends SubsystemBase {
       }
     }
 
-    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
+    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
+    m_wheelOnlyPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
+
+    Logger.recordOutput("Odometry/Wheel Only Odometry", m_wheelOnlyPoseEstimator.getEstimatedPosition());
 
     Logger.recordOutput("Drive/DistanceToTarget",
         Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
@@ -293,7 +318,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
+//    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
@@ -396,7 +421,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Returns whether there are connected april tag cameras */
   public boolean useAutoControl() {
-    return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected));
+    return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected))
+        && m_useAutoCrap.get();
   }
 
   /** Returns the module states (turn angles and drive velocities) for all the modules. */
@@ -415,6 +441,10 @@ public class DriveSubsystem extends SubsystemBase {
       positions[i] = modules[i].getPosition();
     }
     return positions;
+  }
+
+  public Pose2d getPose() {
+    return m_wheelOnlyPoseEstimator.getEstimatedPosition();
   }
 
   /** Returns the robot pose with vision updates */
@@ -446,6 +476,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void setPose(Pose2d pose) {
     gyroIO.resetGyro(pose.getRotation().getDegrees());
     m_wpiPoseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
+    m_wheelOnlyPoseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
   }
 
   /** Returns the maximum linear speed in meters per sec. */

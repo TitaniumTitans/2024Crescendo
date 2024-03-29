@@ -10,6 +10,7 @@ import java.util.HashMap;
 public final class AutoFactory {
 
   public enum AutoModes {
+    TUNING_AUTO("TuningAuto"),
     FRONT_WING_1("FrontWing1"),
     FRONT_WING_2("FrontWing2"),
     FRONT_WING_3("FrontWing3"),

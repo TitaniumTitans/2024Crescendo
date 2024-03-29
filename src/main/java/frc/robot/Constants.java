@@ -129,7 +129,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(4.75, 0.35), new PIDConstants(4.5, 0.75),
+        new PIDConstants(5.0, 0.0), new PIDConstants(5.5, 0.0),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
