@@ -98,11 +98,11 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // run configs on drive motor
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     driveConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.04;
+    driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.02;
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
