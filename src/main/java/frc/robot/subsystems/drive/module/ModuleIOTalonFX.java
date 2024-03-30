@@ -106,7 +106,6 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
-    driveConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
 
     m_driveTalon = TalonFXFactory.createTalon(moduleConstants.DRIVE_MOTOR_ID(), canbus, driveConfig);
     setDriveBrakeMode(true);
@@ -213,9 +212,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnPid.updateIfChanged();
 
     inputs.drivePositionRad =
-        Units.rotationsToRadians(m_drivePosition.getValueAsDouble());
+        Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
     inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble());
+        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
     inputs.driveAppliedVolts = m_driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {m_driveCurrent.getValueAsDouble()};
 
@@ -231,7 +230,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.odometryTimestamps =
             m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
-        .mapToDouble(Units::rotationsToRadians)
+        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / m_moduleConstants.DRIVE_GEAR_RATIO())
         .toArray());
     inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
         .map(Rotation2d::fromRotations)

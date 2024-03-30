@@ -69,7 +69,7 @@ public final class Constants {
     public static final int PIGEON_ID = 13;
 
     // module constants
-    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0 - 1.0 / 16.0);
 
     public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.75);
@@ -246,7 +246,7 @@ public final class Constants {
   public static class ArmSetpoints {
     public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
     public static final ArmPose TRAP_PREPARE = new ArmPose(92.0, 145.0);
-    public static final ArmPose TRAP_SCORE = new ArmPose(45.0, 123.5);
+    public static final ArmPose TRAP_SCORE = new ArmPose(47.0, 119.5);
 
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");

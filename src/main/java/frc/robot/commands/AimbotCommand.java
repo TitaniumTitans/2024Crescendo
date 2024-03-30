@@ -174,7 +174,7 @@ public class AimbotCommand extends Command {
           heading
       ));
 
-      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.MANUAL_CONTROL);
+      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
       m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
 
       // set shooter speeds and rumble controller
@@ -192,7 +192,7 @@ public class AimbotCommand extends Command {
       ));
 
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.BACKUP_SHOT);
-      m_shooterSubsystem.runShooterVelocity(m_runKicker);
+      m_shooterSubsystem.runShooterVelocity(m_runKicker, () -> 4500, () -> 3750);
     }
   }
 

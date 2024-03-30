@@ -161,8 +161,8 @@ public class DriveSubsystem extends SubsystemBase {
             Units.inchesToMeters(0.5),
             Units.degreesToRadians(0.75)),
         VecBuilder.fill(
-            Units.inchesToMeters(5.5),
-            Units.inchesToMeters(5.5),
+            Units.inchesToMeters(4.5),
+            Units.inchesToMeters(4.5),
             Units.degreesToRadians(15.0))
     );
 
@@ -274,21 +274,22 @@ public class DriveSubsystem extends SubsystemBase {
 //      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
     }
 
-    // make sure we're not moving too fast before trying to update vision poses
-    if ((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
-        Units.inchesToMeters(6.0)) == 0.0)
-        && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond,
-        Units.inchesToMeters(6.0)) == 0.0)
-        && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
-        Units.degreesToRadians(7.5)) == 0.0)
-        || !DriverStation.isAutonomousEnabled()) {
-      for (VisionSubsystem camera : m_cameras) {
-        camera.updateInputs();
+    for (VisionSubsystem camera : m_cameras) {
+      // make sure we're not moving too fast before trying to update vision poses
+      if ((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
+          Units.inchesToMeters(6.0)) == 0.0)
+          && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond,
+          Units.inchesToMeters(6.0)) == 0.0)
+          && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
+          Units.degreesToRadians(7.5)) == 0.0)
+          || !DriverStation.isAutonomousEnabled()) {
+
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
             (PoseEstimator.TimestampedVisionUpdate pose) ->
                 m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
         );
       }
+      camera.updateInputs();
     }
 
     m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
@@ -366,7 +367,7 @@ public class DriveSubsystem extends SubsystemBase {
     double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
     Logger.recordOutput("Drive/Theta Output DegsS", outputDegsPerSec);
 
-    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.001;
+    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.002;
     Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
 
     outputDegsPerSec = outputDegsPerSec + cubicOutput;

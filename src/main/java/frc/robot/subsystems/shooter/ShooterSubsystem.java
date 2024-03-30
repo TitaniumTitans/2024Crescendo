@@ -1,12 +1,15 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lib.utils.AimbotUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -16,15 +19,22 @@ public class ShooterSubsystem extends SubsystemBase {
   private double m_leftSpeedSetpoint = 3800.0;
   private double m_rightSpeedSetpoint = 3800.0;
 
+  private final Supplier<Pose2d> m_poseSupplier;
+
   private final LoggedDashboardNumber m_leftSetpoint =
       new LoggedDashboardNumber("Shooter/Left RPM", 4000);
   private final LoggedDashboardNumber m_rightSetpoint =
       new LoggedDashboardNumber("Shooter/Right RPM", 4750);
 
   public ShooterSubsystem(ShooterIO io) {
+    this(io, () -> new Pose2d());
+  }
+
+  public ShooterSubsystem(ShooterIO io, Supplier<Pose2d> pose2dSupplier) {
     m_io = io;
     m_inputs = new ShooterIOInputsAutoLogged();
 
+    m_poseSupplier = pose2dSupplier;
     // turn on logging
   }
 
@@ -55,7 +65,10 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    return runShooterVelocity(runKicker, m_leftSetpoint::get, m_rightSetpoint::get);
+    double distance = AimbotUtils.getDistanceFromSpeaker(m_poseSupplier.get());
+    return runShooterVelocity(runKicker,
+        () -> AimbotUtils.getLeftSpeed(distance),
+        () -> AimbotUtils.getRightSpeed(distance));
   }
 
   public Command runShooterVelocity(boolean runKicker, DoubleSupplier leftRPM, DoubleSupplier rightRPM) {

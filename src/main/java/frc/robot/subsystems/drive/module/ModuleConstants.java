@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive.module;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 
 public record ModuleConstants(
     // Physical constants
@@ -17,7 +18,7 @@ public record ModuleConstants(
     double DRIVE_KP, double DRIVE_KI, double DRIVE_KD,
     // Turning loop gains
     double TURN_KP, double TURN_KI, double TURN_KD) {
-  public static final double DEFAULT_WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+  public static final double DEFAULT_WHEEL_RADIUS_METERS = Constants.DriveConstants.WHEEL_RADIUS_METERS;
   public static final ModuleConstants BLANK_CONSTANTS = new ModuleConstants(
           0,
           new int[] {0, 0, 0},

@@ -227,7 +227,10 @@ public class RobotContainer {
     // 96.240234375
     // 60.029296875
     // 2250
-    m_shooter.setDefaultCommand(m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000));
+    m_shooter.setDefaultCommand(
+        m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000)
+            .finallyDo(() -> m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0))
+        .unless(m_climber::getClimberLock));
     m_driveSubsystem.setDefaultCommand(
         new JoystickDriveCommand(
                 m_driveSubsystem,
@@ -249,11 +252,11 @@ public class RobotContainer {
 
     /** Operator controller */
     m_operatorController.leftTrigger().whileTrue(
-        m_shooter.runShooterVelocity(false, () -> 1400, () -> 1400));
+        m_shooter.runShooterVelocity(true, () -> 250, () -> 250));
     m_operatorController.rightTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
+        m_shooter.runShooterVelocity(true, () -> 750, () -> 100));
 
-    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-360.0 * 3.0));
+    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-1640.0));
     m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
         .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
     m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
@@ -286,6 +289,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", new IntakeControlCommand(m_armSubsystem, m_shooter));
 
     NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem));
+    NamedCommands.registerCommand("SpinupShooter", m_shooter.runShooterVelocity(false));
   }
 
   private void configureDashboard() {
