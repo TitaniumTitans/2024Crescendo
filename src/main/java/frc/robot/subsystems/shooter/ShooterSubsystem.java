@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -65,7 +66,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public Command runShooterVelocity(boolean runKicker) {
-    double distance = AimbotUtils.getDistanceFromSpeaker(m_poseSupplier.get());
+    double distance = Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(m_poseSupplier.get()));
     return runShooterVelocity(runKicker,
         () -> AimbotUtils.getLeftSpeed(distance),
         () -> AimbotUtils.getRightSpeed(distance));

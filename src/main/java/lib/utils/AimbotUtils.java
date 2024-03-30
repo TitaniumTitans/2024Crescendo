@@ -67,9 +67,9 @@ public class AimbotUtils {
   }
 
   public static double getLeftSpeed(double distance) {
-    if (75.0 >= distance) {
+    if (75.0 > distance) {
       return 4250;
-    } else if (distance >= 175.0) {
+    } else if (distance > 170.0) {
       return 5250;
     } else {
       return 4500;
@@ -77,9 +77,9 @@ public class AimbotUtils {
   }
 
   public static double getRightSpeed(double distance) {
-    if (65.0 >= distance) {
+    if (75.0 > distance) {
       return 3500;
-    } else if (distance >= 170.0) {
+    } else if (distance > 170.0) {
       return 4750;
     } else {
       return 3750;

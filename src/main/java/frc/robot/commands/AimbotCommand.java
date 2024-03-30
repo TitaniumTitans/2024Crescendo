@@ -93,7 +93,7 @@ public class AimbotCommand extends Command {
     x = MathUtil.applyDeadband(x, 0.1);
     y = MathUtil.applyDeadband(y, 0.1);
 
-    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15) * 0.65;
+    double o = DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15) * 0.75;
     o = MathUtil.applyDeadband(o, 0.1);
 
     Rotation2d heading;
@@ -185,14 +185,14 @@ public class AimbotCommand extends Command {
       }
     } else {
       m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-          x,
-          y,
-          o,
+          x * m_driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+          y * m_driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+          o * m_driveSubsystem.getMaxAngularSpeedRadPerSec(),
           heading
       ));
 
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.BACKUP_SHOT);
-      m_shooterSubsystem.runShooterVelocity(m_runKicker, () -> 4500, () -> 3750);
+      m_shooterSubsystem.runShooterVelocity(m_runKicker, () -> 4500, () -> 3750).execute();
     }
   }
 

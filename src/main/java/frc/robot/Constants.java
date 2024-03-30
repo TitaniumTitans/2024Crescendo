@@ -246,7 +246,7 @@ public final class Constants {
   public static class ArmSetpoints {
     public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
     public static final ArmPose TRAP_PREPARE = new ArmPose(92.0, 145.0);
-    public static final ArmPose TRAP_SCORE = new ArmPose(47.0, 119.5);
+    public static final ArmPose TRAP_SCORE = new ArmPose(47.0, 120.5);
 
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");

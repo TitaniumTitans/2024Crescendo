@@ -367,12 +367,12 @@ public class DriveSubsystem extends SubsystemBase {
     double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
     Logger.recordOutput("Drive/Theta Output DegsS", outputDegsPerSec);
 
-    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.002;
+    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.003;
     Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
 
     outputDegsPerSec = outputDegsPerSec + cubicOutput;
     // apply deadband, wpilib version borked?
-    if (1.0 > outputDegsPerSec && outputDegsPerSec > -1.0) {
+    if (0.5 > outputDegsPerSec && outputDegsPerSec > -0.5) {
       outputDegsPerSec = 0.0;
     }
 
