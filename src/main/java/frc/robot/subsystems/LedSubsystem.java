@@ -9,11 +9,11 @@ import java.util.function.BooleanSupplier;
 
 public class LedSubsystem extends SubsystemBase {
     private final CANdle m_candle;
-    private static final int m_numLED = 400;
+    private static final int m_numLed = 400;
     private final BooleanSupplier m_hasNote;
 
-    private final Animation m_red = new ColorFlowAnimation(255,0, 0, 0, 0.5, m_numLED, ColorFlowAnimation.Direction.Forward);
-    private final Animation m_blue = new ColorFlowAnimation(0, 255, 0, 0, 0.5, m_numLED, ColorFlowAnimation.Direction.Forward);
+    private final Animation m_red = new ColorFlowAnimation(255,0, 0, 0, 0.5, m_numLed, ColorFlowAnimation.Direction.Forward);
+    private final Animation m_blue = new ColorFlowAnimation(0, 255, 0, 0, 0.5, m_numLed, ColorFlowAnimation.Direction.Forward);
 
     public LedSubsystem(BooleanSupplier hasNote) {
         m_candle = new CANdle(ShooterConstants.LED_ID);
@@ -24,7 +24,7 @@ public class LedSubsystem extends SubsystemBase {
     public void periodic() {
         if (m_hasNote.getAsBoolean()) {
             m_candle.animate(m_red);}
-        else if (!m_hasNote.getAsBoolean()) {
+        else {
             m_candle.animate(m_blue);}
     }
 

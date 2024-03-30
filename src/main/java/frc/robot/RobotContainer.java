@@ -101,7 +101,6 @@ public class RobotContainer {
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
             m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
-        m_led = new LedSubsystem(m_shooter::hasPiece);
       }
       case SIM -> {
       // Sim robot, instantiate physics sim IO implementations
@@ -116,7 +115,6 @@ public class RobotContainer {
         m_climber = new ClimberSubsystem(new ClimberIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOSim(),
             m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
-        m_led = new LedSubsystem(m_shooter::hasPiece);;
       }
       default -> {
         // Replayed robot, disable IO implementations
@@ -130,9 +128,9 @@ public class RobotContainer {
         m_shooter = new ShooterSubsystem(new ShooterIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIO() {});
         m_climber = new ClimberSubsystem(new ClimberIO() {});
-        m_led = new LedSubsystem(m_shooter::hasPiece);
       }
     }
+    m_led = new LedSubsystem(m_shooter::hasPiece);
 
     // configure named commands for auto
     configureNamedCommands();
