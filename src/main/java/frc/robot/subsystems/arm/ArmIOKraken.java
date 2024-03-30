@@ -231,12 +231,12 @@ public class ArmIOKraken implements ArmIO {
     inputs.wristCurrentDraw = m_wristCurrentDrawSignal.getValueAsDouble();
 
     // update any pid properties
-    m_wristProperty.updateIfChanged();
-    m_armProperty.updateIfChanged();
+//    m_wristProperty.updateIfChanged();
+//    m_armProperty.updateIfChanged();
 
-    m_armMaxVelDegS.updateIfChanged();
-    m_wristMaxVelDegS.updateIfChanged();
-    m_accelTimeSecs.updateIfChanged();
+//    m_armMaxVelDegS.updateIfChanged();
+//    m_wristMaxVelDegS.updateIfChanged();
+//    m_accelTimeSecs.updateIfChanged();
 
     Logger.recordOutput("Arm Prev Vel Mult", m_prevArmVelocityMult);
     Logger.recordOutput("Wrist Prev Vel Mult", m_prevWristVelocityMult);

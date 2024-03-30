@@ -154,8 +154,8 @@ public class AimbotCommand extends Command {
       // get our desired rotation and error from it
       Rotation2d desiredRotation =
           AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget);
-      x = MathUtil.clamp(x, -0.25, 0.25);
-      y = MathUtil.clamp(y, -0.25, 0.25);
+      x = MathUtil.clamp(x, -0.45, 0.45);
+      y = MathUtil.clamp(y, -0.45, 0.45);
 
       // if we're far from our setpoint, move faster
       double omega = m_driveSubsystem.alignToAngle(desiredRotation);

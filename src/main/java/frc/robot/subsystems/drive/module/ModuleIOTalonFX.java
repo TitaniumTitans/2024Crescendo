@@ -56,15 +56,15 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final ModuleConstants m_moduleConstants;
 
   private final StatusSignal<Double> m_drivePosition;
-  private final Queue<Double> m_drivePositionQueue;
+//  private final Queue<Double> m_drivePositionQueue;
   private final StatusSignal<Double> m_driveVelocity;
   private final StatusSignal<Double> m_driveAppliedVolts;
   private final StatusSignal<Double> m_driveCurrent;
 
   private final StatusSignal<Double> m_turnAbsolutePosition;
   private final StatusSignal<Double> m_turnPosition;
-  private final Queue<Double> m_turnPositionQueue;
-  private final Queue<Double> m_timestampQueue;
+//  private final Queue<Double> m_turnPositionQueue;
+//  private final Queue<Double> m_timestampQueue;
   private final StatusSignal<Double> m_turnVelocity;
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
@@ -151,8 +151,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     // setup drive values
     m_driveTalon.setPosition(0.0);
     m_drivePosition = m_driveTalon.getPosition();
-    m_drivePositionQueue =
-            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
+//    m_drivePositionQueue =
+//            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
     m_driveVelocity = m_driveTalon.getVelocity();
     m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
     m_driveCurrent = m_driveTalon.getStatorCurrent();
@@ -161,8 +161,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnTalon.setPosition(0.0);
 
     m_turnPosition = m_turnTalon.getPosition();
-    m_turnPositionQueue =
-        PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
+//    m_turnPositionQueue =
+//        PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
     m_turnVelocity = m_turnTalon.getVelocity();
     m_turnAppliedVolts = m_turnTalon.getMotorVoltage();
     m_turnCurrent = m_turnTalon.getStatorCurrent();
@@ -171,7 +171,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnClosedLoopError = m_turnTalon.getClosedLoopError();
     m_turnClosedLoopReference = m_turnTalon.getClosedLoopReference();
 
-    m_timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
+//    m_timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
     // setup refresh rates on all inputs
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -208,8 +208,8 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_turnClosedLoopError,
             m_turnClosedLoopReference);
 
-    m_drivePid.updateIfChanged();
-    m_turnPid.updateIfChanged();
+//    m_drivePid.updateIfChanged();
+//    m_turnPid.updateIfChanged();
 
     inputs.drivePositionRad =
         Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
@@ -227,18 +227,18 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
 
-    inputs.odometryTimestamps =
-            m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
-        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / m_moduleConstants.DRIVE_GEAR_RATIO())
-        .toArray());
-    inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
-        .map(Rotation2d::fromRotations)
-        .toArray(Rotation2d[]::new));
+//    inputs.odometryTimestamps =
+//            m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+//    inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
+//        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / m_moduleConstants.DRIVE_GEAR_RATIO())
+//        .toArray());
+//    inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
+//        .map(Rotation2d::fromRotations)
+//        .toArray(Rotation2d[]::new));
 
-    m_timestampQueue.clear();
-    m_drivePositionQueue.clear();
-    m_turnPositionQueue.clear();
+//    m_timestampQueue.clear();
+//    m_drivePositionQueue.clear();
+//    m_turnPositionQueue.clear();
   }
 
   @Override

@@ -17,9 +17,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -93,7 +91,7 @@ public class RobotContainer {
             new VisionSubsystem[]{
                 new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
                 new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
-                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
+//                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
             }
             );
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());

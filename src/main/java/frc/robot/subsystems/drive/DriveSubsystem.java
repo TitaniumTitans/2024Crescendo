@@ -131,7 +131,7 @@ public class DriveSubsystem extends SubsystemBase {
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
 
-    PhoenixOdometryThread.getInstance().start();
+//    PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(0, 360);
@@ -163,7 +163,7 @@ public class DriveSubsystem extends SubsystemBase {
         VecBuilder.fill(
             Units.inchesToMeters(4.5),
             Units.inchesToMeters(4.5),
-            Units.degreesToRadians(15.0))
+            Units.degreesToRadians(12.5))
     );
 
     m_wheelOnlyPoseEstimator = new SwerveDrivePoseEstimator(
@@ -243,36 +243,36 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Update odometry
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
-    for (int i = 0; i < sampleCount; i++) {
-      // Read wheel positions and deltas from each module
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - m_lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
-        m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-      }
-
-      // Update gyro angle
-      if (gyroInputs.connected) {
-        // Use the real gyro angle
-        m_rawGyroRotation = gyroInputs.odometryYawPositions[i];
-      } else {
-        // Use the angle delta from the kinematics and module deltas
-        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-      }
+//    double[] sampleTimestamps =
+//        modules[0].getOdometryTimestamps(); // All signals are sampled together
+//    int sampleCount = sampleTimestamps.length;
+//    for (int i = 0; i < sampleCount; i++) {
+//       Read wheel positions and deltas from each module
+//      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+//      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+//      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+//        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+//        moduleDeltas[moduleIndex] =
+//            new SwerveModulePosition(
+//                modulePositions[moduleIndex].distanceMeters
+//                    - m_lastModulePositions[moduleIndex].distanceMeters,
+//                modulePositions[moduleIndex].angle);
+//        m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+//      }
+//
+//       Update gyro angle
+//      if (gyroInputs.connected) {
+//         Use the real gyro angle
+//        m_rawGyroRotation = gyroInputs.odometryYawPositions[i];
+//      } else {
+//         Use the angle delta from the kinematics and module deltas
+//        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+//        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+//      }
 
       // Apply update
 //      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
-    }
+//    }
 
     for (VisionSubsystem camera : m_cameras) {
       // make sure we're not moving too fast before trying to update vision poses
@@ -367,7 +367,7 @@ public class DriveSubsystem extends SubsystemBase {
     double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
     Logger.recordOutput("Drive/Theta Output DegsS", outputDegsPerSec);
 
-    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.003;
+    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.008;
     Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
 
     outputDegsPerSec = outputDegsPerSec + cubicOutput;

@@ -23,6 +23,7 @@ public final class AutoFactory {
     SOURCE_PRELOAD_MOBILITY("SourcePreloadMobility"),
     SOURCE_WING_1("SourceWing1"),
     SOURCE_CONTESTED_1("SourceContested1"),
+    SOURCE_CONTESTED_1_2("SourceContested12"),
     SOURCE_WING_1_CONTESTED_1("SourceWing1Contested1");
 
     public final String m_modeName;
