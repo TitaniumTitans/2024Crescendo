@@ -70,7 +70,7 @@ public class RobotContainer {
   private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
   private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
   private final LoggedDashboardBoolean m_useAmpLineup
-      = new LoggedDashboardBoolean("Use Amp Lineup?", true);
+      = new LoggedDashboardBoolean("Use Amp Lineup?", false);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
@@ -200,11 +200,11 @@ public class RobotContainer {
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, () -> 3500, () -> 3500)));
+            .alongWith(m_shooter.runShooterVelocity(false, () -> 3250, () -> 3250)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, () -> 3500, () -> 3500)));
+            .alongWith(m_shooter.runShooterVelocity(true, () -> 3250, () -> 3250)));
 
     m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
@@ -250,9 +250,9 @@ public class RobotContainer {
 
     /** Operator controller */
     m_operatorController.leftTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, () -> 250, () -> 250));
+        m_shooter.runShooterVelocity(false, () -> 0, () -> 0));
     m_operatorController.rightTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, () -> 750, () -> 100));
+        m_shooter.runShooterVelocity(true, () -> 1000, () -> 1000));
 
     m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-1640.0));
     m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
