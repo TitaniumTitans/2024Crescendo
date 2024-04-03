@@ -76,7 +76,7 @@ public class ShooterAutoCommand extends Command {
 
     // too long check may change as system gets tuned
     return (!m_shooterSubsystem.hasPiece() && m_hasChanged
-        && m_timer.hasElapsed(1.25)) || m_timer.hasElapsed(5.0);
+        && m_timer.hasElapsed(0.75)) || m_timer.hasElapsed(5.0);
   }
 
   @Override
