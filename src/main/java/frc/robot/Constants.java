@@ -309,7 +309,7 @@ public final class Constants {
     public static final int KICKER_ID = 24;
     public static final int INTAKE_ID = 14;
     public static final int INDEXER_ID = 15;
-    public static final int LED_ID = 0; /* change later */
+    public static final int LED_ID = 27; /* change later */
 
     public static final double SHOOTER_KP = 0.015;
     public static final double SHOOTER_KI = 0.0;
