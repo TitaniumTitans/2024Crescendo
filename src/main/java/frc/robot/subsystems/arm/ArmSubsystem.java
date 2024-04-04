@@ -98,7 +98,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     // check to make sure we're not in manual control
-    m_io.enableBrakeMode(false && m_desiredState == ArmState.DISABLED && m_disabledBrakeMode);
+    m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED && m_disabledBrakeMode);
 
     if (m_desiredState != ArmState.DISABLED) {
       // check to see if the wrist is currently too close to the rest of the arm
