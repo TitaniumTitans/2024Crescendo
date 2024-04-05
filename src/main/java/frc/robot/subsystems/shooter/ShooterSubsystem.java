@@ -77,6 +77,9 @@ public class ShooterSubsystem extends SubsystemBase {
           m_leftSpeedSetpoint = leftRPM.getAsDouble();
           m_rightSpeedSetpoint = rightRPM.getAsDouble();
 
+          Logger.recordOutput("Shooter/Left Setpoint", m_leftSpeedSetpoint);
+          Logger.recordOutput("Shooter/Right Setpoint", m_rightSpeedSetpoint);
+
           m_io.setLeftVelocityRpm(m_leftSpeedSetpoint);
           m_io.setRightVelocityRpm(m_rightSpeedSetpoint);
 

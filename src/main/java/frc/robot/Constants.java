@@ -311,12 +311,12 @@ public final class Constants {
     public static final int INDEXER_ID = 15;
     public static final int LED_ID = 27; /* change later */
 
-    public static final double SHOOTER_KP = 0.015;
+    public static final double SHOOTER_KP = 0.017;
     public static final double SHOOTER_KI = 0.0;
-    public static final double SHOOTER_KD = 0.00675;
-    public static final double SHOOTER_KF = 0.000152;
+    public static final double SHOOTER_KD = 0.00855;
+    public static final double SHOOTER_KF = 0.000172;
     public static final double SHOOTER_KS = 0.21963;
-    public static final double SHOOTER_KV = 0.114541;
+    public static final double SHOOTER_KV = 0.154541;
 
     public static final boolean TOP_LEFT_INVERTED = false;
     public static final boolean TOP_RIGHT_INVERTED = true;

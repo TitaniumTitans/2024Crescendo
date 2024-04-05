@@ -77,7 +77,7 @@ public class RobotContainer {
   private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
   private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
   private final LoggedDashboardBoolean m_useAmpLineup
-      = new LoggedDashboardBoolean("Use Amp Lineup?", false);
+      = new LoggedDashboardBoolean("Use Amp Lineup?", true);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
@@ -234,9 +234,13 @@ public class RobotContainer {
     // 60.029296875
     // 2250
     m_shooter.setDefaultCommand(
-        m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000)
-            .finallyDo(() -> m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0))
-        .unless(m_climber::getClimberLock));
+        Commands.run(() -> {
+          if (!m_climber.getClimberLock() && m_shooter.hasPiece()) {
+            m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000).execute();
+          } else {
+            m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0);
+          }
+        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
         new JoystickDriveCommand(
                 m_driveSubsystem,

@@ -367,7 +367,7 @@ public class DriveSubsystem extends SubsystemBase {
     double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
     Logger.recordOutput("Drive/Theta Output DegsS", outputDegsPerSec);
 
-    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.008;
+    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.006;
     Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
 
     outputDegsPerSec = outputDegsPerSec + cubicOutput;
