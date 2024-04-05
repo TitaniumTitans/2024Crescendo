@@ -178,7 +178,7 @@ public class AimbotCommand extends Command {
       m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
 
       // set shooter speeds and rumble controller
-      if (m_shooterSubsystem.atSpeed() && error < 15.0) {
+      if (m_shooterSubsystem.atSpeed() && error < 20.0) {
         m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
       } else {
         m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);

@@ -30,7 +30,7 @@ public class JoystickDriveCommand extends Command {
 
   private final Timer m_timer;
 
-  public JoystickDriveCommand(DriveSubsystem driveSubsystem,
+  public \[]JoystickDriveCommand(DriveSubsystem driveSubsystem,
                               DoubleSupplier xSupplier,
                               DoubleSupplier ySupplier,
                               DoubleSupplier omegaSupplier) {
@@ -63,6 +63,19 @@ public class JoystickDriveCommand extends Command {
     double omega = MathUtil.applyDeadband(omegaInput, DEADBAND) * driveSubsystem.getMaxAngularSpeedRadPerSec();
 
     double rotationOutput = driveSubsystem.alignToAngle(m_headingGoal);
+
+    // Apply deadband
+    double linearMagnitude =
+            MathUtil.applyDeadband(
+                    Math.hypot(xInput, yInput), DEADBAND);
+    Rotation2d linearDirection =
+            new Rotation2d(xInput, yInput);
+
+    // Calcaulate new linear velocity
+    Translation2d linearVelocity =
+            new Pose2d(new Translation2d(), linearDirection)
+                    .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+                    .getTranslation();
 
     if (Math.abs(omegaInput) > DEADBAND) {
       rotationOutput = omega;
@@ -97,9 +110,9 @@ public class JoystickDriveCommand extends Command {
     // Convert to field relative speeds & send command
     driveSubsystem.runVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            xInput * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
-            yInput * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
-            rotationOutput,
+                linearVelocity.getX() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+                linearVelocity.getY() * driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+                rotationOutput,
             heading));
   }
 }
