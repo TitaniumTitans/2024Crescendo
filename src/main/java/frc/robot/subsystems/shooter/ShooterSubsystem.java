@@ -116,7 +116,7 @@ public class ShooterSubsystem extends SubsystemBase {
             setKickerPower(kickerPower);
             timer.restart();
           } else if (!timer.hasElapsed(timeout)) {
-            setKickerPower(-0.13);
+            setKickerPower(-0.15);
             setIntakePower(0.0);
           } else {
             setShooterPowerRight(0.0);

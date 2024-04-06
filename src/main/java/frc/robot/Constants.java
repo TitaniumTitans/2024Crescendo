@@ -43,7 +43,7 @@ public final class Constants {
     throw new IllegalStateException("Constants class should not be constructed");
   }
 
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -82,7 +82,7 @@ public final class Constants {
         = new GosBooleanProperty(false, "Drive/Use David Drive", false);
 
     // kV, kS, kA in order
-    public static final double[] DRIVE_FF_GAINS = new double[]{0.06, 0.35, 0.0};
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.08, 0.35, 0.0};
     // kP, kI, kD in order
     public static final double[] DRIVE_FB_GAINS = new double[]{0.08, 0.0, 0.0};
     // kP, kI, kD in order
@@ -334,7 +334,7 @@ public final class Constants {
     public static final int LEFT_CLIMBER_ID = 16;
     public static final int RIGHT_CLIMBER_ID = 17;
 
-    public static final double CLIMBER_KP = 24.0;
+    public static final double CLIMBER_KP = 48.0;
     public static final double CLIMBER_KI = 0.0;
     public static final double CLIMBER_KD = 0.0;
 

@@ -30,7 +30,7 @@ public class JoystickDriveCommand extends Command {
 
   private final Timer m_timer;
 
-  public \[]JoystickDriveCommand(DriveSubsystem driveSubsystem,
+  public JoystickDriveCommand(DriveSubsystem driveSubsystem,
                               DoubleSupplier xSupplier,
                               DoubleSupplier ySupplier,
                               DoubleSupplier omegaSupplier) {
@@ -53,8 +53,8 @@ public class JoystickDriveCommand extends Command {
 
   @Override
   public void execute() {
-    double xInput = setSensitivity(xSupplier.getAsDouble(), 0.25);
-    double yInput = setSensitivity(ySupplier.getAsDouble(), 0.25);
+    double xInput = setSensitivity(xSupplier.getAsDouble(), 0.5);
+    double yInput = setSensitivity(ySupplier.getAsDouble(), 0.5);
     double omegaInput = setSensitivity(omegaSupplier.getAsDouble(), 0.0)
             * Constants.DriveConstants.TURNING_SPEED.getValue();
 

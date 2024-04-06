@@ -97,7 +97,7 @@ public class RobotContainer {
             new ModuleIOTalonFX(DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
                 new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
-                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
+//                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
 //                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
             }
             );
@@ -187,7 +187,7 @@ public class RobotContainer {
 
     /** driver controller */
 
-    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.13)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
     spinUpTrigger.whileTrue(
@@ -233,14 +233,14 @@ public class RobotContainer {
     // 96.240234375
     // 60.029296875
     // 2250
-    m_shooter.setDefaultCommand(
-        Commands.run(() -> {
-          if (!m_climber.getClimberLock() && m_shooter.hasPiece()) {
-            m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000).execute();
-          } else {
-            m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0);
-          }
-        }, m_shooter));
+//    m_shooter.setDefaultCommand(
+//        Commands.run(() -> {
+//          if (!m_climber.getClimberLock() && m_shooter.hasPiece()) {
+//            m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000).execute();
+//          } else {
+//            m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0);
+//          }
+//        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
         new JoystickDriveCommand(
                 m_driveSubsystem,
