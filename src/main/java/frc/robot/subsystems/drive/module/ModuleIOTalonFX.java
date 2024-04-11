@@ -220,25 +220,14 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     inputs.setTurnAbsolutePosition(Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble())
         .minus(m_moduleConstants.ENCODER_OFFSET()));
+
     inputs.setTurnPosition(Rotation2d.fromRotations((
             m_turnPosition.getValueAsDouble())));
+
     inputs.setTurnVelocityRadPerSec(
             Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()));
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
-
-//    inputs.odometryTimestamps =
-//            m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-//    inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
-//        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / m_moduleConstants.DRIVE_GEAR_RATIO())
-//        .toArray());
-//    inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
-//        .map(Rotation2d::fromRotations)
-//        .toArray(Rotation2d[]::new));
-
-//    m_timestampQueue.clear();
-//    m_drivePositionQueue.clear();
-//    m_turnPositionQueue.clear();
   }
 
   @Override
