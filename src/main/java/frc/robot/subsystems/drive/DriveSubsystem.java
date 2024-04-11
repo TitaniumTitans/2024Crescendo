@@ -19,6 +19,7 @@ import com.gos.lib.properties.pid.WpiPidPropertyBuilder;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -50,6 +51,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.*;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,6 +70,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
 
   private final SwerveDrivePoseEstimator m_wpiPoseEstimator;
+  private final SwerveDrivePoseEstimator m_wheelOnlyPoseEstimator;
 
   private final Field2d m_field = new Field2d();
 
@@ -99,6 +102,8 @@ public class DriveSubsystem extends SubsystemBase {
   private FieldRelativeSpeed m_lastFieldRelVel = new FieldRelativeSpeed();
   private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
 
+  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", true);
+
   public DriveSubsystem(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -126,13 +131,13 @@ public class DriveSubsystem extends SubsystemBase {
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
 
-    PhoenixOdometryThread.getInstance().start();
+//    PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(0, 360);
     m_thetaPid.setTolerance(5.0);
 
-    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
+    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
         .addP(0.02)
         .addI(0.01)
         .addD(0.004)
@@ -156,8 +161,23 @@ public class DriveSubsystem extends SubsystemBase {
             Units.inchesToMeters(0.5),
             Units.degreesToRadians(0.75)),
         VecBuilder.fill(
-            Units.inchesToMeters(2.0),
-            Units.inchesToMeters(2.0),
+            Units.inchesToMeters(4.5),
+            Units.inchesToMeters(4.5),
+            Units.degreesToRadians(12.5))
+    );
+
+    m_wheelOnlyPoseEstimator = new SwerveDrivePoseEstimator(
+        kinematics,
+        new Rotation2d(),
+        getModulePositions(),
+        new Pose2d(),
+        VecBuilder.fill(
+            Units.inchesToMeters(0.5),
+            Units.inchesToMeters(0.5),
+            Units.degreesToRadians(0.75)),
+        VecBuilder.fill(
+            Units.inchesToMeters(5.0),
+            Units.inchesToMeters(5.0),
             Units.degreesToRadians(30.0))
     );
 
@@ -223,53 +243,60 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Update odometry
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
-    for (int i = 0; i < sampleCount; i++) {
-      // Read wheel positions and deltas from each module
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-        moduleDeltas[moduleIndex] =
-            new SwerveModulePosition(
-                modulePositions[moduleIndex].distanceMeters
-                    - m_lastModulePositions[moduleIndex].distanceMeters,
-                modulePositions[moduleIndex].angle);
-        m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-      }
-
-      // Update gyro angle
-      if (gyroInputs.connected) {
-        // Use the real gyro angle
-        m_rawGyroRotation = gyroInputs.odometryYawPositions[i];
-      } else {
-        // Use the angle delta from the kinematics and module deltas
-        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-      }
+//    double[] sampleTimestamps =
+//        modules[0].getOdometryTimestamps(); // All signals are sampled together
+//    int sampleCount = sampleTimestamps.length;
+//    for (int i = 0; i < sampleCount; i++) {
+//       Read wheel positions and deltas from each module
+//      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+//      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+//      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+//        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+//        moduleDeltas[moduleIndex] =
+//            new SwerveModulePosition(
+//                modulePositions[moduleIndex].distanceMeters
+//                    - m_lastModulePositions[moduleIndex].distanceMeters,
+//                modulePositions[moduleIndex].angle);
+//        m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+//      }
+//
+//       Update gyro angle
+//      if (gyroInputs.connected) {
+//         Use the real gyro angle
+//        m_rawGyroRotation = gyroInputs.odometryYawPositions[i];
+//      } else {
+//         Use the angle delta from the kinematics and module deltas
+//        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+//        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+//      }
 
       // Apply update
-      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
-    }
+//      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
+//    }
 
-    // make sure we're not moving too fast before trying to update vision poses
-    if ((kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
-        && (kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond <= DriveConstants.MAX_LINEAR_SPEED * 0.75)
-        && (kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond <= DriveConstants.MAX_ANGULAR_SPEED * 0.75)
-        || DriverStation.isTeleop()) {
-      for (VisionSubsystem camera : m_cameras) {
-        camera.updateInputs();
+    for (VisionSubsystem camera : m_cameras) {
+      // make sure we're not moving too fast before trying to update vision poses
+      if ((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
+          Units.inchesToMeters(6.0)) == 0.0)
+          && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond,
+          Units.inchesToMeters(6.0)) == 0.0)
+          && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
+          Units.degreesToRadians(7.5)) == 0.0)
+          || !DriverStation.isAutonomousEnabled()) {
+
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
             (PoseEstimator.TimestampedVisionUpdate pose) ->
                 m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
         );
       }
+      camera.updateInputs();
     }
 
-    m_wpiPoseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyroInputs.yawPosition, getModulePositions());
+    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
+    m_wheelOnlyPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
+
+    Logger.recordOutput("Odometry/Wheel Only Odometry", m_wheelOnlyPoseEstimator.getEstimatedPosition());
 
     Logger.recordOutput("Drive/DistanceToTarget",
         Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
@@ -292,7 +319,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
+//    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
@@ -302,6 +329,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveStates/Optimized", m_optimizedStates);
+
+    Logger.recordOutput("Drive/Desired Linear Velocity FPS",
+        Units.metersToFeet(Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
   }
 
   public void davidDrive(double xVel, double yVel, double angle) {
@@ -333,12 +363,27 @@ public class DriveSubsystem extends SubsystemBase {
      */
   public double alignToAngle(Rotation2d angle) {
     double currentAngle = getVisionPose().getRotation().getDegrees();
-    double error = Math.abs(currentAngle - angle.getDegrees());
-    if (error > 15.0) {
-      return m_largeThetaPid.calculate(currentAngle, angle.getDegrees());
-    } else {
-      return m_thetaPid.calculate(currentAngle, angle.getDegrees());
+    double desiredAngle = angle.getDegrees();
+    double outputDegsPerSec = m_thetaPid.calculate(currentAngle, desiredAngle);
+    Logger.recordOutput("Drive/Theta Output DegsS", outputDegsPerSec);
+
+    double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.006;
+    Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
+
+    outputDegsPerSec = outputDegsPerSec + cubicOutput;
+    // apply deadband, wpilib version borked?
+    if (0.5 > outputDegsPerSec && outputDegsPerSec > -0.5) {
+      outputDegsPerSec = 0.0;
     }
+
+    Logger.recordOutput("Drive/Final Theta Output", outputDegsPerSec);
+
+    return Units.degreesToRadians(outputDegsPerSec);
+  }
+
+  @AutoLogOutput(key = "Drive/Theta Error")
+  public double getThetaError() {
+    return m_thetaPid.getPositionError();
   }
 
   /** Stops the drive. */
@@ -377,7 +422,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Returns whether there are connected april tag cameras */
   public boolean useAutoControl() {
-    return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected));
+    return Arrays.stream(m_cameras).anyMatch((VisionSubsystem::apriltagConnected))
+        && m_useAutoCrap.get();
   }
 
   /** Returns the module states (turn angles and drive velocities) for all the modules. */
@@ -396,6 +442,10 @@ public class DriveSubsystem extends SubsystemBase {
       positions[i] = modules[i].getPosition();
     }
     return positions;
+  }
+
+  public Pose2d getPose() {
+    return m_wheelOnlyPoseEstimator.getEstimatedPosition();
   }
 
   /** Returns the robot pose with vision updates */
@@ -427,6 +477,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void setPose(Pose2d pose) {
     gyroIO.resetGyro(pose.getRotation().getDegrees());
     m_wpiPoseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
+    m_wheelOnlyPoseEstimator.resetPosition(new Rotation2d(), getModulePositions(), pose);
   }
 
   /** Returns the maximum linear speed in meters per sec. */

@@ -69,9 +69,9 @@ public final class Constants {
     public static final int PIGEON_ID = 13;
 
     // module constants
-    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0 - (1.0 / 8.0));
 
-    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(16.5);
+    public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.75);
     public static final double TRACK_WIDTH_Y = Units.inchesToMeters(20.75);
     public static final double DRIVE_BASE_RADIUS =
@@ -82,7 +82,7 @@ public final class Constants {
         = new GosBooleanProperty(false, "Drive/Use David Drive", false);
 
     // kV, kS, kA in order
-    public static final double[] DRIVE_FF_GAINS = new double[]{0.06, 0.35, 0.0};
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.08, 0.35, 0.0};
     // kP, kI, kD in order
     public static final double[] DRIVE_FB_GAINS = new double[]{0.08, 0.0, 0.0};
     // kP, kI, kD in order
@@ -90,24 +90,24 @@ public final class Constants {
 
     public static final Transform3d LEFT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(11.0351 + 0.25), // 11.0351
+            Units.inchesToMeters(11.0351 + 1.25), // 11.0351
             Units.inchesToMeters(10.023204 - 2.0), // 10.023204
             Units.inchesToMeters(7.1374 - 2.0)), // 4.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0 + 1.0),
-            Units.degreesToRadians(-30.0 + 4.0), // -120.0 + 91.0
-            Units.degreesToRadians(-14.7 - 3.0)) // 165.3224 + 180
+            Units.degreesToRadians(0.0 + 0.5),
+            Units.degreesToRadians(-30.0 + 0.75), // -120.0 + 91.0
+            Units.degreesToRadians(-14.7 + 6.0)) // 165.3224 + 180
     );
 
     public static final Transform3d RIGHT_CAMERA_TRANSFORMATION = new Transform3d(
         new Translation3d(
-            Units.inchesToMeters(11.0351 + 0.25), //11.0351
-            Units.inchesToMeters(-10.023204), //-10.023204
-            Units.inchesToMeters(7.1374 - 0.0)), // 7.1374
+            Units.inchesToMeters(11.0351 - 1.25), //11.0351
+            Units.inchesToMeters(-10.023204 - 3.5), //-10.023204
+            Units.inchesToMeters(7.1374 - 2.0)), // 7.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0 + 0.5),
-            Units.degreesToRadians(-30.0 - 2.5), // -30.0 - 1
-            Units.degreesToRadians(14.7 - 2.0)) // 165.3224)
+            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(-30.0 - 1.5), // -30.0 - 1
+            Units.degreesToRadians(14.7 - 11.0)) // 165.3224)
     );
 
     public static final Transform3d INTAKE_CAMERA_TRANSFORMATION = new Transform3d(
@@ -129,7 +129,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(4.75, 0.35), new PIDConstants(4.5, 0.75),
+        new PIDConstants(5.0, 0.0), new PIDConstants(5.5, 0.0),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(
@@ -191,7 +191,7 @@ public final class Constants {
     /* Because the absolute encoders are on a 2/1 ratio, we have to move our offset down a little into a rotation lower
     * than the lowest point the arm and wrist will move to , and then compensate for that in our encoder reset code */
     public static final double OFFSET_NUDGE = 45;
-    public static final double ARM_OFFSET = -0.123779 + Units.degreesToRotations(OFFSET_NUDGE);
+    public static final double ARM_OFFSET = -0.318115 + Units.degreesToRotations(OFFSET_NUDGE);
     public static final double WRIST_OFFSET = 0.000000 + Units.degreesToRotations(OFFSET_NUDGE);
     public static final double ARM_SENSOR_MECHANISM_RATIO =
         (56.0 / 12.0) * (66.0 / 18.0) * (80.0 / 18.0) * (64.0 / 24.0);
@@ -246,7 +246,7 @@ public final class Constants {
   public static class ArmSetpoints {
     public static final ArmPose PASS_SETPOINT = new ArmPose("ArmPoses/Pass Setpoint", false, 45, 55);
     public static final ArmPose TRAP_PREPARE = new ArmPose(92.0, 145.0);
-    public static final ArmPose TRAP_SCORE = new ArmPose(45.0, 123.5);
+    public static final ArmPose TRAP_SCORE = new ArmPose(47.0, 120.5);
 
     private ArmSetpoints() {
       throw new IllegalStateException("Static classes should not be constructed");
@@ -255,9 +255,9 @@ public final class Constants {
     public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
 
     public static final ArmPose STOW_SETPOINT = new
-        ArmPose("ArmPoses/Stow", true, 0.0, 45.0);
+        ArmPose("ArmPoses/Stow", true, 0.0, 35.0);
     public static final ArmPose INTAKE_SETPOINT =
-        new ArmPose("ArmPoses/Intake", true, -7.0, 55.0);
+        new ArmPose("ArmPoses/Intake", true, -5.75, 45.0);
     public static final ArmPose AMP_SETPOINT =
         new ArmPose("ArmPoses/Amp", true, 94.0, 145.0);
 
@@ -309,13 +309,14 @@ public final class Constants {
     public static final int KICKER_ID = 24;
     public static final int INTAKE_ID = 14;
     public static final int INDEXER_ID = 15;
+    public static final int LED_ID = 27; /* change later */
 
-    public static final double SHOOTER_KP = 0.015;
+    public static final double SHOOTER_KP = 0.010;
     public static final double SHOOTER_KI = 0.0;
     public static final double SHOOTER_KD = 0.00675;
-    public static final double SHOOTER_KF = 0.000152;
+    public static final double SHOOTER_KF = 0.000172;
     public static final double SHOOTER_KS = 0.21963;
-    public static final double SHOOTER_KV = 0.114541;
+    public static final double SHOOTER_KV = 0.174541;
 
     public static final boolean TOP_LEFT_INVERTED = false;
     public static final boolean TOP_RIGHT_INVERTED = true;
@@ -333,7 +334,7 @@ public final class Constants {
     public static final int LEFT_CLIMBER_ID = 16;
     public static final int RIGHT_CLIMBER_ID = 17;
 
-    public static final double CLIMBER_KP = 24.0;
+    public static final double CLIMBER_KP = 48.0;
     public static final double CLIMBER_KI = 0.0;
     public static final double CLIMBER_KD = 0.0;
 

@@ -56,15 +56,15 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final ModuleConstants m_moduleConstants;
 
   private final StatusSignal<Double> m_drivePosition;
-  private final Queue<Double> m_drivePositionQueue;
+//  private final Queue<Double> m_drivePositionQueue;
   private final StatusSignal<Double> m_driveVelocity;
   private final StatusSignal<Double> m_driveAppliedVolts;
   private final StatusSignal<Double> m_driveCurrent;
 
   private final StatusSignal<Double> m_turnAbsolutePosition;
   private final StatusSignal<Double> m_turnPosition;
-  private final Queue<Double> m_turnPositionQueue;
-  private final Queue<Double> m_timestampQueue;
+//  private final Queue<Double> m_turnPositionQueue;
+//  private final Queue<Double> m_timestampQueue;
   private final StatusSignal<Double> m_turnVelocity;
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
@@ -98,15 +98,14 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     // run configs on drive motor
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 80.0;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 60.0;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     driveConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.04;
+    driveConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.02;
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
-    driveConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
 
     m_driveTalon = TalonFXFactory.createTalon(moduleConstants.DRIVE_MOTOR_ID(), canbus, driveConfig);
     setDriveBrakeMode(true);
@@ -146,14 +145,14 @@ public class ModuleIOTalonFX implements ModuleIO {
             .addI(m_moduleConstants.TURN_KI())
             .addD(m_moduleConstants.TURN_KD());
 
-    m_posRequest = new PositionVoltage(0, 0, true, 0, 0, false, false, false);
+    m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
 
     // Fancy multithreaded odometry update stuff
     // setup drive values
     m_driveTalon.setPosition(0.0);
     m_drivePosition = m_driveTalon.getPosition();
-    m_drivePositionQueue =
-            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
+//    m_drivePositionQueue =
+//            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
     m_driveVelocity = m_driveTalon.getVelocity();
     m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
     m_driveCurrent = m_driveTalon.getStatorCurrent();
@@ -162,8 +161,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnTalon.setPosition(0.0);
 
     m_turnPosition = m_turnTalon.getPosition();
-    m_turnPositionQueue =
-        PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
+//    m_turnPositionQueue =
+//        PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
     m_turnVelocity = m_turnTalon.getVelocity();
     m_turnAppliedVolts = m_turnTalon.getMotorVoltage();
     m_turnCurrent = m_turnTalon.getStatorCurrent();
@@ -172,7 +171,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnClosedLoopError = m_turnTalon.getClosedLoopError();
     m_turnClosedLoopReference = m_turnTalon.getClosedLoopReference();
 
-    m_timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
+//    m_timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
     // setup refresh rates on all inputs
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -209,13 +208,13 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_turnClosedLoopError,
             m_turnClosedLoopReference);
 
-    m_drivePid.updateIfChanged();
-    m_turnPid.updateIfChanged();
+//    m_drivePid.updateIfChanged();
+//    m_turnPid.updateIfChanged();
 
     inputs.drivePositionRad =
-        Units.rotationsToRadians(m_drivePosition.getValueAsDouble());
+        Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
     inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble());
+        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
     inputs.driveAppliedVolts = m_driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {m_driveCurrent.getValueAsDouble()};
 
@@ -228,24 +227,24 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
 
-    inputs.odometryTimestamps =
-            m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
-    inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
-        .mapToDouble(Units::rotationsToRadians)
-        .toArray());
-    inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
-        .map(Rotation2d::fromRotations)
-        .toArray(Rotation2d[]::new));
+//    inputs.odometryTimestamps =
+//            m_timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+//    inputs.setOdometryDrivePositionsRad(m_drivePositionQueue.stream()
+//        .mapToDouble((Double value) -> Units.rotationsToRadians(value) / m_moduleConstants.DRIVE_GEAR_RATIO())
+//        .toArray());
+//    inputs.setOdometryTurnPositions(m_turnPositionQueue.stream()
+//        .map(Rotation2d::fromRotations)
+//        .toArray(Rotation2d[]::new));
 
-    m_timestampQueue.clear();
-    m_drivePositionQueue.clear();
-    m_turnPositionQueue.clear();
+//    m_timestampQueue.clear();
+//    m_drivePositionQueue.clear();
+//    m_turnPositionQueue.clear();
   }
 
   @Override
   public void setDriveVelocityMPS(double mps) {
     double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
-    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0).withEnableFOC(true);
+    VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0).withEnableFOC(false);
     m_driveTalon.setControl(velRequest.withVelocity(rps));
   }
 

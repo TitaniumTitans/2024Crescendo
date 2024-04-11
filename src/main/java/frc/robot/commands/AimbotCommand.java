@@ -93,7 +93,7 @@ public class AimbotCommand extends Command {
     x = MathUtil.applyDeadband(x, 0.1);
     y = MathUtil.applyDeadband(y, 0.1);
 
-    double o = -DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15) * 0.65;
+    double o = DriveCommands.setSensitivity(-m_driverController.getRightX(), 0.15) * 0.75;
     o = MathUtil.applyDeadband(o, 0.1);
 
     Rotation2d heading;
@@ -152,21 +152,19 @@ public class AimbotCommand extends Command {
           ));
 
       // get our desired rotation and error from it
-      double desiredRotationDegs =
-          AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget)
-              .getDegrees();
-      double error = Math.abs(desiredRotationDegs - m_driveSubsystem.getRotation().getDegrees());
-
-      x = MathUtil.clamp(x, -0.25, 0.25);
-      y = MathUtil.clamp(y, -0.25, 0.25);
+      Rotation2d desiredRotation =
+          AimbotUtils.getDrivebaseAimingAngle(m_driveSubsystem.getVisionPose(), movingTarget);
+      x = MathUtil.clamp(x, -0.45, 0.45);
+      y = MathUtil.clamp(y, -0.45, 0.45);
 
       // if we're far from our setpoint, move faster
-      double omega;
-      if (error > 5.0) {
-        omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
-      } else {
-        omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
-      }
+      double omega = m_driveSubsystem.alignToAngle(desiredRotation);
+      double error = m_driveSubsystem.getThetaError();
+//      if (error > 5.0) {
+//        omega = m_fastController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
+//      } else {
+//        omega = m_smallController.calculate(m_driveSubsystem.getRotation().getDegrees(), desiredRotationDegs);
+//      }
 
       // Convert to field relative speeds & send command
       m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -180,21 +178,21 @@ public class AimbotCommand extends Command {
       m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
 
       // set shooter speeds and rumble controller
-      if (m_shooterSubsystem.atSpeed() && error < 15.0) {
+      if (m_shooterSubsystem.atSpeed() && error < 20.0) {
         m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
       } else {
         m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
       }
     } else {
       m_driveSubsystem.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-          x,
-          y,
-          o,
+          x * m_driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+          y * m_driveSubsystem.getMaxLinearSpeedMetersPerSec(),
+          o * m_driveSubsystem.getMaxAngularSpeedRadPerSec(),
           heading
       ));
 
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.BACKUP_SHOT);
-      m_shooterSubsystem.runShooterVelocity(m_runKicker);
+      m_shooterSubsystem.runShooterVelocity(m_runKicker, () -> 4500, () -> 3750).execute();
     }
   }
 

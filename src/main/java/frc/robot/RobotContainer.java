@@ -19,18 +19,22 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.auto.AutoFactory;
 import frc.robot.commands.auto.IntakeControlCommand;
 import frc.robot.commands.auto.ShooterAutoCommand;
+import frc.robot.subsystems.LedSubsystem;
 import frc.robot.subsystems.arm.*;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOKraken;
@@ -48,6 +52,7 @@ import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.AllianceFlipUtil;
 import lib.utils.FieldConstants;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
@@ -62,6 +67,7 @@ public class RobotContainer {
   private final ShooterSubsystem m_shooter;
   public final ArmSubsystem m_armSubsystem;
   private final ClimberSubsystem m_climber;
+  private final LedSubsystem m_led;
 
   // Controller
   private final CommandXboxController m_driverController = new CommandXboxController(0);
@@ -70,6 +76,8 @@ public class RobotContainer {
   private final LoggedDashboardNumber m_armIncrement = new LoggedDashboardNumber("Arm/Increment value", 1);
   private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
   private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
+  private final LoggedDashboardBoolean m_useAmpLineup
+      = new LoggedDashboardBoolean("Use Amp Lineup?", true);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
@@ -83,14 +91,14 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         m_driveSubsystem = new DriveSubsystem(
             new GyroIOPigeon2(true),
-            new ModuleIOTalonFX(Constants.DriveConstants.FL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.FR_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BL_MOD_CONSTANTS),
-            new ModuleIOTalonFX(Constants.DriveConstants.BR_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.FL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.FR_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.BL_MOD_CONSTANTS),
+            new ModuleIOTalonFX(DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
                 new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
-                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
-                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
+//                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
+//                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
             }
             );
         m_shooter = new ShooterSubsystem(new ShooterIOKraken());
@@ -126,6 +134,7 @@ public class RobotContainer {
         m_climber = new ClimberSubsystem(new ClimberIO() {});
       }
     }
+    m_led = new LedSubsystem(m_shooter::hasPiece);
 
     // configure named commands for auto
     configureNamedCommands();
@@ -140,8 +149,8 @@ public class RobotContainer {
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   * Joystick} or {@link XboxController}), and then passing it to a {@link
+   * JoystickButton}.
    */
   private void configureButtonBindings() {
     /** trigger setup */
@@ -178,7 +187,7 @@ public class RobotContainer {
 
     /** driver controller */
 
-    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.1)
+    intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.13)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
     spinUpTrigger.whileTrue(
@@ -186,7 +195,9 @@ public class RobotContainer {
     shootTrigger.whileTrue(
         new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), true));
 
-    ampLineupTrigger.whileTrue(m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+    ampLineupTrigger.whileTrue(
+        m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+            .unless(() -> !m_useAmpLineup.get())
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
         .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
@@ -197,11 +208,11 @@ public class RobotContainer {
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, () -> 3500, () -> 3500)));
+            .alongWith(m_shooter.runShooterVelocity(false, () -> 3250, () -> 3250)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, () -> 3500, () -> 3500)));
+            .alongWith(m_shooter.runShooterVelocity(true, () -> 3250, () -> 3250)));
 
     m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
     m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
@@ -222,9 +233,16 @@ public class RobotContainer {
     // 96.240234375
     // 60.029296875
     // 2250
-
+//    m_shooter.setDefaultCommand(
+//        Commands.run(() -> {
+//          if (!m_climber.getClimberLock() && m_shooter.hasPiece()) {
+//            m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000).execute();
+//          } else {
+//            m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0);
+//          }
+//        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
+        new JoystickDriveCommand(
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
@@ -244,11 +262,11 @@ public class RobotContainer {
 
     /** Operator controller */
     m_operatorController.leftTrigger().whileTrue(
-        m_shooter.runShooterVelocity(false, () -> 1400, () -> 1400));
+        m_shooter.runShooterVelocity(false, () -> 0, () -> 0));
     m_operatorController.rightTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, () -> 1400, () -> 1400));
+        m_shooter.runShooterVelocity(true, () -> 1000, () -> 1000));
 
-    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-360.0 * 3.0));
+    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-1640.0));
     m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
         .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
     m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
@@ -281,6 +299,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake", new IntakeControlCommand(m_armSubsystem, m_shooter));
 
     NamedCommands.registerCommand("AimAndShoot", new ShooterAutoCommand(m_armSubsystem, m_shooter, m_driveSubsystem));
+    NamedCommands.registerCommand("SpinupShooter", m_shooter.runShooterVelocity(false));
   }
 
   private void configureDashboard() {

@@ -52,6 +52,10 @@ public class ShooterAutoCommand extends Command {
     double error = Math.abs(desiredAngle.getDegrees() - m_driveSubsystem.getRotation().getDegrees());
     Logger.recordOutput("Shooter/Auto Error", error);
 
+    Logger.recordOutput("Auto/ShooterAtSpeed?", m_shooterSubsystem.atSpeed());
+    Logger.recordOutput("Auto/DriveBaseGood?", error < 10.0);
+    Logger.recordOutput("Auto/WristAtSetpoint", m_armSubsystem.wristAtSetpoint());
+
     // only actually shoot if we're aligned close enough to speaker and flywheels are at speed
     m_shooterSubsystem.runShooterVelocity(m_shooterSubsystem.atSpeed()
         && error < 10.0 && m_armSubsystem.wristAtSetpoint()).execute();
@@ -72,7 +76,7 @@ public class ShooterAutoCommand extends Command {
 
     // too long check may change as system gets tuned
     return (!m_shooterSubsystem.hasPiece() && m_hasChanged
-        && m_timer.hasElapsed(1.25)) || m_timer.hasElapsed(5.0);
+        && m_timer.hasElapsed(0.75)) || m_timer.hasElapsed(5.0);
   }
 
   @Override

@@ -1,12 +1,13 @@
 package lib.utils;
 
+import com.gos.lib.properties.GosDoubleProperty;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.subsystems.arm.ArmPose;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 public class AimbotUtils {
 
@@ -14,8 +15,10 @@ public class AimbotUtils {
   private static final InterpolatingDoubleTreeMap m_leftSpeedLerpTable = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap m_rightSpeedLerpTable = new InterpolatingDoubleTreeMap();
 
-  private static final LoggedDashboardNumber m_offsetNudge =
-      new LoggedDashboardNumber("Wrist Angle Nudge", 0.01);
+  private static final GosDoubleProperty m_offsetInches =
+      new GosDoubleProperty(false, "Wrist Angle Offset In", 0);
+  private static final GosDoubleProperty m_offsetDegrees =
+          new GosDoubleProperty(false, "Wrist Angle Degs offset", 1.6);
 
   private static final double Y_TARGET = 0.2;
 
@@ -46,29 +49,50 @@ public class AimbotUtils {
   }
 
   /** Linear interpolation tables for aiming */
-  public static double getWristAngle(double distance) {
-    double angle = 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance);
-    if (90.0 >= distance && distance > 55.0) {
-      return angle;
-    } else if (150.0 >= distance && distance > 90.0) {
-      return angle - 1.8;
-    } else if (195.0 >= distance && distance > 150.0) {
-      return angle - 3.75;
-    } else if (distance > 200.0) {
-      return angle;
-    } else if (distance > 195.0) {
-      return angle - 4.25;
+  public static double getWristAngle(double dist) {
+//    double angle = 49.319 + (1.427 * Y_TARGET) + (-0.10599 * distance)
+//            + m_offsetDegrees.getValue();
+//    if (90.0 >= distance && distance > 55.0) {
+//      return angle;
+//    } else if (150.0 >= distance && distance > 90.0) {
+//      return angle - 1.8;
+//    } else if (195.0 >= distance && distance > 150.0) {
+//      return angle - 3.75;
+//    } else if (distance > 200.0) {
+//      return angle;
+//    } else if (distance > 195.0) {
+//      return angle - 4.25;
+//    } else {
+//      return 55.0;
+//    }
+
+    double distance = dist - m_offsetInches.getValue();
+    return 49.15 - 0.123 * distance
+            + 0.0015 * Math.pow((distance - 117.647), 2)
+            - 1.628e-5 * Math.pow((distance - 117.647), 3)
+            + m_offsetDegrees.getValue();
+  }
+
+  @AutoLogOutput(key="Shooter/Left Setpoint")
+  public static double getLeftSpeed(double distance) {
+    if (75.0 > distance) {
+      return 4500;
+    } else if (distance > 170.0) {
+      return 5500;
     } else {
-      return 55.0;
+      return 4750;
     }
   }
 
-  public static double getLeftSpeed(double distance) {
-    return distance >= 75.0 ? 4000 : 3750;
-  }
-
+  @AutoLogOutput(key="Shooter/Right Setpoint")
   public static double getRightSpeed(double distance) {
-    return distance >= 75.0 ? 4750 : 4500;
+    if (75.0 > distance) {
+      return 3000;
+    } else if (distance > 170.0) {
+      return 4000;
+    } else {
+      return 3250;
+    }
   }
 
   /** Gets the distance from the drivebase to the speaker in meters */

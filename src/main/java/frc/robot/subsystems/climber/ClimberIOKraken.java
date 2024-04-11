@@ -115,8 +115,8 @@ public class ClimberIOKraken implements ClimberIO {
     inputs.leftClimberAppliedOutput = m_leftAppliedOutputSignal.getValueAsDouble();
     inputs.rightClimberAppliedOutput = m_rightAppliedOutputSignal.getValueAsDouble();
 
-    m_leftProperty.updateIfChanged();
-    m_rightProperty.updateIfChanged();
+//    m_leftProperty.updateIfChanged();
+//    m_rightProperty.updateIfChanged();
   }
 
   @Override

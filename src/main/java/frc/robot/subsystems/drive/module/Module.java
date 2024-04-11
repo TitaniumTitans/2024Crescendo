@@ -52,7 +52,7 @@ public class Module {
   }
 
   public void periodic() {
-    Logger.processInputs("Swerve/Module" + m_index, m_inputs);
+//    Logger.processInputs("Swerve/Module" + m_index, m_inputs);
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
@@ -73,15 +73,15 @@ public class Module {
     }
 
     // Calculate positions for odometry
-    int sampleCount = m_inputs.odometryTimestamps.length; // All signals are sampled together
-    m_odometryPositions = new SwerveModulePosition[sampleCount];
-    for (int i = 0; i < sampleCount; i++) {
-      double positionMeters = m_inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
-      Rotation2d angle =
-          m_inputs.odometryTurnPositions[i].plus(
-              m_turnRelativeOffset != null ? m_turnRelativeOffset : new Rotation2d());
-      m_odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
-    }
+//    int sampleCount = m_inputs.odometryTimestamps.length; // All signals are sampled together
+//    m_odometryPositions = new SwerveModulePosition[sampleCount];
+//    for (int i = 0; i < sampleCount; i++) {
+//      double positionMeters = m_inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
+//      Rotation2d angle =
+//          m_inputs.odometryTurnPositions[i].plus(
+//              m_turnRelativeOffset != null ? m_turnRelativeOffset : new Rotation2d());
+//      m_odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
+//    }
   }
 
   /** Returns the module positions received this cycle. */

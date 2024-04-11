@@ -30,7 +30,7 @@ import java.util.Queue;
 public class GyroIOPigeon2 implements GyroIO {
   private final Pigeon2 pigeon = new Pigeon2(13, "canivore");
   private final StatusSignal<Double> yaw = pigeon.getYaw();
-  private final Queue<Double> yawPositionQueue;
+//  private final Queue<Double> yawPositionQueue;
   private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
 
   public GyroIOPigeon2(boolean phoenixDrive) {
@@ -39,26 +39,26 @@ public class GyroIOPigeon2 implements GyroIO {
     yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
     pigeon.optimizeBusUtilization();
-    if (phoenixDrive) {
-      yawPositionQueue =
-          PhoenixOdometryThread.getInstance().registerSignal(pigeon, pigeon.getYaw());
-    } else {
-      yawPositionQueue =
-          SparkMaxOdometryThread.getInstance()
-              .registerSignal(() -> pigeon.getYaw().getValueAsDouble());
-    }
+//    if (phoenixDrive) {
+//      yawPositionQueue =
+//          PhoenixOdometryThread.getInstance().registerSignal(pigeon, pigeon.getYaw());
+//    } else {
+//      yawPositionQueue =
+//          SparkMaxOdometryThread.getInstance()
+//              .registerSignal(() -> pigeon.getYaw().getValueAsDouble());
+//    }
   }
 
   @Override
   public void updateInputs(GyroIOInputsAutoLogged inputs) {
     inputs.setConnected(BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK));
-    inputs.setYawPosition(Rotation2d.fromDegrees(yaw.getValueAsDouble()));
+    inputs.setYawPosition(Rotation2d.fromDegrees(yaw.refresh().getValueAsDouble()));
     inputs.setYawVelocityRadPerSec(Units.degreesToRadians(yawVelocity.getValueAsDouble()));
 
-    inputs.setOdometryYawPositions(yawPositionQueue.stream()
-        .map(Rotation2d::fromDegrees)
-        .toArray(Rotation2d[]::new));
-    yawPositionQueue.clear();
+//    inputs.setOdometryYawPositions(yawPositionQueue.stream()
+//        .map(Rotation2d::fromDegrees)
+//        .toArray(Rotation2d[]::new));
+//    yawPositionQueue.clear();
   }
 
   @Override
