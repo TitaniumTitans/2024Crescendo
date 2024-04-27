@@ -28,6 +28,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 
@@ -50,21 +51,25 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final TalonFX m_driveTalon;
   private final TalonFX m_turnTalon;
 
+  // GoSProperties for motor controllers
   private final Phoenix6PidPropertyBuilder m_drivePid;
   private final Phoenix6PidPropertyBuilder m_turnPid;
 
   private final ModuleConstants m_moduleConstants;
 
+  // Queues for odometry
+  private final Queue<Double> m_drivePositionQueue;
+  private final Queue<Double> m_turnPositionQueue;
+
+  // status signals for drive motor
   private final StatusSignal<Double> m_drivePosition;
-//  private final Queue<Double> m_drivePositionQueue;
   private final StatusSignal<Double> m_driveVelocity;
   private final StatusSignal<Double> m_driveAppliedVolts;
   private final StatusSignal<Double> m_driveCurrent;
 
+  // status signals for azimuth motor
   private final StatusSignal<Double> m_turnAbsolutePosition;
   private final StatusSignal<Double> m_turnPosition;
-//  private final Queue<Double> m_turnPositionQueue;
-//  private final Queue<Double> m_timestampQueue;
   private final StatusSignal<Double> m_turnVelocity;
   private final StatusSignal<Double> m_turnAppliedVolts;
   private final StatusSignal<Double> m_turnCurrent;
@@ -72,7 +77,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> m_turnClosedLoopError;
   private final StatusSignal<Double> m_turnClosedLoopReference;
 
-
+  // control requests
   PositionVoltage m_posRequest;
 
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
@@ -106,6 +111,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.MotorOutput.Inverted =
             moduleConstants.DRIVE_MOTOR_INVERTED() ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive;
+    driveConfig.Feedback.SensorToMechanismRatio = m_moduleConstants.DRIVE_GEAR_RATIO();
 
     m_driveTalon = TalonFXFactory.createTalon(moduleConstants.DRIVE_MOTOR_ID(), canbus, driveConfig);
     setDriveBrakeMode(true);
@@ -148,34 +154,32 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_posRequest = new PositionVoltage(0, 0, false, 0, 0, false, false, false);
 
     // Fancy multithreaded odometry update stuff
+    m_drivePosition = m_driveTalon.getPosition();
+    m_turnPosition = m_turnTalon.getPosition();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(
+            Constants.DriveConstants.ODOMETRY_FREQUENCY, m_drivePosition, m_turnPosition);
+    m_drivePositionQueue =
+            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_drivePosition);
+    m_turnPositionQueue =
+            PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnPosition);
+
     // setup drive values
     m_driveTalon.setPosition(0.0);
-    m_drivePosition = m_driveTalon.getPosition();
-//    m_drivePositionQueue =
-//            PhoenixOdometryThread.getInstance().registerSignal(m_driveTalon, m_driveTalon.getPosition());
     m_driveVelocity = m_driveTalon.getVelocity();
     m_driveAppliedVolts = m_driveTalon.getMotorVoltage();
     m_driveCurrent = m_driveTalon.getStatorCurrent();
 
     // setup turn values
     m_turnTalon.setPosition(0.0);
-
-    m_turnPosition = m_turnTalon.getPosition();
-//    m_turnPositionQueue =
-//        PhoenixOdometryThread.getInstance().registerSignal(m_turnTalon, m_turnTalon.getPosition());
     m_turnVelocity = m_turnTalon.getVelocity();
     m_turnAppliedVolts = m_turnTalon.getMotorVoltage();
     m_turnCurrent = m_turnTalon.getStatorCurrent();
-
     m_turnClosedLoopOutput = m_turnTalon.getClosedLoopOutput();
     m_turnClosedLoopError = m_turnTalon.getClosedLoopError();
     m_turnClosedLoopReference = m_turnTalon.getClosedLoopReference();
 
-//    m_timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
-
     // setup refresh rates on all inputs
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        Module.ODOMETRY_FREQUENCY, m_drivePosition, m_turnPosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
         5.0,
         m_driveVelocity,
@@ -194,6 +198,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputsAutoLogged inputs) {
+    // update all signals
     BaseStatusSignal.refreshAll(
             m_drivePosition,
             m_driveVelocity,
@@ -208,22 +213,21 @@ public class ModuleIOTalonFX implements ModuleIO {
             m_turnClosedLoopError,
             m_turnClosedLoopReference);
 
-//    m_drivePid.updateIfChanged();
-//    m_turnPid.updateIfChanged();
+    m_drivePid.updateIfChanged();
+    m_turnPid.updateIfChanged();
 
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(m_drivePosition.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(m_driveVelocity.getValueAsDouble()) / m_moduleConstants.DRIVE_GEAR_RATIO();
+    // update the logged values of the drive motor
+    inputs.drivePositionRots = m_drivePosition.getValueAsDouble();
+    inputs.driveVelocityRotsPerSec = m_driveVelocity.getValueAsDouble();
     inputs.driveAppliedVolts = m_driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {m_driveCurrent.getValueAsDouble()};
 
+    // update the logged value of the encoder
     inputs.setTurnAbsolutePosition(Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble())
         .minus(m_moduleConstants.ENCODER_OFFSET()));
 
-    inputs.setTurnPosition(Rotation2d.fromRotations((
-            m_turnPosition.getValueAsDouble())));
-
+    // update the logged values of the azimuth motor
+    inputs.setTurnPosition(Rotation2d.fromRotations((m_turnPosition.getValueAsDouble())));
     inputs.setTurnVelocityRadPerSec(
             Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()));
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());

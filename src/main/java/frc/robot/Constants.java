@@ -13,7 +13,6 @@
 
 package frc.robot;
 
-import com.fasterxml.jackson.core.SerializableString;
 import com.gos.lib.properties.GosBooleanProperty;
 import com.gos.lib.properties.GosDoubleProperty;
 import com.pathplanner.lib.path.PathConstraints;
@@ -39,9 +38,11 @@ import java.util.List;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  private Constants() {
+    private Constants() {
     throw new IllegalStateException("Constants class should not be constructed");
   }
+
+  public static final double loopPeriodSecs = Units.millisecondsToSeconds(20);
 
   public static final Mode currentMode = Mode.REAL;
 
@@ -61,12 +62,13 @@ public final class Constants {
             new GosDoubleProperty(false, "Drive/Turning Speed", 0.75);
     public static final GosBooleanProperty HOLD_HEADING =
             new GosBooleanProperty(false, "Drive/Hold Heading", false);
-
     private DriveConstants() {
       throw new IllegalStateException("Constants class should not be constructed");
     }
 
+
     public static final int PIGEON_ID = 13;
+    public static final double ODOMETRY_FREQUENCY = 250;
 
     // module constants
     public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0 - (1.0 / 8.0));

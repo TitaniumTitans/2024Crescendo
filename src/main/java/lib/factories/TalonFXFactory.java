@@ -51,7 +51,12 @@ public class TalonFXFactory {
   public static TalonFX createTalon(int id, TalonFXConfiguration config) {
     TalonFX talonFX = new TalonFX(id, "canivore");
 
-    talonFX.getConfigurator().apply(config);
+    for (int i = 0; i < 4; i++) {
+      boolean error = talonFX.getConfigurator().apply(config, 0.1).isError();
+      if (!error) {
+        break;
+      }
+    }
 
     TalonFxMotors.add(new Pair<>(talonFX, config));
     return talonFX;

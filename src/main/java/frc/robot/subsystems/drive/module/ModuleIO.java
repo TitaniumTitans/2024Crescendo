@@ -19,8 +19,8 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
   @AutoLog
   class ModuleIOInputs {
-    protected double drivePositionRad = 0.0;
-    protected double driveVelocityRadPerSec = 0.0;
+    protected double drivePositionRots = 0.0;
+    protected double driveVelocityRotsPerSec = 0.0;
     protected double driveAppliedVolts = 0.0;
     protected double[] driveCurrentAmps = new double[] {};
 
@@ -35,20 +35,20 @@ public interface ModuleIO {
 
     protected double[] odometryTimestamps = new double[] {};
 
-    public double getDrivePositionRad() {
-      return drivePositionRad;
+    public double getDrivePositionRots() {
+      return drivePositionRots;
     }
 
-    public void setDrivePositionRad(double drivePositionRad) {
-      this.drivePositionRad = drivePositionRad;
+    public void setDrivePositionRots(double drivePositionRots) {
+      this.drivePositionRots = drivePositionRots;
     }
 
-    public double getDriveVelocityRadPerSec() {
-      return driveVelocityRadPerSec;
+    public double getDriveVelocityRotsPerSec() {
+      return driveVelocityRotsPerSec;
     }
 
-    public void setDriveVelocityRadPerSec(double driveVelocityRadPerSec) {
-      this.driveVelocityRadPerSec = driveVelocityRadPerSec;
+    public void setDriveVelocityRotsPerSec(double driveVelocityRotsPerSec) {
+      this.driveVelocityRotsPerSec = driveVelocityRotsPerSec;
     }
 
     public double getDriveAppliedVolts() {

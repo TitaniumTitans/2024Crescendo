@@ -55,6 +55,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,7 +64,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 public class DriveSubsystem extends SubsystemBase {
 
-  public static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -74,6 +75,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final Field2d m_field = new Field2d();
 
+  public static final Lock odometryLock = new ReentrantLock();
+  public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
+
   private Rotation2d m_rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] m_lastModulePositions = new SwerveModulePosition[] {
       new SwerveModulePosition(),
@@ -84,6 +88,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final VisionSubsystem[] m_cameras;
 
+  // heading controllers
   private final PIDController m_thetaPid;
   private final PidProperty m_thetaPidProperty;
 
@@ -91,6 +96,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final SysIdRoutine m_sysId;
 
+  // used to log and control module setpoints
   private final SwerveModuleState[] m_optimizedStates = new SwerveModuleState[] {
       new SwerveModuleState(),
       new SwerveModuleState(),
@@ -98,10 +104,12 @@ public class DriveSubsystem extends SubsystemBase {
       new SwerveModuleState()
   };
 
+  // field relative speeds used for shoot on move logic
   private FieldRelativeSpeed m_fieldRelVel = new FieldRelativeSpeed();
   private FieldRelativeSpeed m_lastFieldRelVel = new FieldRelativeSpeed();
   private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
 
+  // Manual mode selector
   private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", true);
 
   public DriveSubsystem(
