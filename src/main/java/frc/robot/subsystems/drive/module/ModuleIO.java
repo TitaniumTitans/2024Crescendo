@@ -19,8 +19,8 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
   @AutoLog
   class ModuleIOInputs {
-    protected double drivePositionRots = 0.0;
-    protected double driveVelocityRotsPerSec = 0.0;
+    protected double drivePositionMeters = 0.0;
+    protected double driveVelocityMPS = 0.0;
     protected double driveAppliedVolts = 0.0;
     protected double[] driveCurrentAmps = new double[] {};
 
@@ -30,25 +30,25 @@ public interface ModuleIO {
     protected double turnAppliedVolts = 0.0;
     protected double[] turnCurrentAmps = new double[] {};
 
-    protected double[] odometryDrivePositionsRad = new double[] {};
+    protected double[] odometryDrivePositionsMeters = new double[] {};
     protected Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
 
     protected double[] odometryTimestamps = new double[] {};
 
-    public double getDrivePositionRots() {
-      return drivePositionRots;
+    public double getDrivePositionMeters() {
+      return drivePositionMeters;
     }
 
-    public void setDrivePositionRots(double drivePositionRots) {
-      this.drivePositionRots = drivePositionRots;
+    public void setDrivePositionMeters(double drivePositionMeters) {
+      this.drivePositionMeters = drivePositionMeters;
     }
 
-    public double getDriveVelocityRotsPerSec() {
-      return driveVelocityRotsPerSec;
+    public double getDriveVelocityMPS() {
+      return driveVelocityMPS;
     }
 
-    public void setDriveVelocityRotsPerSec(double driveVelocityRotsPerSec) {
-      this.driveVelocityRotsPerSec = driveVelocityRotsPerSec;
+    public void setDriveVelocityMPS(double driveVelocityMPS) {
+      this.driveVelocityMPS = driveVelocityMPS;
     }
 
     public double getDriveAppliedVolts() {
@@ -107,12 +107,12 @@ public interface ModuleIO {
       this.turnCurrentAmps = turnCurrentAmps;
     }
 
-    public double[] getOdometryDrivePositionsRad() {
-      return odometryDrivePositionsRad;
+    public double[] getOdometryDrivePositionsMeters() {
+      return odometryDrivePositionsMeters;
     }
 
-    public void setOdometryDrivePositionsRad(double[] odometryDrivePositionsRad) {
-      this.odometryDrivePositionsRad = odometryDrivePositionsRad;
+    public void setOdometryDrivePositionsMeters(double[] odometryDrivePositionsRad) {
+      this.odometryDrivePositionsMeters = odometryDrivePositionsRad;
     }
 
     public Rotation2d[] getOdometryTurnPositions() {

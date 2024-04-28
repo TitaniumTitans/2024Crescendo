@@ -50,6 +50,7 @@ import java.util.Queue;
 public class ModuleIOTalonFX implements ModuleIO {
   private final TalonFX m_driveTalon;
   private final TalonFX m_turnTalon;
+  private final CANcoder m_cancoder;
 
   // GoSProperties for motor controllers
   private final Phoenix6PidPropertyBuilder m_drivePid;
@@ -82,24 +83,20 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
     String canbus = "canivore";
-    
-    /*
-    * this is technically the proper way of using any class that
-    * implements the "Closeable" or "AutoClosable", typically things
-    * like files or network ports, but also robot hardware */
-    try (CANcoder cancoder = new CANcoder(moduleConstants.ENCODER_ID(), canbus)) {
-      // run factory default on cancoder
-      var encoderConfig = new CANcoderConfiguration();
-      encoderConfig.MagnetSensor.SensorDirection =
-          moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
-              : SensorDirectionValue.CounterClockwise_Positive;
-      encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
-      cancoder.getConfigurator().apply(encoderConfig);
-
-      m_turnAbsolutePosition = cancoder.getAbsolutePosition();
-    }
-
     m_moduleConstants = moduleConstants;
+
+    m_cancoder = new CANcoder(moduleConstants.ENCODER_ID(), canbus);
+
+      // run factory default on cancoder
+    var encoderConfig = new CANcoderConfiguration();
+    encoderConfig.MagnetSensor.SensorDirection =
+        moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
+            : SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+    encoderConfig.MagnetSensor.MagnetOffset = m_moduleConstants.ENCODER_OFFSET().getRotations();
+    m_cancoder.getConfigurator().apply(encoderConfig);
+
+    m_turnAbsolutePosition = m_cancoder.getAbsolutePosition();
 
     // run configs on drive motor
     var driveConfig = new TalonFXConfiguration();
@@ -171,7 +168,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_driveCurrent = m_driveTalon.getStatorCurrent();
 
     // setup turn values
-    m_turnTalon.setPosition(0.0);
+    m_turnTalon.setPosition(m_turnAbsolutePosition.getValueAsDouble());
     m_turnVelocity = m_turnTalon.getVelocity();
     m_turnAppliedVolts = m_turnTalon.getMotorVoltage();
     m_turnCurrent = m_turnTalon.getStatorCurrent();
@@ -217,14 +214,13 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_turnPid.updateIfChanged();
 
     // update the logged values of the drive motor
-    inputs.drivePositionRots = m_drivePosition.getValueAsDouble();
-    inputs.driveVelocityRotsPerSec = m_driveVelocity.getValueAsDouble();
+    inputs.drivePositionMeters = m_drivePosition.getValueAsDouble() * m_moduleConstants.WHEEL_CURCUMFERENCE_METERS();
+    inputs.driveVelocityMPS = m_driveVelocity.getValueAsDouble() * m_moduleConstants.WHEEL_CURCUMFERENCE_METERS();
     inputs.driveAppliedVolts = m_driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {m_driveCurrent.getValueAsDouble()};
 
     // update the logged value of the encoder
-    inputs.setTurnAbsolutePosition(Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble())
-        .minus(m_moduleConstants.ENCODER_OFFSET()));
+    inputs.setTurnAbsolutePosition(Rotation2d.fromRotations(m_turnAbsolutePosition.getValueAsDouble()));
 
     // update the logged values of the azimuth motor
     inputs.setTurnPosition(Rotation2d.fromRotations((m_turnPosition.getValueAsDouble())));
@@ -232,6 +228,17 @@ public class ModuleIOTalonFX implements ModuleIO {
             Units.rotationsToRadians(m_turnVelocity.getValueAsDouble()));
     inputs.setTurnAppliedVolts(m_turnAppliedVolts.getValueAsDouble());
     inputs.setTurnCurrentAmps(new double[] {m_turnCurrent.getValueAsDouble()});
+
+    // update high speed odometry inputs
+    inputs.odometryDrivePositionsMeters =
+            m_drivePositionQueue.stream()
+                    .mapToDouble(
+                            signalValue -> signalValue * m_moduleConstants.WHEEL_CURCUMFERENCE_METERS())
+                    .toArray();
+    inputs.odometryTurnPositions =
+            m_turnPositionQueue.stream().map(Rotation2d::fromRotations).toArray(Rotation2d[]::new);
+    m_drivePositionQueue.clear();
+    m_turnPositionQueue.clear();
   }
 
   @Override

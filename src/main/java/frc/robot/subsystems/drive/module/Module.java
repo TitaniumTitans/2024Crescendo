@@ -28,11 +28,6 @@ public class Module {
   private final ModuleIOInputsAutoLogged m_inputs = new ModuleIOInputsAutoLogged();
   private final int m_index;
 
-  private Rotation2d m_angleSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Double m_speedSetpoint = null; // Setpoint for closed loop control, null for open loop
-  private Rotation2d m_turnRelativeOffset = null; // Relative + Offset = Absolute
-  private SwerveModulePosition[] m_odometryPositions = new SwerveModulePosition[] {};
-
   public Module(ModuleIO io) {
     this.m_io = io;
     ModuleConstants moduleConstants = m_io.getModuleConstants();
@@ -50,40 +45,19 @@ public class Module {
   public void updateInputs() {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("Swerve/Module" + m_index, m_inputs);
-
-    // On first cycle, reset relative turn encoder
-    // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (m_turnRelativeOffset == null) {
-      m_turnRelativeOffset = m_inputs.getTurnAbsolutePosition().minus(m_inputs.getTurnPosition());
-    }
-
-    // Run closed loop turn control
-    if (m_angleSetpoint != null) {
-      m_io.setTurnPositionRots(m_angleSetpoint.minus(m_turnRelativeOffset).getRotations());
-
-      // Run closed loop drive control
-      // Only allowed if closed loop turn control is running
-      if (m_speedSetpoint != null) {
-        // Run drive controller
-        m_io.setDriveVelocityMPS(m_speedSetpoint);
-      }
-    }
-
-    // Calculate positions for odometry
-//    int sampleCount = m_inputs.odometryTimestamps.length; // All signals are sampled together
-//    m_odometryPositions = new SwerveModulePosition[sampleCount];
-//    for (int i = 0; i < sampleCount; i++) {
-//      double positionMeters = m_inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
-//      Rotation2d angle =
-//          m_inputs.odometryTurnPositions[i].plus(
-//              m_turnRelativeOffset != null ? m_turnRelativeOffset : new Rotation2d());
-//      m_odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
-//    }
   }
 
   /** Returns the module positions received this cycle. */
   public SwerveModulePosition[] getOdometryPositions() {
-    return m_odometryPositions;
+    int minOdometryPositions =
+            Math.min(m_inputs.odometryDrivePositionsMeters.length, m_inputs.odometryTurnPositions.length);
+    SwerveModulePosition[] positions = new SwerveModulePosition[minOdometryPositions];
+    for (int i = 0; i < minOdometryPositions; i++) {
+      positions[i] =
+              new SwerveModulePosition(
+                      m_inputs.odometryDrivePositionsMeters[i], m_inputs.odometryTurnPositions[i]);
+    }
+    return positions;
   }
 
   /** Returns the timestamps of the samples received this cycle. */
@@ -98,30 +72,25 @@ public class Module {
     var optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     // Update setpoints, controllers run in "periodic"
-    m_angleSetpoint = optimizedState.angle;
-    m_speedSetpoint = optimizedState.speedMetersPerSecond;
+    double angleSetpoint = optimizedState.angle.getRotations();
+    double speedSetpoint = optimizedState.speedMetersPerSecond;
+
+    m_io.setTurnPositionRots(angleSetpoint);
+    m_io.setDriveVelocityMPS(speedSetpoint);
 
     return optimizedState;
   }
 
   /** Runs the module with the specified voltage while controlling to zero degrees. */
   public void runCharacterization(double volts) {
-    // Closed loop turn control
-    m_angleSetpoint = new Rotation2d();
-
     // Open loop drive control
     m_io.setDriveVelocityMPS(volts);
-    m_speedSetpoint = null;
   }
 
   /** Disables all outputs to motors. */
   public void stop() {
     m_io.setTurnPositionRots(0.0);
     m_io.setDriveVelocityMPS(0.0);
-
-    // Disable closed loop control for turn and drive
-    m_angleSetpoint = null;
-    m_speedSetpoint = null;
   }
 
   /** Sets whether brake mode is enabled. */
@@ -132,21 +101,17 @@ public class Module {
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    if (m_turnRelativeOffset == null) {
-      return new Rotation2d();
-    } else {
-      return m_inputs.getTurnPosition().plus(m_turnRelativeOffset);
-    }
+    return m_inputs.getTurnPosition();
   }
 
   /** Returns the current drive position of the module in meters. */
   public double getPositionMeters() {
-    return m_inputs.getDrivePositionRots() * WHEEL_RADIUS;
+    return m_inputs.getDrivePositionMeters() * WHEEL_RADIUS;
   }
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return m_inputs.getDriveVelocityRotsPerSec() * WHEEL_RADIUS;
+    return m_inputs.getDriveVelocityMPS() * WHEEL_RADIUS;
   }
 
   /** Returns the module position (turn angle and drive position). */
@@ -161,6 +126,6 @@ public class Module {
 
   /** Returns the drive velocity in radians/sec. */
   public double getCharacterizationVelocity() {
-    return m_inputs.getDriveVelocityRotsPerSec();
+    return m_inputs.getDriveVelocityMPS();
   }
 }

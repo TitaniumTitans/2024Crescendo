@@ -139,7 +139,7 @@ public class DriveSubsystem extends SubsystemBase {
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
 
-//    PhoenixOdometryThread.getInstance().start();
+    PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(0, 360);
@@ -234,9 +234,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
     odometryLock.unlock();
     Logger.processInputs("Drive/Gyro", gyroInputs);
-    for (var module : modules) {
-      module.periodic();
-    }
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
@@ -251,37 +248,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     // Update odometry
-//    double[] sampleTimestamps =
-//        modules[0].getOdometryTimestamps(); // All signals are sampled together
-//    int sampleCount = sampleTimestamps.length;
-//    for (int i = 0; i < sampleCount; i++) {
-//       Read wheel positions and deltas from each module
-//      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-//      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-//      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-//        modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
-//        moduleDeltas[moduleIndex] =
-//            new SwerveModulePosition(
-//                modulePositions[moduleIndex].distanceMeters
-//                    - m_lastModulePositions[moduleIndex].distanceMeters,
-//                modulePositions[moduleIndex].angle);
-//        m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-//      }
-//
-//       Update gyro angle
-//      if (gyroInputs.connected) {
-//         Use the real gyro angle
-//        m_rawGyroRotation = gyroInputs.odometryYawPositions[i];
-//      } else {
-//         Use the angle delta from the kinematics and module deltas
-//        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-//        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-//      }
-
-      // Apply update
-//      m_wpiPoseEstimator.updateWithTime(sampleTimestamps[i], m_rawGyroRotation, modulePositions);
-//    }
-
     for (VisionSubsystem camera : m_cameras) {
       // make sure we're not moving too fast before trying to update vision poses
       if ((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
@@ -304,8 +270,8 @@ public class DriveSubsystem extends SubsystemBase {
     m_wheelOnlyPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 
+    // log field positioning data
     Logger.recordOutput("Odometry/Wheel Only Odometry", m_wheelOnlyPoseEstimator.getEstimatedPosition());
-
     Logger.recordOutput("Drive/DistanceToTarget",
         Units.metersToInches(AimbotUtils.getDistanceFromSpeaker(getVisionPose())));
     Logger.recordOutput("Drive/AngleToTarget",
@@ -327,7 +293,6 @@ public class DriveSubsystem extends SubsystemBase {
   public void runVelocity(ChassisSpeeds speeds) {
     // Calculate module setpoints
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-//    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, DriveConstants.MAX_LINEAR_SPEED);
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
