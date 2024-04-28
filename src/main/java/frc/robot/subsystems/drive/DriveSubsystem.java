@@ -78,15 +78,7 @@ public class DriveSubsystem extends SubsystemBase {
   public static final Lock odometryLock = new ReentrantLock();
   public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
 
-  private Rotation2d m_rawGyroRotation = new Rotation2d();
-  private SwerveModulePosition[] m_lastModulePositions = new SwerveModulePosition[] {
-      new SwerveModulePosition(),
-      new SwerveModulePosition(),
-      new SwerveModulePosition(),
-      new SwerveModulePosition()
-  };
-
-  private final VisionSubsystem[] m_cameras;
+    private final VisionSubsystem[] m_cameras;
 
   // heading controllers
   private final PIDController m_thetaPid;
