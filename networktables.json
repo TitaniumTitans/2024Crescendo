@@ -807,6 +807,14 @@
     }
   },
   {
+    "name": "/Preferences/Wrist Angle Degs offset",
+    "type": "double",
+    "value": 1.6,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/Wrist Angle",
     "type": "double",
     "value": 45.0,

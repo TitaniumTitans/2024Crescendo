@@ -44,7 +44,7 @@ public final class Constants {
 
   public static final double loopPeriodSecs = Units.millisecondsToSeconds(20);
 
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */

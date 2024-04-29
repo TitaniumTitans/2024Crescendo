@@ -149,7 +149,7 @@ public class DriveSubsystem extends SubsystemBase {
     modules[2] = new Module(blModuleIO);
     modules[3] = new Module(brModuleIO);
 
-    PhoenixOdometryThread.getInstance().start();
+//    PhoenixOdometryThread.getInstance().start();
 
     m_thetaPid = new PIDController(0.0, 0.0, 0.0);
     m_thetaPid.enableContinuousInput(0, 360);
