@@ -50,24 +50,24 @@ public class SparkMaxOdometryThread {
 
   public Queue<Double> registerSignal(DoubleSupplier signal) {
     Queue<Double> queue = new ArrayBlockingQueue<>(20);
-    DriveSubsystem.odometryLock.lock();
+    DriveSubsystem.m_odometryLock.lock();
     try {
       signals.add(signal);
       queues.add(queue);
     } finally {
-      DriveSubsystem.odometryLock.unlock();
+      DriveSubsystem.m_odometryLock.unlock();
     }
     return queue;
   }
 
   private void periodic() {
-    DriveSubsystem.odometryLock.lock();
+    DriveSubsystem.m_odometryLock.lock();
     try {
       for (int i = 0; i < signals.size(); i++) {
         queues.get(i).offer(signals.get(i).getAsDouble());
       }
     } finally {
-      DriveSubsystem.odometryLock.unlock();
+      DriveSubsystem.m_odometryLock.unlock();
     }
   }
 }

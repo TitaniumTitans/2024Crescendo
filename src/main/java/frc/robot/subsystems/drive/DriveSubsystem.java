@@ -36,7 +36,6 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -45,10 +44,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.drive.module.Module;
+import frc.robot.subsystems.drive.module.ModuleConstants;
 import frc.robot.subsystems.drive.module.ModuleIO;
 import frc.robot.subsystems.drive.module.PhoenixOdometryThread;
 import frc.robot.subsystems.vision.VisionSubsystem;
 import lib.utils.*;
+import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
@@ -59,10 +60,16 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.IntStream;
 
 import static edu.wpi.first.units.Units.Volts;
 
 public class DriveSubsystem extends SubsystemBase {
+  // used to record timestamps for replay
+  @AutoLog
+  public static class OdometryTimestampInputs {
+    public double[] timestamps = new double[] {};
+  }
 
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -75,10 +82,21 @@ public class DriveSubsystem extends SubsystemBase {
 
   private final Field2d m_field = new Field2d();
 
-  public static final Lock odometryLock = new ReentrantLock();
-  public static final Queue<Double> timestampQueue = new ArrayBlockingQueue<>(20);
+  public static final Lock m_odometryLock = new ReentrantLock();
+  public static final Queue<Double> m_timestampQueue = new ArrayBlockingQueue<>(20);
+  private final OdometryTimestampInputsAutoLogged m_timestampInputs = new OdometryTimestampInputsAutoLogged();
 
-    private final VisionSubsystem[] m_cameras;
+  private Rotation2d m_rawGyroRotation = new Rotation2d();
+  private double m_lastTimestamp = 0.0;
+  private SwerveModulePosition[] m_lastModulePositions =
+          new SwerveModulePosition[] {
+                  new SwerveModulePosition(),
+                  new SwerveModulePosition(),
+                  new SwerveModulePosition(),
+                  new SwerveModulePosition()
+          };
+
+  private final VisionSubsystem[] m_cameras;
 
   // heading controllers
   private final PIDController m_thetaPid;
@@ -219,13 +237,83 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    odometryLock.lock(); // Prevents odometry updates while reading data
+    m_odometryLock.lock(); // Prevents odometry updates while reading data
+    // process gyro inputs
     gyroIO.updateInputs(gyroInputs);
+    Logger.processInputs("Drive/Gyro", gyroInputs);
+    // process module inputs
     for (var module : modules) {
       module.updateInputs();
     }
-    odometryLock.unlock();
-    Logger.processInputs("Drive/Gyro", gyroInputs);
+    // process timestamp inputs
+    m_timestampInputs.timestamps =
+            m_timestampQueue.stream().mapToDouble(Double::valueOf).toArray();
+    Logger.processInputs("Drive/Odometry/Timestamps", m_timestampInputs);
+    m_odometryLock.unlock();
+
+    // find the lowest number of odometry updates across all sources
+    int minOdometryUpdates =
+            IntStream.of(
+                    m_timestampInputs.timestamps.length,
+                    Arrays.stream(modules)
+                            .mapToInt((Module module) -> module.getOdometryPositions().length)
+                            .min()
+                            .orElse(0))
+                    .min()
+                    .orElse(0);
+    if (gyroInputs.connected) {
+      minOdometryUpdates = Math.min(minOdometryUpdates, gyroInputs.odometryYawPositions.length);
+    }
+
+    // pass all odometry data to robot
+    for (int i = 0; i < minOdometryUpdates; i++) {
+      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
+      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
+
+      double currentTimestamp = m_timestampInputs.timestamps[i];
+      boolean useUpdate = true;
+
+      // use the module delta as a filter
+      if (currentTimestamp - m_lastTimestamp != 0.0) {
+        double dt = currentTimestamp - m_lastTimestamp;
+
+        for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+          modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
+
+          double velocity = (modulePositions[moduleIndex].distanceMeters
+              - m_lastModulePositions[moduleIndex].distanceMeters)
+              / dt;
+          double omega = modulePositions[moduleIndex].angle
+              .minus(m_lastModulePositions[moduleIndex].angle)
+              .getDegrees()
+              / dt;
+
+          moduleDeltas[moduleIndex] =
+              new SwerveModulePosition(
+                  modulePositions[moduleIndex].distanceMeters
+                      - m_lastModulePositions[moduleIndex].distanceMeters,
+                  modulePositions[moduleIndex].angle);
+
+          m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
+
+          useUpdate = velocity <= DriveConstants.MAX_LINEAR_SPEED / 0.2
+              && omega <= 90 / 0.2; // make not a floating number
+        }
+      }
+
+      // update gyro heading
+      if (gyroInputs.connected) {
+        m_rawGyroRotation = gyroInputs.yawPosition;
+      } else {
+        Twist2d twist = kinematics.toTwist2d(moduleDeltas);
+        m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+      }
+
+      // apply gyro update
+      if (useUpdate) {
+        m_wpiPoseEstimator.updateWithTime(currentTimestamp, m_rawGyroRotation, modulePositions);
+      }
+    }
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
@@ -258,7 +346,7 @@ public class DriveSubsystem extends SubsystemBase {
       camera.updateInputs();
     }
 
-    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
+//    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_wheelOnlyPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 

@@ -52,7 +52,7 @@ public class PhoenixOdometryThread extends Thread {
   public Queue<Double> registerSignal(ParentDevice device, StatusSignal<Double> signal) {
     Queue<Double> queue = new ArrayBlockingQueue<>(20);
     signalsLock.lock();
-    DriveSubsystem.odometryLock.lock();
+    DriveSubsystem.m_odometryLock.lock();
     try {
       isCANFD = CANBus.isNetworkFD(device.getNetwork());
       BaseStatusSignal[] newSignals = new BaseStatusSignal[signals.length + 1];
@@ -62,7 +62,7 @@ public class PhoenixOdometryThread extends Thread {
       queues.add(queue);
     } finally {
       signalsLock.unlock();
-      DriveSubsystem.odometryLock.unlock();
+      DriveSubsystem.m_odometryLock.unlock();
     }
     return queue;
   }
@@ -87,14 +87,14 @@ public class PhoenixOdometryThread extends Thread {
       double fpgaTimestamp = Logger.getRealTimestamp() / 1.0e6;
 
       // Save new data to queues
-      DriveSubsystem.odometryLock.lock();
+      DriveSubsystem.m_odometryLock.lock();
       try {
         for (int i = 0; i < signals.length; i++) {
           queues.get(i).offer(signals[i].getValueAsDouble());
         }
-        DriveSubsystem.timestampQueue.offer(fpgaTimestamp);
+        DriveSubsystem.m_timestampQueue.offer(fpgaTimestamp);
       } finally {
-        DriveSubsystem.odometryLock.unlock();
+        DriveSubsystem.m_odometryLock.unlock();
       }
     }
   }
