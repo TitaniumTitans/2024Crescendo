@@ -45,20 +45,20 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void setRightVelocityRpm(double rpm) {
     // convert any RPM to RPS and then calculate ff and fb outputs
-    setMotorVoltageTR(
-        m_velocityController.calculate(m_simRight.getAngularVelocityRPM() * 60.0,
-            rpm * 60.0) +
-            m_feedforward.calculate(rpm * 60.0)
+    this.setMotorVoltageTR(
+        m_velocityController.calculate(m_simRight.getAngularVelocityRPM() / 60.0,
+            rpm / 60.0) +
+            m_feedforward.calculate(rpm / 60.0)
     );
   }
 
   @Override
   public void setLeftVelocityRpm(double rpm) {
     // convert any RPM to RPS and then calculate ff and fb outputs
-    setMotorVoltageTL(
-        m_velocityController.calculate(m_simLeft.getAngularVelocityRPM() * 60.0,
-            rpm * 60.0) +
-            m_feedforward.calculate(rpm * 60.0)
+    this.setMotorVoltageTL(
+        m_velocityController.calculate(m_simLeft.getAngularVelocityRPM() / 60.0,
+            rpm / 60.0) +
+            m_feedforward.calculate(rpm / 60.0)
     );
   }
 

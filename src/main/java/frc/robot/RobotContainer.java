@@ -73,9 +73,6 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(0);
   private final CommandXboxController m_operatorController = new CommandXboxController(1);
 
-  private final LoggedDashboardNumber m_armIncrement = new LoggedDashboardNumber("Arm/Increment value", 1);
-  private final LoggedDashboardNumber m_leftPower = new LoggedDashboardNumber("Shooter/Left Power", 2250);
-  private final LoggedDashboardNumber m_rightPower = new LoggedDashboardNumber("Shooter/Right Power", 2250);
   private final LoggedDashboardBoolean m_useAmpLineup
       = new LoggedDashboardBoolean("Use Amp Lineup?", true);
 
@@ -242,7 +239,7 @@ public class RobotContainer {
 //          }
 //        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
-        new JoystickDriveCommand(
+        DriveCommands.joystickDrive(
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),

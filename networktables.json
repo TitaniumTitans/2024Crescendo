@@ -48,22 +48,6 @@
     }
   },
   {
-    "name": "/Preferences/Wrist Angle Offset In",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Wrist Angle Degs offset",
-    "type": "double",
-    "value": 1.6,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "/Preferences/ArmPoses/Pass SetpointArm Angle",
     "type": "double",
     "value": 45.0,
@@ -107,6 +91,22 @@
     "name": "/Preferences/ArmPoses/ShooterTestingWrist Angle",
     "type": "double",
     "value": 55.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Wrist Angle Offset In",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Wrist Angle Degs offset",
+    "type": "double",
+    "value": 1.6,
     "properties": {
       "persistent": true
     }

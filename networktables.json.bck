@@ -22,5 +22,77 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.kp",
+    "type": "double",
+    "value": 0.02,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.ki",
+    "type": "double",
+    "value": 0.01,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive/Theta Alignment.mm.kd",
+    "type": "double",
+    "value": 0.004,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/Pass SetpointArm Angle",
+    "type": "double",
+    "value": 45.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/Pass SetpointWrist Angle",
+    "type": "double",
+    "value": 55.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/Amp IntermediateArm Angle",
+    "type": "double",
+    "value": 60.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/Amp IntermediateWrist Angle",
+    "type": "double",
+    "value": 145.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/ShooterTestingArm Angle",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/ArmPoses/ShooterTestingWrist Angle",
+    "type": "double",
+    "value": 55.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]
