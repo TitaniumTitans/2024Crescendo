@@ -131,24 +131,16 @@ public class ShooterIOPrototype implements ShooterIO {
 
     inputs.setTlVelocityRPM(m_topLeftMotor.getEncoder().getVelocity() / 60.0);
     inputs.setTrVelocityRPM(m_topRightMotor.getEncoder().getVelocity() / 60.0);
-    inputs.setBlVelocityRPM(m_bottomLeftMotor.getEncoder().getVelocity() / 60.0);
-    inputs.setBrVelocityRPM(m_bottomRightMotor.getEncoder().getVelocity() / 60.0);
 
     inputs.setTlAppliedVolts(m_topLeftMotor.getAppliedOutput() * m_topLeftMotor.getBusVoltage());
     inputs.setTrAppliedVolts(m_topRightMotor.getAppliedOutput() * m_topRightMotor.getBusVoltage());
-    inputs.setBlAppliedVolts(m_bottomLeftMotor.getAppliedOutput() * m_bottomLeftMotor.getBusVoltage());
-    inputs.setBrAppliedVolts(m_bottomRightMotor.getAppliedOutput() * m_bottomRightMotor.getBusVoltage());
     inputs.setKickerAppliedVolts(m_kickerMotor.getAppliedOutput() * m_kickerMotor.getBusVoltage());
 
     inputs.setTlCurrentDraw(m_topLeftMotor.getOutputCurrent());
     inputs.setTrCurrentDraw(m_topRightMotor.getOutputCurrent());
-    inputs.setBlCurrentDraw(m_bottomLeftMotor.getOutputCurrent());
-    inputs.setBrCurrentDraw(m_bottomRightMotor.getOutputCurrent());
     inputs.setKickerCurrentDraw(m_kickerMotor.getOutputCurrent());
 
     inputs.setTlTemperature(m_topLeftMotor.getMotorTemperature());
     inputs.setTrTemperature(m_topRightMotor.getMotorTemperature());
-    inputs.setBlTemperature(m_bottomLeftMotor.getMotorTemperature());
-    inputs.setBrTemperature(m_bottomRightMotor.getMotorTemperature());
   }
 }

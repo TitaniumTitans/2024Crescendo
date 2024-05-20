@@ -7,29 +7,21 @@ public interface ShooterIO {
   class ShooterIOInputs {
     protected double tlVelocityRPM = 0.0;
     protected double trVelocityRPM = 0.0;
-    protected double blVelocityRPM = 0.0;
-    protected double brVelocityRPM = 0.0;
 
     protected double tlAppliedVolts = 0.0;
     protected double trAppliedVolts = 0.0;
-    protected double blAppliedVolts = 0.0;
-    protected double brAppliedVolts = 0.0;
     protected double kickerAppliedVolts = 0.0;
     protected double indexerAppliedVolts = 0.0;
     protected double intakeAppliedVolts = 0.0;
 
     protected double tlCurrentDraw = 0.0;
     protected double trCurrentDraw = 0.0;
-    protected double blCurrentDraw = 0.0;
-    protected double brCurrentDraw = 0.0;
     protected double kickerCurrentDraw = 0.0;
     protected double intakeCurrentDraw = 0.0;
     protected double indexerCurrentDraw = 0.0;
 
     protected double tlTemperature = 0.0;
     protected double trTemperature = 0.0;
-    protected double blTemperature = 0.0;
-    protected double brTemperature = 0.0;
     protected double indexerTemperature = 0.0;
     protected double intakeTemperature = 0.0;
 
@@ -52,22 +44,6 @@ public interface ShooterIO {
       this.trVelocityRPM = trVelocityRPM;
     }
 
-    public double getBlVelocityRPM() {
-      return blVelocityRPM;
-    }
-
-    public void setBlVelocityRPM(double blVelocityRPM) {
-      this.blVelocityRPM = blVelocityRPM;
-    }
-
-    public double getBrVelocityRPM() {
-      return brVelocityRPM;
-    }
-
-    public void setBrVelocityRPM(double brVelocityRPM) {
-      this.brVelocityRPM = brVelocityRPM;
-    }
-
     public double getTlAppliedVolts() {
       return tlAppliedVolts;
     }
@@ -82,22 +58,6 @@ public interface ShooterIO {
 
     public void setTrAppliedVolts(double trAppliedVolts) {
       this.trAppliedVolts = trAppliedVolts;
-    }
-
-    public double getBlAppliedVolts() {
-      return blAppliedVolts;
-    }
-
-    public void setBlAppliedVolts(double blAppliedVolts) {
-      this.blAppliedVolts = blAppliedVolts;
-    }
-
-    public double getBrAppliedVolts() {
-      return brAppliedVolts;
-    }
-
-    public void setBrAppliedVolts(double brAppliedVolts) {
-      this.brAppliedVolts = brAppliedVolts;
     }
 
     public double getKickerAppliedVolts() {
@@ -132,22 +92,6 @@ public interface ShooterIO {
       this.trCurrentDraw = trCurrentDraw;
     }
 
-    public double getBlCurrentDraw() {
-      return blCurrentDraw;
-    }
-
-    public void setBlCurrentDraw(double blCurrentDraw) {
-      this.blCurrentDraw = blCurrentDraw;
-    }
-
-    public double getBrCurrentDraw() {
-      return brCurrentDraw;
-    }
-
-    public void setBrCurrentDraw(double brCurrentDraw) {
-      this.brCurrentDraw = brCurrentDraw;
-    }
-
     public double getKickerCurrentDraw() {
       return kickerCurrentDraw;
     }
@@ -170,22 +114,6 @@ public interface ShooterIO {
 
     public void setTrTemperature(double trTemperature) {
       this.trTemperature = trTemperature;
-    }
-
-    public double getBlTemperature() {
-      return blTemperature;
-    }
-
-    public void setBlTemperature(double blTemperature) {
-      this.blTemperature = blTemperature;
-    }
-
-    public double getBrTemperature() {
-      return brTemperature;
-    }
-
-    public void setBrTemperature(double brTemperature) {
-      this.brTemperature = brTemperature;
     }
 
     public double getIndexerAppliedVolts() {

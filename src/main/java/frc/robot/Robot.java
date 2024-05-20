@@ -15,6 +15,8 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.gos.lib.properties.PropertyManager;
+import edu.wpi.first.math.spline.Spline;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
