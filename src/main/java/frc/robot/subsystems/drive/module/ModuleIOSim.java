@@ -32,7 +32,7 @@ public class ModuleIOSim implements ModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
   private final DCMotorSim driveSim =
-      new DCMotorSim(DCMotor.getKrakenX60(1), ModuleConstants.GearRatios.L3_KRAKEN.ratio, 0.025);
+      new DCMotorSim(DCMotor.getKrakenX60(1), ModuleConstants.GearRatios.L3.ratio, 0.025);
 
   private final DCMotorSim turnSim =
       new DCMotorSim(DCMotor.getFalcon500Foc(1), ModuleConstants.GearRatios.TURN.ratio, 0.004);
@@ -71,15 +71,15 @@ public class ModuleIOSim implements ModuleIO {
     inputs.turnAppliedVolts = turnAppliedVolts;
     inputs.turnCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
 
-    inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};
     inputs.odometryDrivePositionsMeters = new double[] {inputs.drivePositionMeters};
     inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
   }
 
   @Override
   public void setDriveVelocityMPS(double mps) {
-    double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
+    double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * ModuleConstants.GearRatios.L3.ratio;
     driveAppliedVolts = m_driveController.calculate(driveSim.getAngularVelocityRPM() / 60.0, rps);
+    driveAppliedVolts += rps * m_moduleConstants.DRIVE_KV();
     driveAppliedVolts = MathUtil.clamp(driveAppliedVolts, -12.0, 12.0);
     driveSim.setInputVoltage(driveAppliedVolts);
   }

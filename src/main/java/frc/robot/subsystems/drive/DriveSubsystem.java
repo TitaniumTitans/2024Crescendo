@@ -36,6 +36,7 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -248,6 +249,10 @@ public class DriveSubsystem extends SubsystemBase {
     // process timestamp inputs
     m_timestampInputs.timestamps =
             m_timestampQueue.stream().mapToDouble(Double::valueOf).toArray();
+    // fake sim inputs
+    if (m_timestampInputs.timestamps.length == 0) {
+      m_timestampInputs.timestamps = new double[] {Timer.getFPGATimestamp()};
+    }
     Logger.processInputs("Drive/Odometry/Timestamps", m_timestampInputs);
     m_odometryLock.unlock();
 
@@ -283,6 +288,7 @@ public class DriveSubsystem extends SubsystemBase {
           double velocity = (modulePositions[moduleIndex].distanceMeters
               - m_lastModulePositions[moduleIndex].distanceMeters)
               / dt;
+
           double omega = modulePositions[moduleIndex].angle
               .minus(m_lastModulePositions[moduleIndex].angle)
               .getDegrees()
@@ -292,12 +298,14 @@ public class DriveSubsystem extends SubsystemBase {
               new SwerveModulePosition(
                   modulePositions[moduleIndex].distanceMeters
                       - m_lastModulePositions[moduleIndex].distanceMeters,
-                  modulePositions[moduleIndex].angle);
+                  modulePositions[moduleIndex].angle.minus(
+                      m_lastModulePositions[moduleIndex].angle));
 
           m_lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
 
-          useUpdate = velocity <= DriveConstants.MAX_LINEAR_SPEED / 0.2
-              && omega <= 90 / 0.2; // make not a floating number
+          // make sure our delta isn't too large
+          useUpdate = Math.abs(velocity) <= DriveConstants.MAX_LINEAR_SPEED * 5.0
+              && Math.abs(omega) <= 1080 * 5.0; // make not a floating number
         }
       }
 
@@ -306,13 +314,15 @@ public class DriveSubsystem extends SubsystemBase {
         m_rawGyroRotation = gyroInputs.yawPosition;
       } else {
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-        m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+        m_rawGyroRotation = m_rawGyroRotation.plus(new Rotation2d(twist.dtheta));
       }
 
       // apply gyro update
       if (useUpdate) {
         m_wpiPoseEstimator.updateWithTime(currentTimestamp, m_rawGyroRotation, modulePositions);
       }
+      m_lastTimestamp = currentTimestamp;
+
     }
 
     // Stop moving when disabled
