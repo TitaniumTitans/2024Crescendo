@@ -190,45 +190,45 @@ public class RobotContainer {
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.13)
         .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.INTAKE)));
 
-    spinUpTrigger.whileTrue(
-        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), false));
-    shootTrigger.whileTrue(
-        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), true));
+//    spinUpTrigger.whileTrue(
+//        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), false));
+//    shootTrigger.whileTrue(
+//        new AimbotCommand(m_armSubsystem, m_driveSubsystem, m_shooter, m_driverController.getHID(), true));
 
-    ampLineupTrigger.whileTrue(
-        m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
-            .unless(() -> !m_useAmpLineup.get())
-        .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
-        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
+//    ampLineupTrigger.whileTrue(
+//        m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
+//            .unless(() -> !m_useAmpLineup.get())
+//        .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
+//        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
-    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.75),
-        () -> m_shooter.setKickerPower(0.0),
-        m_shooter)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
+//    ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.75),
+//        () -> m_shooter.setKickerPower(0.0),
+//        m_shooter)
+//        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, () -> 3250, () -> 3250)));
+            .alongWith(m_shooter.runShooterVelocity(false, () -> 1500, () -> 1500)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, () -> 3250, () -> 3250)));
+            .alongWith(m_shooter.runShooterVelocity(true, () -> 1500, () -> 1500)));
 
-    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+//    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+//    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
-    m_driverController.pov(90).whileTrue(
-            Commands.runEnd(() -> {
-                      m_shooter.setIntakePower(-0.75);
-                      m_shooter.setKickerPower(-0.75);
-                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
-                    },
-                    () -> {
-                      m_shooter.setIntakePower(0.0);
-                      m_shooter.setKickerPower(0.0);
-                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
-                    },
-                    m_shooter));
+//    m_driverController.pov(90).whileTrue(
+//            Commands.runEnd(() -> {
+//                      m_shooter.setIntakePower(-0.75);
+//                      m_shooter.setKickerPower(-0.75);
+//                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
+//                    },
+//                    () -> {
+//                      m_shooter.setIntakePower(0.0);
+//                      m_shooter.setKickerPower(0.0);
+//                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
+//                    },
+//                    m_shooter));
 
     // 96.240234375
     // 60.029296875
@@ -242,7 +242,7 @@ public class RobotContainer {
 //          }
 //        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
-        new JoystickDriveCommand(
+        DriveCommands.joystickDrive(
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
@@ -261,35 +261,35 @@ public class RobotContainer {
 
 
     /** Operator controller */
-    m_operatorController.leftTrigger().whileTrue(
-        m_shooter.runShooterVelocity(false, () -> 0, () -> 0));
-    m_operatorController.rightTrigger().whileTrue(
-        m_shooter.runShooterVelocity(true, () -> 1000, () -> 1000));
-
-    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-1640.0));
-    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
-        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
-    m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
-        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
-
-    m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
-    m_operatorController.pov(180).whileTrue(m_climber.setClimberPowerFactory(-0.5));
+//    m_operatorController.leftTrigger().whileTrue(
+//        m_shooter.runShooterVelocity(false, () -> 0, () -> 0));
+//    m_operatorController.rightTrigger().whileTrue(
+//        m_shooter.runShooterVelocity(true, () -> 1000, () -> 1000));
+//
+//    m_operatorController.leftBumper().whileTrue(m_climber.setClimberPosition(-1640.0));
+//    m_operatorController.rightBumper().whileTrue(m_climber.setClimberPosition(1230.0)
+//        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
+//    m_operatorController.y().whileTrue(m_climber.setClimberPosition(30.0)
+//        .unless(() -> m_armSubsystem.getArmState() == ArmSubsystem.ArmState.SCORE_TRAP));
+//
+//    m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
+//    m_operatorController.pov(180).whileTrue(m_climber.setClimberPowerFactory(-0.5));
 //    m_operatorController.pov(90).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
 //    m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
 
-    m_operatorController.a()
-        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.PREPARE_TRAP),
-            m_armSubsystem));
-    m_operatorController.b()
-        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.SCORE_TRAP),
-            m_armSubsystem));
-    m_operatorController.x()
-        .onTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
+//    m_operatorController.a()
+//        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.PREPARE_TRAP),
+//            m_armSubsystem));
+//    m_operatorController.b()
+//        .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.SCORE_TRAP),
+//            m_armSubsystem));
+//    m_operatorController.x()
+//        .onTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 
     // arm 45.0
     // wrist 123.5
 
-    m_operatorController.start().onTrue(m_climber.resetClimber());
+//    m_operatorController.start().onTrue(m_climber.resetClimber());
   }
 
   /**
