@@ -197,7 +197,6 @@ public class RobotContainer {
 
     ampLineupTrigger.whileTrue(
         m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
-            .unless(() -> !m_useAmpLineup.get())
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
         .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
 

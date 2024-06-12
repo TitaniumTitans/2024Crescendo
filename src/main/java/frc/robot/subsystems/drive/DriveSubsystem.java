@@ -102,7 +102,7 @@ public class DriveSubsystem extends SubsystemBase {
   private FieldRelativeSpeed m_lastFieldRelVel = new FieldRelativeSpeed();
   private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
 
-  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", true);
+  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", false);
 
   public DriveSubsystem(
       GyroIO gyroIO,
