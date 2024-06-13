@@ -208,11 +208,11 @@ public class RobotContainer {
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, () -> 1500, () -> 1500)));
+            .alongWith(m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, () -> 1500, () -> 1500)));
+            .alongWith(m_shooter.runShooterVelocity(true, () -> 1000, () -> 1000)));
 
 //    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
 //    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
@@ -242,7 +242,7 @@ public class RobotContainer {
 //          }
 //        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
+        DriveCommands.joystickDrive(\[]
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
