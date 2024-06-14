@@ -230,14 +230,6 @@ public class RobotContainer {
     // 96.240234375
     // 60.029296875
     // 2250
-//    m_shooter.setDefaultCommand(
-//        Commands.run(() -> {
-//          if (!m_climber.getClimberLock() && m_shooter.hasPiece()) {
-//            m_shooter.runShooterVelocity(false, () -> 1000, () -> 1000).execute();
-//          } else {
-//            m_shooter.setShooterPowerFactory(0.0, 0.0, 0.0);
-//          }
-//        }, m_shooter));
     m_driveSubsystem.setDefaultCommand(
         DriveCommands.joystickDrive(
                 m_driveSubsystem,
@@ -271,8 +263,6 @@ public class RobotContainer {
 
     m_operatorController.pov(0).whileTrue(m_climber.setClimberPowerFactory(0.5));
     m_operatorController.pov(180).whileTrue(m_climber.setClimberPowerFactory(-0.5));
-//    m_operatorController.pov(90).whileTrue(m_climber.setRightClimberPowerFactory(0.5));
-//    m_operatorController.pov(270).whileTrue(m_climber.setRightClimberPowerFactory(-0.5));
 
     m_operatorController.a()
         .onTrue(Commands.runOnce(() -> m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.PREPARE_TRAP),

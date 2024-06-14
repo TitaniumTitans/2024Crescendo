@@ -14,6 +14,7 @@ import lib.factories.TalonFXFactory;
 import lib.properties.phoenix6.Phoenix6PidPropertyBuilder;
 import lib.properties.phoenix6.PidPropertyPublic;
 import frc.robot.Constants.ShooterConstants;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
@@ -170,6 +171,9 @@ public class ShooterIOKraken implements ShooterIO {
 
     inputs.tlVelocityRPM = m_leftVelSignal.refresh().getValueAsDouble() * 60.0;
     inputs.trVelocityRPM = m_rightVelSignal.refresh().getValueAsDouble() * 60.0;
+
+    Logger.recordOutput("Shooter/SysId/Left Vel RPS", m_leftVelSignal.refresh().getValueAsDouble());
+    Logger.recordOutput("Shooter/SysId/Right Vel RPS", m_rightVelSignal.refresh().getValueAsDouble());
 
     inputs.tlAppliedVolts = m_leftVoltOutSignal.getValueAsDouble();
     inputs.trAppliedVolts = m_rightVoltOutSignal.getValueAsDouble();

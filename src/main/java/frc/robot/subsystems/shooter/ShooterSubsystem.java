@@ -2,15 +2,21 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import lib.utils.AimbotUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import static edu.wpi.first.units.Units.Volts;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -27,8 +33,10 @@ public class ShooterSubsystem extends SubsystemBase {
   private final LoggedDashboardNumber m_rightSetpoint =
       new LoggedDashboardNumber("Shooter/Right RPM", 4750);
 
+  private final SysIdRoutine m_sysId;
+
   public ShooterSubsystem(ShooterIO io) {
-    this(io, () -> new Pose2d());
+    this(io, Pose2d::new);
   }
 
   public ShooterSubsystem(ShooterIO io, Supplier<Pose2d> pose2dSupplier) {
@@ -36,7 +44,16 @@ public class ShooterSubsystem extends SubsystemBase {
     m_inputs = new ShooterIOInputsAutoLogged();
 
     m_poseSupplier = pose2dSupplier;
-    // turn on logging
+
+    m_sysId =
+            new SysIdRoutine(
+                    new SysIdRoutine.Config(
+                            null,
+                            null,
+                            null,
+                            (SysIdRoutineLog.State state) ->
+                                    Logger.recordOutput("Flywheel/SysIdState", state.toString())),
+                    new SysIdRoutine.Mechanism(voltage -> runCharacterizationVolts(voltage.in(Volts)), null, this));
   }
 
   @Override
@@ -63,6 +80,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public void setIntakePower(double power) {
     m_io.setIntakeVoltage(power * 12.0);
+  }
+
+  public void runCharacterizationVolts(double volts) {
+    m_io.setMotorVoltageTL(volts);
+    m_io.setMotorVoltageTR(volts);
   }
 
   public Command runShooterVelocity(boolean runKicker) {
@@ -145,5 +167,15 @@ public class ShooterSubsystem extends SubsystemBase {
   public boolean atSpeed() {
     return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 150
         && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 150;
+  }
+
+  /** Returns a command to run a quasistatic test in the specified direction. */
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return m_sysId.quasistatic(direction);
+  }
+
+  /** Returns a command to run a dynamic test in the specified direction. */
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return m_sysId.dynamic(direction);
   }
 }
