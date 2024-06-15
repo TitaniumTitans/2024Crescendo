@@ -96,7 +96,7 @@ public final class Constants {
             Units.inchesToMeters(10.023204 - 2.0), // 10.023204
             Units.inchesToMeters(7.1374 - 2.0)), // 4.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0 + 0.5),
+            Units.degreesToRadians(0.0 + 0.5 + 180.0),
             Units.degreesToRadians(-30.0 + 0.75), // -120.0 + 91.0
             Units.degreesToRadians(-14.7 + 6.0)) // 165.3224 + 180
     );
@@ -107,7 +107,7 @@ public final class Constants {
             Units.inchesToMeters(-10.023204 - 3.5), //-10.023204
             Units.inchesToMeters(7.1374 - 2.0)), // 7.1374
         new Rotation3d(
-            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(0.0 + 180.0),
             Units.degreesToRadians(-30.0 - 1.5), // -30.0 - 1
             Units.degreesToRadians(14.7 - 11.0)) // 165.3224)
     );

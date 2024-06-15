@@ -213,8 +213,8 @@ public class DriveSubsystem extends SubsystemBase {
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
-            (List<Pose2d> activePath) -> Logger.recordOutput(
-                    "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
+            (List<Pose2d> activePath) -> {} /* Logger.recordOutput(
+                    "Odometry/Trajectory", activePath.toArray(new Pose2d[0]))*/);
     PathPlannerLogging.setLogTargetPoseCallback(
             (Pose2d targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
 
