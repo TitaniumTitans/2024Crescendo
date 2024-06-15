@@ -177,6 +177,10 @@ public class AimbotCommand extends Command {
       m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.AUTO_AIM);
       m_shooterSubsystem.runShooterVelocity(m_runKicker).execute();
 
+      Logger.recordOutput("Aimbot/At Speed", m_shooterSubsystem.atSpeed());
+      Logger.recordOutput("Aimbot/At Rotation", error < 20.0);
+      Logger.recordOutput("Aimbot/Has Note", m_shooterSubsystem.hasPiece());
+
       // set shooter speeds and rumble controller
       if (m_shooterSubsystem.atSpeed() && error < 20.0) {
         m_driverController.setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
