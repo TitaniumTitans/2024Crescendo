@@ -93,7 +93,6 @@ public class ModuleIOTalonFX implements ModuleIO {
         moduleConstants.ENCODER_INVERTED() ? SensorDirectionValue.Clockwise_Positive
             : SensorDirectionValue.CounterClockwise_Positive;
     encoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
-    encoderConfig.MagnetSensor.MagnetOffset = m_moduleConstants.ENCODER_OFFSET().getRotations();
     m_cancoder.getConfigurator().apply(encoderConfig);
 
     m_turnAbsolutePosition = m_cancoder.getAbsolutePosition();
@@ -168,7 +167,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     m_driveCurrent = m_driveTalon.getStatorCurrent();
 
     // setup turn values
-    m_turnTalon.setPosition(m_turnAbsolutePosition.getValueAsDouble());
+    m_turnTalon.setPosition(m_turnAbsolutePosition.getValueAsDouble() - m_moduleConstants.ENCODER_OFFSET().getRotations());
     m_turnVelocity = m_turnTalon.getVelocity();
     m_turnAppliedVolts = m_turnTalon.getMotorVoltage();
     m_turnCurrent = m_turnTalon.getStatorCurrent();
