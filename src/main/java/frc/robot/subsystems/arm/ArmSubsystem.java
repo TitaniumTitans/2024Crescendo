@@ -117,8 +117,8 @@ public class ArmSubsystem extends SubsystemBase {
     Logger.recordOutput("Arm/Arm Setpoint", m_desiredArmPoseDegs);
     Logger.recordOutput("Arm/Wrist Setpoint", m_desiredWristPoseDegs);
 
-    Logger.recordOutput("Arm/Arm Velocity Multiplier");
-    Logger.recordOutput("Arm/Wrist Velocity Multiplier");
+//    Logger.recordOutput("Arm/Arm Velocity Multiplier");
+//    Logger.recordOutput("Arm/Wrist Velocity Multiplier");
 
     // Update arm visualizers
     m_poseVisualizer.update(m_inputs.armPositionDegs, m_inputs.wristPositionDegs);
