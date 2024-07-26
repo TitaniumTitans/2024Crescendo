@@ -159,7 +159,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_thetaPid.setTolerance(5.0);
 
     m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
-        .addP(2.6)
+        .addP(3.0)
         .addI(0.00)
         .addD(0.00)
         .build();
@@ -182,8 +182,8 @@ public class DriveSubsystem extends SubsystemBase {
             Units.inchesToMeters(0.5),
             Units.degreesToRadians(0.75)),
         VecBuilder.fill(
-            Units.inchesToMeters(4.5),
-            Units.inchesToMeters(4.5),
+            Units.inchesToMeters(5.0),
+            Units.inchesToMeters(5.0),
             Units.degreesToRadians(12.5))
     );
 
@@ -350,10 +350,10 @@ public class DriveSubsystem extends SubsystemBase {
           Units.degreesToRadians(7.5)) == 0.0)
           || !DriverStation.isAutonomousEnabled()) {
 
-//        camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
-//            (PoseEstimator.TimestampedVisionUpdate pose) ->
-//                m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
-//        );
+        camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
+            (PoseEstimator.TimestampedVisionUpdate pose) ->
+                m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
+        );
       }
       camera.updateInputs();
     }

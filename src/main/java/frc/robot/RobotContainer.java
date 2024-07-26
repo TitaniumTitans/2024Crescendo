@@ -93,12 +93,12 @@ public class RobotContainer {
             new ModuleIOTalonFX(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
-//                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
-//                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
+                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
+                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
 //                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
             }
             );
-        m_shooter = new ShooterSubsystem(new ShooterIOKraken());
+        m_shooter = new ShooterSubsystem(new ShooterIOKraken(), m_driveSubsystem::getVisionPose);
         m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
             m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
