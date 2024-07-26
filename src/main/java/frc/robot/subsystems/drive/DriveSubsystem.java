@@ -61,11 +61,13 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
 import static edu.wpi.first.units.Units.Volts;
 
 public class DriveSubsystem extends SubsystemBase {
+
   // used to record timestamps for replay
   @AutoLog
   public static class OdometryTimestampInputs {
@@ -121,7 +123,7 @@ public class DriveSubsystem extends SubsystemBase {
   private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
 
   // Manual mode selector
-  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", true);
+  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", false);
 
   public DriveSubsystem(
       GyroIO gyroIO,
@@ -156,10 +158,10 @@ public class DriveSubsystem extends SubsystemBase {
     m_thetaPid.enableContinuousInput(0, 360);
     m_thetaPid.setTolerance(5.0);
 
-    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", false, m_thetaPid)
-        .addP(0.02)
-        .addI(0.01)
-        .addD(0.004)
+    m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
+        .addP(2.6)
+        .addI(0.00)
+        .addD(0.00)
         .build();
 
     // 0.04, 0.01, 0.0
@@ -319,7 +321,7 @@ public class DriveSubsystem extends SubsystemBase {
 
       // apply gyro update
       if (useUpdate) {
-        m_wpiPoseEstimator.updateWithTime(currentTimestamp, m_rawGyroRotation, modulePositions);
+//        m_wpiPoseEstimator.updateWithTime(currentTimestamp, m_rawGyroRotation, modulePositions);
       }
       m_lastTimestamp = currentTimestamp;
 
@@ -348,15 +350,15 @@ public class DriveSubsystem extends SubsystemBase {
           Units.degreesToRadians(7.5)) == 0.0)
           || !DriverStation.isAutonomousEnabled()) {
 
-        camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
-            (PoseEstimator.TimestampedVisionUpdate pose) ->
-                m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
-        );
+//        camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
+//            (PoseEstimator.TimestampedVisionUpdate pose) ->
+//                m_wpiPoseEstimator.addVisionMeasurement(pose.pose(), pose.timestamp(), pose.stdDevs())
+//        );
       }
       camera.updateInputs();
     }
 
-//    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
+    m_wpiPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_wheelOnlyPoseEstimator.update(gyroInputs.yawPosition, getModulePositions());
     m_thetaPidProperty.updateIfChanged();
 
@@ -433,9 +435,9 @@ public class DriveSubsystem extends SubsystemBase {
     double cubicOutput = Math.pow(m_thetaPid.getPositionError(), 3.0) * 0.006;
     Logger.recordOutput("Drive/Theta Cubic Output", cubicOutput);
 
-    outputDegsPerSec = outputDegsPerSec + cubicOutput;
+//    outputDegsPerSec = outputDegsPerSec + cubicOutput;
     // apply deadband, wpilib version borked?
-    if (0.5 > outputDegsPerSec && outputDegsPerSec > -0.5) {
+    if (0.5 > outputDegsPerSec && outputDegsPerSec > -0.5 || m_thetaPid.atSetpoint()) {
       outputDegsPerSec = 0.0;
     }
 
@@ -557,6 +559,14 @@ public class DriveSubsystem extends SubsystemBase {
     return AutoBuilder.pathfindToPoseFlipped(
         pose, DriveConstants.DEFAULT_CONSTRAINTS).withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf)
         .unless(() -> !useAutoControl());
+  }
+
+  public Command rotateToAngle(IntSupplier angle) {
+    return runEnd(() -> {
+      double output = alignToAngle(Rotation2d.fromDegrees(angle.getAsInt()));
+      runVelocity(new ChassisSpeeds(0.0, 0.0, output));
+        },
+        () -> runVelocity(new ChassisSpeeds()));
   }
 
   /** Returns an array of module translations. */

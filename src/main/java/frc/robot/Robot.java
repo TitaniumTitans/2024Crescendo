@@ -108,6 +108,8 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
 //    TalonFXFactory.handleFaults();
 //    DataLogUtil.updateTables();
+
+    robotContainer.controllerRumble();
   }
 
   /** This function is called once when the robot is disabled. */

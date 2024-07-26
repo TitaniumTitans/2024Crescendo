@@ -73,8 +73,8 @@ public class AimbotUtils {
             + m_offsetDegrees.getValue();
   }
 
-  @AutoLogOutput(key="Shooter/Left Setpoint")
-  public static double getLeftSpeed(double distance) {
+  @AutoLogOutput(key="Shooter/Right Setpoint")
+  public static double getRightSpeed(double distance) {
     if (75.0 > distance) {
       return 4500;
     } else if (distance > 170.0) {
@@ -84,8 +84,8 @@ public class AimbotUtils {
     }
   }
 
-  @AutoLogOutput(key="Shooter/Right Setpoint")
-  public static double getRightSpeed(double distance) {
+  @AutoLogOutput(key="Shooter/Left Setpoint")
+  public static double getLeftSpeed(double distance) {
     if (75.0 > distance) {
       return 3000;
     } else if (distance > 170.0) {

@@ -93,7 +93,7 @@ public class RobotContainer {
             new ModuleIOTalonFX(DriveConstants.BL_MOD_CONSTANTS),
             new ModuleIOTalonFX(DriveConstants.BR_MOD_CONSTANTS),
             new VisionSubsystem[]{
-                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
+//                new VisionSubsystem("RightCamera", DriveConstants.RIGHT_CAMERA_TRANSFORMATION),
 //                new VisionSubsystem("LeftCamera", DriveConstants.LEFT_CAMERA_TRANSFORMATION),
 //                new VisionSubsystem("IntakeCamera", DriveConstants.INTAKE_CAMERA_TRANSFORMATION)
             }
@@ -182,6 +182,8 @@ public class RobotContainer {
         .and(intakeTrigger.negate())
         .debounce(0.1, Debouncer.DebounceType.kBoth);
 
+    Trigger rotationTestTrigger = m_driverController.povCenter().negate();
+
     /** driver controller */
 
     intakeTrigger.whileTrue(m_shooter.intakeCommand(0.75, 0.5, 0.13)
@@ -211,21 +213,26 @@ public class RobotContainer {
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
             .alongWith(m_shooter.runShooterVelocity(true, () -> 3250, () -> 3250)));
 
-    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
-    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
+//    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
+//    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
 
-    m_driverController.pov(90).whileTrue(
-            Commands.runEnd(() -> {
-                      m_shooter.setIntakePower(-0.75);
-                      m_shooter.setKickerPower(-0.75);
-                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
-                    },
-                    () -> {
-                      m_shooter.setIntakePower(0.0);
-                      m_shooter.setKickerPower(0.0);
-                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
-                    },
-                    m_shooter));
+//    m_driverController.pov(90).whileTrue(
+//            Commands.runEnd(() -> {
+//                      m_shooter.setIntakePower(-0.75);
+//                      m_shooter.setKickerPower(-0.75);
+//                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.INTAKE);
+//                    },
+//                    () -> {
+//                      m_shooter.setIntakePower(0.0);
+//                      m_shooter.setKickerPower(0.0);
+//                      m_armSubsystem.setDesiredState(ArmSubsystem.ArmState.STOW);
+//                    },
+//                    m_shooter));
+
+    /*** testing rotation controller ***/
+    rotationTestTrigger.whileTrue(
+        m_driveSubsystem.rotateToAngle(() -> m_driverController.getHID().getPOV())
+    );
 
     // 96.240234375
     // 60.029296875
@@ -308,5 +315,13 @@ public class RobotContainer {
 
   public void resetClimberLock() {
     m_climber.resetClimberLock().schedule();
+  }
+
+  public void controllerRumble() {
+    if (m_shooter.atSpeed()) {
+      m_driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
+    } else {
+      m_driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
+    }
   }
 }

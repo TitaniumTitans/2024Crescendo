@@ -83,14 +83,14 @@ public class ShooterIOKraken implements ShooterIO {
     m_intake = TalonFXFactory.createTalon(ShooterConstants.INTAKE_ID, "rio", shooterConfig);
     m_kicker = TalonFXFactory.createTalon(ShooterConstants.KICKER_ID, shooterConfig);
 
-    m_leftProperty = new Phoenix6PidPropertyBuilder("Shooter/Left PID", false, m_leftTalon, 0)
+    m_leftProperty = new Phoenix6PidPropertyBuilder("Shooter/Left PID", true, m_leftTalon, 0)
         .addP(ShooterConstants.SHOOTER_KP)
         .addD(ShooterConstants.SHOOTER_KD)
         .addKS(ShooterConstants.SHOOTER_KS)
         .addKV(ShooterConstants.SHOOTER_KV)
         .build();
 
-    m_rightProperty = new Phoenix6PidPropertyBuilder("Shooter/Right PID", false, m_rightTalon, 0)
+    m_rightProperty = new Phoenix6PidPropertyBuilder("Shooter/Right PID", true, m_rightTalon, 0)
         .addP(ShooterConstants.SHOOTER_KP)
         .addD(ShooterConstants.SHOOTER_KD)
         .addKS(ShooterConstants.SHOOTER_KS)

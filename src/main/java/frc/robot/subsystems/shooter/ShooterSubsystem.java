@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import lib.utils.AimbotUtils;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -164,9 +165,11 @@ public class ShooterSubsystem extends SubsystemBase {
     });
   }
 
+  @AutoLogOutput(key = "Shooter/At Setpoint")
   public boolean atSpeed() {
-    return Math.abs(m_leftSpeedSetpoint - m_inputs.tlVelocityRPM) < 150
-        && Math.abs(m_rightSpeedSetpoint - m_inputs.trVelocityRPM) < 150;
+    // not using absolute value lets us do 150 rpm under, infinite rpm over
+    return m_leftSpeedSetpoint - m_inputs.tlVelocityRPM <= 150
+        && m_rightSpeedSetpoint - m_inputs.trVelocityRPM <= 150;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
