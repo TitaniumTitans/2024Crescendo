@@ -205,7 +205,7 @@ public class DriveSubsystem extends SubsystemBase {
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configureHolonomic(
         this::getVisionPose,
-        this::setPose,
+        (Pose2d pose) -> {}, // don't reset pose, use vision instead
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         DriveConstants.HOLONOMIC_CONFIG,
