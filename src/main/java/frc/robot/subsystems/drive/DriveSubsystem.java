@@ -333,10 +333,11 @@ public class DriveSubsystem extends SubsystemBase {
         module.stop();
       }
     }
+
     // Log empty setpoint states when disabled
     if (DriverStation.isDisabled()) {
-//      Logger.recordOutput("SwerveStates/Setpoints");
-//      Logger.recordOutput("SwerveStates/SetpointsOptimized");
+      Logger.recordOutput("SwerveStates/Setpoints");
+      Logger.recordOutput("SwerveStates/SetpointsOptimized");
     }
 
     // Update odometry
@@ -348,7 +349,7 @@ public class DriveSubsystem extends SubsystemBase {
           Units.inchesToMeters(6.0)) == 0.0)
           && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
           Units.degreesToRadians(7.5)) == 0.0))
-          || !DriverStation.isAutonomousEnabled() || true) {
+          || !DriverStation.isAutonomousEnabled()) {
 
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
             (PoseEstimator.TimestampedVisionUpdate pose) ->

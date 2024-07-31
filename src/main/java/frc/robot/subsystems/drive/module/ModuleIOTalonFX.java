@@ -245,9 +245,6 @@ public class ModuleIOTalonFX implements ModuleIO {
     double rps = (mps / m_moduleConstants.WHEEL_CURCUMFERENCE_METERS()) * m_moduleConstants.DRIVE_GEAR_RATIO();
     VelocityVoltage velRequest = new VelocityVoltage(rps).withSlot(0).withEnableFOC(false);
     m_driveTalon.setControl(velRequest.withVelocity(rps));
-
-//    double output = mps / Constants.DriveConstants.MAX_LINEAR_SPEED;
-//    m_driveTalon.setVoltage(output * 12.0);
   }
 
   @Override
