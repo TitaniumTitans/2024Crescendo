@@ -318,7 +318,7 @@ public class RobotContainer {
   }
 
   public void controllerRumble() {
-    if (m_shooter.atSpeed()) {
+    if (m_shooter.atSpeed() && DriverStation.isTeleop()) {
       m_driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 1.0);
     } else {
       m_driverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0);

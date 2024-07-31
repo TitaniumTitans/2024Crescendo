@@ -71,7 +71,7 @@ public final class Constants {
     public static final double ODOMETRY_FREQUENCY = 250;
 
     // module constants
-    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0 - (1.0 / 8.0));
+    public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
 
     public static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.1);
     public static final double TRACK_WIDTH_X = Units.inchesToMeters(18.75);
@@ -84,9 +84,9 @@ public final class Constants {
         = new GosBooleanProperty(false, "Drive/Use David Drive", false);
 
     // kV, kS, kA in order
-    public static final double[] DRIVE_FF_GAINS = new double[]{0.08, 0.35, 0.0};
+    public static final double[] DRIVE_FF_GAINS = new double[]{0.02, 0.3, 0.0}; // {0.08, 0.35, 0.0}
     // kP, kI, kD in order
-    public static final double[] DRIVE_FB_GAINS = new double[]{0.08, 0.0, 0.0};
+    public static final double[] DRIVE_FB_GAINS = new double[]{0.11, 0.0, 0.0}; // {0.08, 0.0, 0.0}
     // kP, kI, kD in order
     public static final double[] TURN_FB_GAINS = new double[]{47.0, 0.0, 0.0};
 
@@ -131,7 +131,7 @@ public final class Constants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_CONFIG = new HolonomicPathFollowerConfig(
-        new PIDConstants(5.0, 0.0), new PIDConstants(5.5, 0.0),
+        new PIDConstants(4.0, 0.0), new PIDConstants(4.5, 0.0),
         DriveConstants.MAX_LINEAR_SPEED * 0.5, DriveConstants.DRIVE_BASE_RADIUS, new ReplanningConfig());
 
     public static final ModuleConstants FL_MOD_CONSTANTS = new ModuleConstants(

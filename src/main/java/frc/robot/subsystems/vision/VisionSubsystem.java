@@ -33,11 +33,11 @@ public class VisionSubsystem {
   private AprilTagFieldLayout m_aprilTagFieldLayout;
   private final String m_name;
 
-  private final double xyStdDevCoefficient = Units.inchesToMeters(10.0);
-  private final double thetaStdDevCoefficient = Units.degreesToRadians(10.0);
+  private final double xyStdDevCoefficient = Units.inchesToMeters(9.0);
+  private final double thetaStdDevCoefficient = Units.degreesToRadians(9.0);
 
-  private final double xyStdDevMultiTagCoefficient = Units.inchesToMeters(5.0);
-  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(5.0);
+  private final double xyStdDevMultiTagCoefficient = Units.inchesToMeters(4.0);
+  private final double thetaStdDevMultiTagCoefficient = Units.degreesToRadians(4.0);
 
   private final PhotonVisionIOInputsAutoLogged inputs = new PhotonVisionIOInputsAutoLogged();
 

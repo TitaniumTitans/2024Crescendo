@@ -123,7 +123,7 @@ public class DriveSubsystem extends SubsystemBase {
   private FieldRelativeAccel m_fieldRelAccel = new FieldRelativeAccel();
 
   // Manual mode selector
-  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", false);
+  private final LoggedDashboardBoolean m_useAutoCrap = new LoggedDashboardBoolean("Use Auto Crap?", true);
 
   public DriveSubsystem(
       GyroIO gyroIO,
@@ -178,12 +178,12 @@ public class DriveSubsystem extends SubsystemBase {
         getModulePositions(),
         new Pose2d(),
         VecBuilder.fill(
-            Units.inchesToMeters(0.5),
-            Units.inchesToMeters(0.5),
+            Units.inchesToMeters(1.0),
+            Units.inchesToMeters(1.0),
             Units.degreesToRadians(0.75)),
         VecBuilder.fill(
-            Units.inchesToMeters(5.0),
-            Units.inchesToMeters(5.0),
+            Units.inchesToMeters(3.0),
+            Units.inchesToMeters(3.0),
             Units.degreesToRadians(12.5))
     );
 
@@ -342,13 +342,13 @@ public class DriveSubsystem extends SubsystemBase {
     // Update odometry
     for (VisionSubsystem camera : m_cameras) {
       // make sure we're not moving too fast before trying to update vision poses
-      if ((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
+      if (((MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
           Units.inchesToMeters(6.0)) == 0.0)
           && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond,
           Units.inchesToMeters(6.0)) == 0.0)
           && (MathUtil.applyDeadband(kinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond,
-          Units.degreesToRadians(7.5)) == 0.0)
-          || !DriverStation.isAutonomousEnabled()) {
+          Units.degreesToRadians(7.5)) == 0.0))
+          || !DriverStation.isAutonomousEnabled() || true) {
 
         camera.getPose(m_wpiPoseEstimator.getEstimatedPosition()).ifPresent(
             (PoseEstimator.TimestampedVisionUpdate pose) ->

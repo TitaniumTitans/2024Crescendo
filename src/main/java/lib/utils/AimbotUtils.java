@@ -18,7 +18,7 @@ public class AimbotUtils {
   private static final GosDoubleProperty m_offsetInches =
       new GosDoubleProperty(false, "Wrist Angle Offset In", 0);
   private static final GosDoubleProperty m_offsetDegrees =
-          new GosDoubleProperty(false, "Wrist Angle Degs offset", 1.6);
+          new GosDoubleProperty(true, "Wrist Angle Degs offset", 1.0);
 
   private static final double Y_TARGET = 0.2;
 
