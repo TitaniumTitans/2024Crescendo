@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -75,6 +76,8 @@ public class RobotContainer {
 
   private final LoggedDashboardBoolean m_useAmpLineup
       = new LoggedDashboardBoolean("Use Amp Lineup?", true);
+  private final LoggedDashboardBoolean m_useDavidDrive
+      = new LoggedDashboardBoolean("Use David Drive?", true);
 
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
@@ -238,12 +241,9 @@ public class RobotContainer {
     // 60.029296875
     // 2250
     m_driveSubsystem.setDefaultCommand(
-        DriveCommands.joystickDrive(
-                m_driveSubsystem,
-                () -> -m_driverController.getLeftY(),
-                () -> -m_driverController.getLeftX(),
-                () -> -m_driverController.getRightX()
-        ));
+            new DavidDriveCommand(m_driveSubsystem, m_driverController)
+    );
+
     m_driverController
         .start()
         .onTrue(
