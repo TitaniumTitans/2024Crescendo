@@ -159,7 +159,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_thetaPid.setTolerance(5.0);
 
     m_thetaPidProperty = new WpiPidPropertyBuilder("Drive/Theta Alignment", true, m_thetaPid)
-        .addP(3.0)
+        .addP(3.5)
         .addI(0.00)
         .addD(0.00)
         .build();
