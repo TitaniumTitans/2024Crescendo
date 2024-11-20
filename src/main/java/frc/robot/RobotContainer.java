@@ -102,7 +102,7 @@ public class RobotContainer {
             }
             );
         m_shooter = new ShooterSubsystem(new ShooterIOKraken(), m_driveSubsystem::getVisionPose);
-        m_climber = new ClimberSubsystem(new ClimberIOKraken() {});
+        m_climber = new ClimberSubsystem(new ClimberIO() {});
         m_armSubsystem = new ArmSubsystem(new ArmIOKraken(),
             m_driveSubsystem::getVisionPose, m_climber::getClimberLock, m_climber::getClimberHeight);
       }
