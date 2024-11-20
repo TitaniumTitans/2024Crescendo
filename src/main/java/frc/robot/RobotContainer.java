@@ -82,6 +82,9 @@ public class RobotContainer {
   // Dashboard inputs
   private final AutoFactory m_autonFactory;
 
+  private final LoggedDashboardNumber m_passSpeed
+      = new LoggedDashboardNumber("Pass Speed", 1000);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -210,11 +213,11 @@ public class RobotContainer {
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(false, () -> 3250, () -> 3250)));
+            .alongWith(m_shooter.runShooterVelocity(false, m_passSpeed::get, m_passSpeed::get)));
 
     passTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
-            .alongWith(m_shooter.runShooterVelocity(true, () -> 3250, () -> 3250)));
+            .alongWith(m_shooter.runShooterVelocity(true, m_passSpeed::get, m_passSpeed::get)));
 
 //    m_driverController.pov(180).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP));
 //    m_driverController.pov(0).whileTrue(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.ANTI_DEFENSE));
