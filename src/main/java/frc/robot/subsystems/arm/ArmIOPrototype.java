@@ -103,7 +103,7 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void setArmAngle(double degrees, double velocity) {
+  public void setArmAngle(double degrees, double velocity, boolean useMM) {
     m_shoulder.setControl(m_shoulderReqMM.withPosition(degrees / 360.0));
   }
 
@@ -113,7 +113,7 @@ public class ArmIOPrototype implements ArmIO {
   }
 
   @Override
-  public void setWristAngle(double degrees, double velocity) {
+  public void setWristAngle(double degrees, double velocity, boolean useMM) {
     m_wrist.setControl(m_wristReqMM.withPosition(degrees / 360.0));
   }
 }

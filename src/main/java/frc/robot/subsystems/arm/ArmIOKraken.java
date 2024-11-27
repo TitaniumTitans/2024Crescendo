@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
@@ -44,6 +45,8 @@ public class ArmIOKraken implements ArmIO {
   // Control outputs
   private final DynamicMotionMagicVoltage m_wristDynMMRequest;
   private final DynamicMotionMagicVoltage m_armDynMMRequest;
+  private final PositionVoltage m_wristPIDRequest;
+  private final PositionVoltage m_armPIDRequest;
   private final Follower m_armFollowerRequest;
   private final Follower m_wristFollowerRequest;
   private final NeutralOut m_stopRequest;
@@ -116,6 +119,14 @@ public class ArmIOKraken implements ArmIO {
         .withSlot(0);
 
     m_armDynMMRequest = new DynamicMotionMagicVoltage(0, 0, 0, 0)
+        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
+        .withSlot(0);
+
+    m_armPIDRequest = new PositionVoltage(0.0)
+        .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
+        .withSlot(0);
+
+    m_wristPIDRequest = new PositionVoltage(0.0)
         .withEnableFOC(m_armMaster.getIsProLicensed().getValue() && m_wristMaster.getIsProLicensed().getValue())
         .withSlot(0);
 
@@ -249,11 +260,18 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setArmAngle(double degrees, double velocityMult) {
-    m_armDynMMRequest.Velocity = m_armMaxVel * velocityMult;
+  public void setArmAngle(double degrees, double velocityMult, boolean useMM) {
+    if (useMM) {
+      m_armDynMMRequest.Velocity = m_armMaxVel * velocityMult;
 
-    m_armMaster.setControl(m_armDynMMRequest.withPosition(degrees / 360));
-    m_armFollower.setControl(m_armFollowerRequest);
+      m_armMaster.setControl(m_armDynMMRequest.withPosition(degrees / 360));
+      m_armFollower.setControl(m_armFollowerRequest);
+    } else {
+      m_armMaster.setControl(m_armPIDRequest
+          .withPosition(degrees / 360)
+          .withVelocity(velocityMult / 360));
+      m_armFollower.setControl(m_armFollowerRequest);
+    }
   }
 
   @Override
@@ -263,11 +281,18 @@ public class ArmIOKraken implements ArmIO {
   }
 
   @Override
-  public void setWristAngle(double degrees, double velocityMult) {
-    m_wristDynMMRequest.Velocity = m_wristMaxVel * velocityMult;
+  public void setWristAngle(double degrees, double velocityMult, boolean useMM) {
+    if (useMM) {
+      m_wristDynMMRequest.Velocity = m_wristMaxVel * velocityMult;
 
-    m_wristMaster.setControl(m_wristDynMMRequest.withPosition(degrees / 360));
-    m_wristFollower.setControl(m_wristFollowerRequest);
+      m_wristMaster.setControl(m_wristDynMMRequest.withPosition(degrees / 360));
+      m_wristFollower.setControl(m_wristFollowerRequest);
+    } else {
+      m_wristMaster.setControl(m_wristPIDRequest
+          .withPosition(degrees / 360)
+          .withVelocity(velocityMult / 360));
+      m_wristFollower.setControl(m_wristFollowerRequest);
+    }
   }
 
   // We have to nudge our "zero" value because of the gear ratio

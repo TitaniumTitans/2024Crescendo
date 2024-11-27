@@ -45,6 +45,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   private final Timer m_trajTimer;
   private double m_reverseTimer;
+  private double m_forwardTimer;
   private ArmTrajectory.ArmTrajectoryState armState;
 
   private ArmState m_desiredState = ArmState.STOW;
@@ -78,6 +79,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_climberHeightSupplier = climberHeight;
 
     m_trajTimer = new Timer();
+    m_forwardTimer = 0.0;
+    m_reverseTimer = 0.0;
     armState = null;
 
     m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
@@ -110,15 +113,17 @@ public class ArmSubsystem extends SubsystemBase {
     // check to make sure we're not in manual control
     m_io.enableBrakeMode(m_desiredState == ArmState.DISABLED && m_disabledBrakeMode);
 
+    boolean useMM = armState != null;
+
     if (m_desiredState != ArmState.DISABLED) {
       // check to see if the wrist is currently too close to the rest of the arm
       double predictedUnderGap = MathUtil.clamp(ArmConstants.WRIST_ARM_GAP.getValue()
               - (m_desiredArmPoseDegs + m_desiredWristPoseDegs), 0, 180);
 
-      m_io.setWristAngle(m_desiredWristPoseDegs + predictedUnderGap, m_wristVelocityMult);
+      m_io.setWristAngle(m_desiredWristPoseDegs + predictedUnderGap, m_wristVelocityMult, useMM);
 
       // set the arms angle
-      m_io.setArmAngle(m_desiredArmPoseDegs, m_armVelocityMult);
+      m_io.setArmAngle(m_desiredArmPoseDegs, m_armVelocityMult, useMM);
     }
 
     Logger.recordOutput("Arm/Desired State", m_desiredState);
@@ -129,6 +134,9 @@ public class ArmSubsystem extends SubsystemBase {
 
     Logger.recordOutput("Arm/At Setpoint", armAtSetpoint());
     Logger.recordOutput("Arm/Traj Timer", m_trajTimer.get());
+
+    Logger.recordOutput("Arm/Reverse Timer", m_reverseTimer);
+    Logger.recordOutput("Arm/Forward Timer", m_forwardTimer);
 
 //    Logger.recordOutput("Arm/Arm Velocity Multiplier");
 //    Logger.recordOutput("Arm/Wrist Velocity Multiplier");
@@ -210,12 +218,22 @@ public class ArmSubsystem extends SubsystemBase {
         ArmTrajectory traj = ArmConstants.AMP_TRAJECTORY;
 
         // arm state should be null by the time the trajectory ends
-        if (m_currentState != ArmState.AMP && m_currentState != ArmState.AMP_REVERSE) {
-          m_trajTimer.restart();
+        if (m_currentState != ArmState.AMP) {
+          if (m_currentState != ArmState.AMP_REVERSE) {
+            m_trajTimer.restart();
+            m_forwardTimer = 0.0;
+          } else {
+            m_forwardTimer = (m_reverseTimer - m_trajTimer.get());
+            m_reverseTimer = 0.0;
+            m_trajTimer.restart();
+          }
           m_currentState = ArmState.AMP;
         }
 
-        armState = traj.sample(m_trajTimer.get());
+        double time = m_trajTimer.get() + m_forwardTimer;
+        Logger.recordOutput("Arm/Actual Forward Time", time);
+
+        armState = traj.sample(time);
         m_desiredArmPoseDegs = armState.armPositionDegs();
         m_desiredWristPoseDegs = armState.wristPositionDegs();
 
@@ -225,6 +243,7 @@ public class ArmSubsystem extends SubsystemBase {
       case AMP_REVERSE -> {
         ArmTrajectory traj = ArmConstants.AMP_TRAJECTORY;
         // if the arm is at the setpoint, then the arm is up at amp
+        m_currentState = ArmState.AMP_REVERSE;
         if (m_reverseTimer == 0.0) {
           // restart the timer and find how long the last trajectory ran
           m_trajTimer.stop();
