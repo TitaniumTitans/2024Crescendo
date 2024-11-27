@@ -26,6 +26,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.arm.ArmPose;
 import frc.robot.subsystems.drive.module.ModuleConstants;
+import lib.utils.ArmTrajectory;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public final class Constants {
 
   public static final double loopPeriodSecs = Units.millisecondsToSeconds(20);
 
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -217,6 +218,32 @@ public final class Constants {
     public static final double ARM_KS = 0.375;
     public static final double ARM_KV = 0.0;
     public static final double ARM_KG = 0.375;
+
+    private static final ArmTrajectory.ArmTrajectoryState start = new ArmTrajectory.ArmTrajectoryState(
+        ArmSetpoints.STOW_SETPOINT.wristAngle(), 0.0, ArmSetpoints.STOW_SETPOINT.armAngle(), 0.0
+    );
+
+    private static final ArmTrajectory.ArmTrajectoryState middle = new ArmTrajectory.ArmTrajectoryState(
+        ArmSetpoints.AMP_INTERMEDIATE.wristAngle(), 0.0, ArmSetpoints.AMP_INTERMEDIATE.armAngle(), 50.0
+    );
+
+    private static final ArmTrajectory.ArmTrajectoryState end = new ArmTrajectory.ArmTrajectoryState(
+        ArmSetpoints.AMP_SETPOINT.wristAngle(), 0.0, ArmSetpoints.AMP_SETPOINT.armAngle(), 0.0
+    );
+
+    public static final ArmTrajectory AMP_TRAJECTORY = ArmTrajectory.fromCoeffs(
+        ArmTrajectory.cubic_interpolation(
+            0.0, 2.0, start, middle
+        ),
+        0.0,
+        2.0
+    ).append(ArmTrajectory.fromCoeffs(
+        ArmTrajectory.cubic_interpolation(
+            0.0, 2.0, middle, end
+        ),
+        0.0,
+        2.0
+    ));
 
     public static final GosDoubleProperty WRIST_LOWER_LIMIT =
         new GosDoubleProperty(true, "Arm/WristLowerLimit", 0);

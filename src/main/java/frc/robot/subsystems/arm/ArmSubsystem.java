@@ -4,12 +4,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ArmSetpoints;
 import lib.utils.AimbotUtils;
+import lib.utils.ArmTrajectory;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
@@ -24,12 +26,13 @@ public class ArmSubsystem extends SubsystemBase {
     AUTO_AIM,
     ANTI_DEFENSE,
     AMP,
+    AMP_REVERSE,
     PREPARE_TRAP,
     SCORE_TRAP,
     PASS,
     DISABLED,
     BACKUP_SHOT,
-    MANUAL_CONTROL
+    MANUAL_CONTROL,
   }
 
   private final ArmIO m_io;
@@ -39,6 +42,10 @@ public class ArmSubsystem extends SubsystemBase {
   private double m_desiredWristPoseDegs;
   private double m_wristVelocityMult = 0;
   private boolean m_disabledBrakeMode = true;
+
+  private final Timer m_trajTimer;
+  private double m_reverseTimer;
+  private ArmTrajectory.ArmTrajectoryState armState;
 
   private ArmState m_desiredState = ArmState.STOW;
   private ArmState m_currentState = ArmState.DISABLED;
@@ -69,6 +76,9 @@ public class ArmSubsystem extends SubsystemBase {
     m_poseSupplier = supplier;
     m_climberLock = climberLock;
     m_climberHeightSupplier = climberHeight;
+
+    m_trajTimer = new Timer();
+    armState = null;
 
     m_poseVisualizer = new ArmVisualizer("Current Arm Pose", Color.kFirstBlue);
     m_setpointVisualizer = new ArmVisualizer("Current Arm Setpoint", Color.kFirstRed);
@@ -116,6 +126,9 @@ public class ArmSubsystem extends SubsystemBase {
 
     Logger.recordOutput("Arm/Arm Setpoint", m_desiredArmPoseDegs);
     Logger.recordOutput("Arm/Wrist Setpoint", m_desiredWristPoseDegs);
+
+    Logger.recordOutput("Arm/At Setpoint", armAtSetpoint());
+    Logger.recordOutput("Arm/Traj Timer", m_trajTimer.get());
 
 //    Logger.recordOutput("Arm/Arm Velocity Multiplier");
 //    Logger.recordOutput("Arm/Wrist Velocity Multiplier");
@@ -194,17 +207,52 @@ public class ArmSubsystem extends SubsystemBase {
         m_desiredWristPoseDegs = ArmSetpoints.INTAKE_SETPOINT.wristAngle();
       }
       case AMP -> {
-        if (Math.abs(m_inputs.wristPositionDegs - m_desiredWristPoseDegs) > 5.0) {
-          m_armVelocityMult = 0.5;
-        } else {
-          m_armVelocityMult = 1.0;
+        ArmTrajectory traj = ArmConstants.AMP_TRAJECTORY;
+
+        // arm state should be null by the time the trajectory ends
+        if (m_currentState != ArmState.AMP && m_currentState != ArmState.AMP_REVERSE) {
+          m_trajTimer.restart();
+          m_currentState = ArmState.AMP;
         }
-        m_wristVelocityMult = 1.0;
 
-        m_currentState = ArmState.AMP;
+        armState = traj.sample(m_trajTimer.get());
+        m_desiredArmPoseDegs = armState.armPositionDegs();
+        m_desiredWristPoseDegs = armState.wristPositionDegs();
 
-        m_desiredArmPoseDegs = ArmSetpoints.AMP_SETPOINT.armAngle();
-        m_desiredWristPoseDegs = ArmSetpoints.AMP_SETPOINT.wristAngle();
+        m_armVelocityMult = armState.armVelocityDegsPerSec();
+        m_wristVelocityMult = armState.wristVelocityDegsPerSec();
+      }
+      case AMP_REVERSE -> {
+        ArmTrajectory traj = ArmConstants.AMP_TRAJECTORY;
+        // if the arm is at the setpoint, then the arm is up at amp
+        if (m_reverseTimer == 0.0) {
+          // restart the timer and find how long the last trajectory ran
+          m_trajTimer.stop();
+          m_reverseTimer = Math.min(m_trajTimer.get(), traj.getFinalTime());
+          m_trajTimer.restart();
+        } else {
+          // reverse the time by getting the difference between the trajectories length and the timer
+          double time = m_reverseTimer - m_trajTimer.get();
+
+          if (time <= 0.0) {
+            m_reverseTimer = 0.0;
+            m_trajTimer.stop();
+            m_trajTimer.reset();
+            armState = null;
+            m_desiredState = ArmState.STOW;
+            handleState();
+          }
+
+          // get the current state in the trajectory
+          armState =
+              traj.sample(time);
+
+          m_desiredArmPoseDegs = armState.armPositionDegs();
+          m_armVelocityMult = armState.armVelocityDegsPerSec();
+
+          m_desiredWristPoseDegs = armState.wristPositionDegs();
+          m_wristVelocityMult = armState.wristVelocityDegsPerSec();
+        }
       }
       case PREPARE_TRAP -> {
         m_desiredArmPoseDegs = ArmSetpoints.TRAP_PREPARE.armAngle();

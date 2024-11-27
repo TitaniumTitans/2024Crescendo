@@ -204,12 +204,13 @@ public class RobotContainer {
         m_driveSubsystem.pathfollowFactory(FieldConstants.AMP_LINEUP)
             .unless(() -> !m_useAmpLineup.get())
         .finallyDo(() -> m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP).schedule()))
-        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.STOW));
+        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP_REVERSE));
 
     ampDepositeTrigger.whileTrue(Commands.runEnd(() -> m_shooter.setKickerPower(-0.75),
         () -> m_shooter.setKickerPower(0.0),
         m_shooter)
-        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)));
+        .alongWith(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP)))
+        .whileFalse(m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.AMP_REVERSE));
 
     passSpinUpTrigger.whileTrue(
         m_armSubsystem.setDesiredStateFactory(ArmSubsystem.ArmState.PASS)
