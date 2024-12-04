@@ -45,7 +45,7 @@ public final class Constants {
 
   public static final double loopPeriodSecs = Units.millisecondsToSeconds(20);
 
-  public static final Mode currentMode = Mode.SIM;
+  public static final Mode currentMode = Mode.REAL;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -281,7 +281,7 @@ public final class Constants {
       throw new IllegalStateException("Static classes should not be constructed");
     }
 
-    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 145.0);
+    public static final ArmPose AMP_INTERMEDIATE = new ArmPose("ArmPoses/Amp Intermediate", false, 60.0, 135.0);
 
     public static final ArmPose STOW_SETPOINT = new
         ArmPose("ArmPoses/Stow", true, 0.0, 35.0);

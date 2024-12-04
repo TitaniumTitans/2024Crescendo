@@ -247,7 +247,7 @@ public class ArmSubsystem extends SubsystemBase {
         if (m_reverseTimer == 0.0) {
           // restart the timer and find how long the last trajectory ran
           m_trajTimer.stop();
-          m_reverseTimer = Math.min(m_trajTimer.get(), traj.getFinalTime());
+          m_reverseTimer = Math.min(m_trajTimer.get() + m_forwardTimer, traj.getFinalTime());
           m_trajTimer.restart();
         } else {
           // reverse the time by getting the difference between the trajectories length and the timer
