@@ -21,7 +21,7 @@ public class TalonFXFactory {
   //NOTE: This and the next method should return a talonFX, and both be static methods, not constructors
   //METHOD: This allows for the creation of a new Talon Brushless Motor
   public static TalonFX createTalon(int id) {
-    TalonFX talonFX = new TalonFX(id, "canivore");
+    TalonFX talonFX = new TalonFX(id, "rio");
     talonFX.getConfigurator().apply(new TalonFXConfiguration());
     TalonFxMotors.add(new Pair<>(talonFX, new TalonFXConfiguration()));
     return talonFX;
@@ -49,7 +49,7 @@ public class TalonFXFactory {
 
   //METHOD: This allows for the creation of a new Talon Brushless Motor with a preset Config
   public static TalonFX createTalon(int id, TalonFXConfiguration config) {
-    TalonFX talonFX = new TalonFX(id, "canivore");
+    TalonFX talonFX = new TalonFX(id, "rio");
 
     for (int i = 0; i < 4; i++) {
       boolean error = talonFX.getConfigurator().apply(config, 0.1).isError();

@@ -69,7 +69,7 @@ public class ArmIOKraken implements ArmIO {
   private final StatusSignal<Double> m_wristCurrentDrawSignal;
 
   public ArmIOKraken() {
-    final String CANBUS = "canivore";
+    final String CANBUS = "rio";
     m_armEncoder = new CANcoder(ArmConstants.ARM_ENCODER_ID, CANBUS);
     m_wristEncoder = new CANcoder(ArmConstants.WRIST_ENCODER_ID, CANBUS);
 

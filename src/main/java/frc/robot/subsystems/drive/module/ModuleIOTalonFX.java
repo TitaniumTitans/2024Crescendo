@@ -82,7 +82,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   PositionVoltage m_posRequest;
 
   public ModuleIOTalonFX(ModuleConstants moduleConstants) {
-    String canbus = "canivore";
+    String canbus = "rio";
     m_moduleConstants = moduleConstants;
 
     m_cancoder = new CANcoder(moduleConstants.ENCODER_ID(), canbus);
